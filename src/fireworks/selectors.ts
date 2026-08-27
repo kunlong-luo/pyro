@@ -12,15 +12,15 @@ import type { FireworksState } from "@/stores/fireworksStore";
 // ---------------------------------------------------------------------------
 
 export function isRunning(state: FireworksState): boolean {
-	return !state.paused && !state.menuOpen;
+  return !state.paused && !state.menuOpen;
 }
 
 export function soundEnabledSelector(state: FireworksState): boolean {
-	return state.soundEnabled;
+  return state.soundEnabled;
 }
 
 export function canPlaySoundSelector(state: FireworksState): boolean {
-	return isRunning(state) && soundEnabledSelector(state);
+  return isRunning(state) && soundEnabledSelector(state);
 }
 
 // ---------------------------------------------------------------------------
@@ -28,25 +28,25 @@ export function canPlaySoundSelector(state: FireworksState): boolean {
 // ---------------------------------------------------------------------------
 
 export function qualitySelector(state: FireworksState): number {
-	return Number(state.config.quality);
+  return Number(state.config.quality);
 }
 
 export function shellNameSelector(state: FireworksState): string {
-	return state.config.shell;
+  return state.config.shell;
 }
 
 export function shellSizeSelector(state: FireworksState): number {
-	return Number(state.config.size);
+  return Number(state.config.size);
 }
 
 export function finaleSelector(state: FireworksState): boolean {
-	return state.config.finale;
+  return state.config.finale;
 }
 
 export function skyLightingSelector(state: FireworksState): number {
-	return Number(state.config.skyLighting);
+  return Number(state.config.skyLighting);
 }
 
 export function scaleFactorSelector(state: FireworksState): number {
-	return state.config.scaleFactor;
+  return state.config.scaleFactor;
 }

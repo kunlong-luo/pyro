@@ -15,15 +15,15 @@
 
 **核心特性：**
 
-* **12+ 种烟花弹壳类型**：每种均包含独特的视觉行为与爆炸效果
-* **实时粒子模拟**：星粒（Stars）、火花（Sparks）、爆炸闪光（Burst Flashes）
-* **Web Audio API**：高度同步的音效系统
-* **自定义背景**：支持图片、渐变及自定义 CSS 样式
-* **文字烟花**：基于文本点阵生成的字样烟花
-* **自动发射序列**：可配置的自动发射模式与节奏
-* **全屏与质量自适应**：自动检测设备性能并调整渲染质量
-* **本地状态持久化**：基于 `localStorage` 保存配置
-* **响应式设计**：完美适配移动端与桌面端
+- **12+ 种烟花弹壳类型**：每种均包含独特的视觉行为与爆炸效果
+- **实时粒子模拟**：星粒（Stars）、火花（Sparks）、爆炸闪光（Burst Flashes）
+- **Web Audio API**：高度同步的音效系统
+- **自定义背景**：支持图片、渐变及自定义 CSS 样式
+- **文字烟花**：基于文本点阵生成的字样烟花
+- **自动发射序列**：可配置的自动发射模式与节奏
+- **全屏与质量自适应**：自动检测设备性能并调整渲染质量
+- **本地状态持久化**：基于 `localStorage` 保存配置
+- **响应式设计**：完美适配移动端与桌面端
 
 ---
 
@@ -103,21 +103,21 @@ index.html
 
 ### 3.2 模块职责表
 
-| 模块 | 核心职责 | 主要暴露对象/导出 |
-| --- | --- | --- |
-| **config.js** | 包含不可变的配置常量、默认选项、帮助文档文本与 DOM 选择器 | `FireworksAppConfig` |
-| **store.js** | 单一状态树管理，支持状态变更订阅、数据标准化与版本迁移 | `createDefaultState`, `createStore`, `normalizeConfig` |
-| **ui.js** | DOM 节点查询、控制组件生成、界面渲染与 UI 事件绑定 | `queryNodes`, `populateControls`, `renderApp`, `bindAppControls` |
-| **background-manager.js** | 背景图片/渐变色的加载、校验与 CSS 转换应用 | `createBackgroundManager` |
-| **runtime.js** | 全局常量定义、设备性能检测、状态 Selector 与背景解耦处理 | 全局常量、`store`、`backgroundManager`、状态选择函数 |
-| **shells.js** | 各种烟花弹壳构造逻辑、随机弹壳生成器与自动发射序列算法 | `shellTypes`, `shellNames`, `randomShell`, `startSequence` |
-| **simulation.js** | 核心物理引擎更新循环与 Canvas 渲染（星粒、火花、拖尾、夜空光照） | `update`, `render`, `colorSky`, 粒子工厂函数 |
-| **interaction.js** | 触控/鼠标/键盘交互处理、自动发射定时器、模拟速度调节 | `handlePointerStart/End/Move`, `handleKeydown`, `updateGlobals` |
-| **audio.js** | 基于 Web Audio API 的音频上下文管理、音频解码与随机音调播放 | `soundManager` (preload, playSound, pauseAll 等) |
-| **engine.js** | 整体应用启动、资源加载流程调度与运行阶段绑定 | `init`, `attachRuntimeBindings` |
-| **MyMath.js** | 数学辅助函数、随机数生成算法、文本转粒子点阵矩阵算法 | `MyMath` (`dist`, `angle`, `splitVector`, `literalLattice` 等) |
-| **Stage.js** | Canvas 像素比（DPR）适配、尺寸缩放、统一事件绑定与帧迭代器 (Ticker) | `Stage`, `Ticker` |
-| **fscreen.js** | 跨浏览器的全屏 API 标准化封装 | `fscreen` |
+| 模块                      | 核心职责                                                            | 主要暴露对象/导出                                                |
+| ------------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| **config.js**             | 包含不可变的配置常量、默认选项、帮助文档文本与 DOM 选择器           | `FireworksAppConfig`                                             |
+| **store.js**              | 单一状态树管理，支持状态变更订阅、数据标准化与版本迁移              | `createDefaultState`, `createStore`, `normalizeConfig`           |
+| **ui.js**                 | DOM 节点查询、控制组件生成、界面渲染与 UI 事件绑定                  | `queryNodes`, `populateControls`, `renderApp`, `bindAppControls` |
+| **background-manager.js** | 背景图片/渐变色的加载、校验与 CSS 转换应用                          | `createBackgroundManager`                                        |
+| **runtime.js**            | 全局常量定义、设备性能检测、状态 Selector 与背景解耦处理            | 全局常量、`store`、`backgroundManager`、状态选择函数             |
+| **shells.js**             | 各种烟花弹壳构造逻辑、随机弹壳生成器与自动发射序列算法              | `shellTypes`, `shellNames`, `randomShell`, `startSequence`       |
+| **simulation.js**         | 核心物理引擎更新循环与 Canvas 渲染（星粒、火花、拖尾、夜空光照）    | `update`, `render`, `colorSky`, 粒子工厂函数                     |
+| **interaction.js**        | 触控/鼠标/键盘交互处理、自动发射定时器、模拟速度调节                | `handlePointerStart/End/Move`, `handleKeydown`, `updateGlobals`  |
+| **audio.js**              | 基于 Web Audio API 的音频上下文管理、音频解码与随机音调播放         | `soundManager` (preload, playSound, pauseAll 等)                 |
+| **engine.js**             | 整体应用启动、资源加载流程调度与运行阶段绑定                        | `init`, `attachRuntimeBindings`                                  |
+| **MyMath.js**             | 数学辅助函数、随机数生成算法、文本转粒子点阵矩阵算法                | `MyMath` (`dist`, `angle`, `splitVector`, `literalLattice` 等)   |
+| **Stage.js**              | Canvas 像素比（DPR）适配、尺寸缩放、统一事件绑定与帧迭代器 (Ticker) | `Stage`, `Ticker`                                                |
+| **fscreen.js**            | 跨浏览器的全屏 API 标准化封装                                       | `fscreen`                                                        |
 
 ---
 
@@ -127,9 +127,9 @@ index.html
 
 **设计模式**：轻量级类 Redux 单一状态树：
 
-* 状态不可变更新：通过 `setState(partial)` 提交变更
-* 发布/订阅机制：支持 `subscribe(listener)` 触发视图同步
-* 数据持久化：自动同步至 `localStorage`，支持 Schema 版本迁移（如 1.0 → 2.1）
+- 状态不可变更新：通过 `setState(partial)` 提交变更
+- 发布/订阅机制：支持 `subscribe(listener)` 触发视图同步
+- 数据持久化：自动同步至 `localStorage`，支持 Schema 版本迁移（如 1.0 → 2.1）
 
 **状态结构简图**：
 
@@ -170,11 +170,11 @@ index.html
 
 **单帧物理计算流程**：
 
-* 阻力计算：应用空气阻力（`airDrag` / `airDragHeavy`）衰减速度
-* 重力加速度：全局叠加 `GRAVITY = 0.9`
-* 旋转与彗星运动：针对特定 Shell 算法计算自旋轨迹
-* 火花喷发：根据速率和寿命，在星粒当前坐标下生成 Spark 实例
-* 渐变与闪烁：处理 `secondColor` 颜色过渡以及 Strobe（频闪）效果
+- 阻力计算：应用空气阻力（`airDrag` / `airDragHeavy`）衰减速度
+- 重力加速度：全局叠加 `GRAVITY = 0.9`
+- 旋转与彗星运动：针对特定 Shell 算法计算自旋轨迹
+- 火花喷发：根据速率和寿命，在星粒当前坐标下生成 Spark 实例
+- 渐变与闪烁：处理 `secondColor` 颜色过渡以及 Strobe（频闪）效果
 
 **渲染管线**：
 
@@ -190,28 +190,28 @@ render() ──► colorSky() ──► 清除/淡化旧轨迹 ──► 绘制�
 
 **12 种核心弹壳类型**：
 
-| 弹壳名称 (Shell Type) | 视觉特征与行为 |
-| --- | --- |
-| **Chrysanthemum (菊花)** | 经典球形密集爆炸，带有渐变花芯（Pistil）、亮粉与拖尾 streamers |
-| **Ghost (幽灵)** | 隐形星粒飞行一段时间后突然显色，寿命长且带有柔和拖尾 |
-| **Strobe (频闪)** | 剧烈闪烁的高亮星粒，可搭配对比色花芯 |
-| **Palm (棕榈)** | 数量少但极其粗壮的星粒，带有极其漫长的金粉拖尾 |
-| **Ring (圆环)** | 扁平或倾斜的环状粒子分布，中间伴随微型花芯 |
-| **Crossette (交叉/花冠)** | 星粒到达寿命终点时，二次分裂为 4 个呈十字飞开的子星粒 |
-| **Floral (花朵)** | 星粒消逝时二次爆发成微型花簇 |
-| **Falling Leaves (落叶)** | 隐形粒子在空中缓缓落下，同时不断剥落金色闪烁的“落叶” |
-| **Willow (垂柳)** | 极其持久的金色亮粉拖尾，受重力影响如下垂的柳枝 |
-| **Crackle (噼啪声)** | 星粒死亡时爆发出密集伴随爆裂声的金色微粒 |
-| **Horse Tail (马尾)** | 紧凑向上抛出的星粒，顶端受重力翻转下坠 |
-| **Random (随机)** | 按权重算法自动随机选择一种弹壳构建 |
+| 弹壳名称 (Shell Type)     | 视觉特征与行为                                                 |
+| ------------------------- | -------------------------------------------------------------- |
+| **Chrysanthemum (菊花)**  | 经典球形密集爆炸，带有渐变花芯（Pistil）、亮粉与拖尾 streamers |
+| **Ghost (幽灵)**          | 隐形星粒飞行一段时间后突然显色，寿命长且带有柔和拖尾           |
+| **Strobe (频闪)**         | 剧烈闪烁的高亮星粒，可搭配对比色花芯                           |
+| **Palm (棕榈)**           | 数量少但极其粗壮的星粒，带有极其漫长的金粉拖尾                 |
+| **Ring (圆环)**           | 扁平或倾斜的环状粒子分布，中间伴随微型花芯                     |
+| **Crossette (交叉/花冠)** | 星粒到达寿命终点时，二次分裂为 4 个呈十字飞开的子星粒          |
+| **Floral (花朵)**         | 星粒消逝时二次爆发成微型花簇                                   |
+| **Falling Leaves (落叶)** | 隐形粒子在空中缓缓落下，同时不断剥落金色闪烁的“落叶”           |
+| **Willow (垂柳)**         | 极其持久的金色亮粉拖尾，受重力影响如下垂的柳枝                 |
+| **Crackle (噼啪声)**      | 星粒死亡时爆发出密集伴随爆裂声的金色微粒                       |
+| **Horse Tail (马尾)**     | 紧凑向上抛出的星粒，顶端受重力翻转下坠                         |
+| **Random (随机)**         | 按权重算法自动随机选择一种弹壳构建                             |
 
 **自动发射算法序列 (Launch Sequences)**：
 
-* `seqRandomShell`：随机发射单个烟花
-* `seqTwoRandom`：左右两侧同时发射
-* `seqTriple`：中间先发，两侧延迟跟随
-* `seqPyramid`：从两侧向中间递进的金字塔 barrage 序列
-* `seqSmallBarrage`：基于余弦波节奏的快速连续扫射发射
+- `seqRandomShell`：随机发射单个烟花
+- `seqTwoRandom`：左右两侧同时发射
+- `seqTriple`：中间先发，两侧延迟跟随
+- `seqPyramid`：从两侧向中间递进的金字塔 barrage 序列
+- `seqSmallBarrage`：基于余弦波节奏的快速连续扫射发射
 
 ---
 
@@ -219,10 +219,10 @@ render() ──► colorSky() ──► 清除/淡化旧轨迹 ──► 绘制�
 
 基于 **Web Audio API** 实现的高性能音频处理：
 
-* **延迟初始化**：受浏览器 Autoplay 策略限制，在首次用户交互后激活 AudioContext
-* **预加载与解码**：启动阶段异步拉取 MP3 资源并完成 `decodeAudioData`
-* **随机防重**：同一类音效（如升空声、爆炸声）提供多个文件变体，播放时动态随机挑选并微调音高（Playback Rate）和音量，避免听觉疲劳
-* **音频限流**：微型爆裂声（burstSmall）内置 20ms 防重叠冷却时间
+- **延迟初始化**：受浏览器 Autoplay 策略限制，在首次用户交互后激活 AudioContext
+- **预加载与解码**：启动阶段异步拉取 MP3 资源并完成 `decodeAudioData`
+- **随机防重**：同一类音效（如升空声、爆炸声）提供多个文件变体，播放时动态随机挑选并微调音高（Playback Rate）和音量，避免听觉疲劳
+- **音频限流**：微型爆裂声（burstSmall）内置 20ms 防重叠冷却时间
 
 ---
 
@@ -252,14 +252,15 @@ render() ──► colorSky() ──► 清除/淡化旧轨迹 ──► 绘制�
 ### 5.1 双 Canvas 渲染模型
 
 ```html
-<canvas id="trails-canvas"></canvas>  <!-- 绘制持久化残影与拖尾 (lighten 混合模式) -->
-<canvas id="main-canvas"></canvas>    <!-- 绘制当前帧真实位置 (source-over 混合模式) -->
-
+<canvas id="trails-canvas"></canvas>
+<!-- 绘制持久化残影与拖尾 (lighten 混合模式) -->
+<canvas id="main-canvas"></canvas>
+<!-- 绘制当前帧真实位置 (source-over 混合模式) -->
 ```
 
-* **拖尾画布 (`trails-canvas`)**：每次更新时不会完全清空，而是覆盖一层带有微小 Alpha 值的黑幕（如 `rgba(0,0,0,0.175)`），使历史帧的粒子逐渐消退，形成拖尾。
-* **长曝光模式 (`longExposure`)**：将拖尾画布的清空 Alpha 降低至 `0.0025`，使烟花轨迹长期保留在屏幕上。
-* **夜空光照 (`colorSky`)**：实时计算屏幕所有活跃星粒的 RGB 均值，按比例动态改变背景容器的 `backgroundColor`，模拟烟花照亮夜空的效果。
+- **拖尾画布 (`trails-canvas`)**：每次更新时不会完全清空，而是覆盖一层带有微小 Alpha 值的黑幕（如 `rgba(0,0,0,0.175)`），使历史帧的粒子逐渐消退，形成拖尾。
+- **长曝光模式 (`longExposure`)**：将拖尾画布的清空 Alpha 降低至 `0.0025`，使烟花轨迹长期保留在屏幕上。
+- **夜空光照 (`colorSky`)**：实时计算屏幕所有活跃星粒的 RGB 均值，按比例动态改变背景容器的 `backgroundColor`，模拟烟花照亮夜空的效果。
 
 ---
 
@@ -279,11 +280,11 @@ render() ──► colorSky() ──► 清除/淡化旧轨迹 ──► 绘制�
 
 本系统为纯静态项目：
 
-* **无需编译构建**：直接将代码上传至 GitHub Pages、Vercel 或 Nginx 静态目录即可运行。
-* **协议要求**：由于使用了 Web Audio 及全屏 API，建议部署在 HTTPS 环境下。
+- **无需编译构建**：直接将代码上传至 GitHub Pages、Vercel 或 Nginx 静态目录即可运行。
+- **协议要求**：由于使用了 Web Audio 及全屏 API，建议部署在 HTTPS 环境下。
 
 ### 常用扩展点
 
-* **新增烟花弹壳**：在 `js/fireworks/shells.js` 的 `shellTypes` 中添加新的工厂函数，并在 `shellNames` 登记。
-* **新增音效资源**：在 `js/fireworks/audio.js` 的 `soundManager.sources` 中注册音频文件路径。
-* **自定义默认文字**：修改 `js/app/config.js` 中的 `defaultWords` 数组。
+- **新增烟花弹壳**：在 `js/fireworks/shells.js` 的 `shellTypes` 中添加新的工厂函数，并在 `shellNames` 登记。
+- **新增音效资源**：在 `js/fireworks/audio.js` 的 `soundManager.sources` 中注册音频文件路径。
+- **自定义默认文字**：修改 `js/app/config.js` 中的 `defaultWords` 数组。

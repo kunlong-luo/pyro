@@ -12,12 +12,7 @@ import { MyMath } from "@/lib/math";
 // Types
 // ---------------------------------------------------------------------------
 
-export type SoundType =
-  | "lift"
-  | "burst"
-  | "burstSmall"
-  | "crackle"
-  | "crackleSmall";
+export type SoundType = "lift" | "burst" | "burstSmall" | "crackle" | "crackleSmall";
 
 export interface SoundSource {
   volume: number;
@@ -101,9 +96,10 @@ export function createSoundManager(deps: SoundManagerDeps): SoundManager {
 
   function ensureContext(): AudioContext {
     if (!ctx) {
-      ctx = new (window.AudioContext ||
-        (window as unknown as { webkitAudioContext: typeof AudioContext })
-          .webkitAudioContext)();
+      ctx = new (
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+      )();
     }
 
     if (!decodePromise) {
@@ -213,11 +209,7 @@ export function createSoundManager(deps: SoundManagerDeps): SoundManager {
 
     playSound(type, scale = 1): void {
       scale = MyMath.clamp(scale, 0, 1);
-      if (
-        !deps.getCanPlaySound() ||
-        deps.getSimSpeed() < 0.95 ||
-        !userInteracted
-      ) {
+      if (!deps.getCanPlaySound() || deps.getSimSpeed() < 0.95 || !userInteracted) {
         return;
       }
 
@@ -240,10 +232,7 @@ export function createSoundManager(deps: SoundManagerDeps): SoundManager {
       }
 
       const initialVolume = source.volume;
-      const initialPlaybackRate = MyMath.random(
-        source.playbackRateMin,
-        source.playbackRateMax,
-      );
+      const initialPlaybackRate = MyMath.random(source.playbackRateMin, source.playbackRateMax);
       const scaledVolume = initialVolume * scale;
       const scaledPlaybackRate = initialPlaybackRate * (2 - scale);
       const gainNode = ctx!.createGain();

@@ -27,7 +27,9 @@ export function createTicker(): Ticker {
       return;
     }
 
-    (window as unknown as { webkitRequestAnimationFrame: (cb: FrameRequestCallback) => void }).webkitRequestAnimationFrame(handleFrame);
+    (
+      window as unknown as { webkitRequestAnimationFrame: (cb: FrameRequestCallback) => void }
+    ).webkitRequestAnimationFrame(handleFrame);
   }
 
   function handleFrame(timestamp: DOMHighResTimeStamp): void {
@@ -82,22 +84,16 @@ interface CanvasContextWithBackingStore extends CanvasRenderingContext2D {
   backingStorePixelRatio?: number;
 }
 
-function getDevicePixelRatio(
-  context: CanvasRenderingContext2D,
-  disableHighDPI: boolean,
-): number {
+function getDevicePixelRatio(context: CanvasRenderingContext2D, disableHighDPI: boolean): number {
   if (disableHighDPI) {
     return 1;
   }
 
-  const backingStoreRatio =
-    (context as CanvasContextWithBackingStore).backingStorePixelRatio ?? 1;
+  const backingStoreRatio = (context as CanvasContextWithBackingStore).backingStorePixelRatio ?? 1;
   return (window.devicePixelRatio ?? 1) / backingStoreRatio;
 }
 
-function ensureCanvasNode(
-  canvas: string | HTMLCanvasElement,
-): HTMLCanvasElement {
+function ensureCanvasNode(canvas: string | HTMLCanvasElement): HTMLCanvasElement {
   if (typeof canvas === "string") {
     const el = document.getElementById(canvas);
     if (!(el instanceof HTMLCanvasElement)) {
@@ -202,10 +198,7 @@ export class Stage {
 
   dispatchEvent(event: "resize"): void;
   dispatchEvent(event: StageEventName, payload: PointerEventPayload): void;
-  dispatchEvent(
-    event: StageEventName,
-    payload?: PointerEventPayload,
-  ): void {
+  dispatchEvent(event: StageEventName, payload?: PointerEventPayload): void {
     if (event === "resize") {
       for (const listener of this._listeners.resize) {
         listener();
@@ -251,19 +244,12 @@ export class Stage {
       onCanvas: x >= 0 && x <= this.width && y >= 0 && y <= this.height,
     };
 
-    this.dispatchEvent(
-      `pointer${type}` as "pointerstart" | "pointermove" | "pointerend",
-      payload,
-    );
+    this.dispatchEvent(`pointer${type}` as "pointerstart" | "pointermove" | "pointerend", payload);
   }
 
   // -- static coordinate helpers --------------------------------------------
 
-  static windowToCanvas(
-    canvas: HTMLCanvasElement,
-    x: number,
-    y: number,
-  ): { x: number; y: number } {
+  static windowToCanvas(canvas: HTMLCanvasElement, x: number, y: number): { x: number; y: number } {
     const bounds = canvas.getBoundingClientRect();
     return {
       x: (x - bounds.left) * (canvas.width / bounds.width),

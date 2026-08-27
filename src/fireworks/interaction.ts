@@ -186,9 +186,7 @@ export function createInteraction(deps: InteractionDeps): Interaction {
     const viewportHeight = window.innerHeight;
     const containerWidth = Math.min(viewportWidth, MAX_WIDTH);
     const containerHeight =
-      viewportWidth <= 420
-        ? viewportHeight
-        : Math.min(viewportHeight, MAX_HEIGHT);
+      viewportWidth <= 420 ? viewportHeight : Math.min(viewportHeight, MAX_HEIGHT);
 
     deps.stageContainer.style.width = `${containerWidth}px`;
     deps.stageContainer.style.height = `${containerHeight}px`;
@@ -206,8 +204,7 @@ export function createInteraction(deps: InteractionDeps): Interaction {
   function updateSpeedFromEvent(event: PointerEventPayload): boolean {
     if (isUpdatingSpeed || event.y >= deps.mainStage.height - 44) {
       const edgePadding = 16;
-      const newSpeed =
-        (event.x - edgePadding) / (deps.mainStage.width - edgePadding * 2);
+      const newSpeed = (event.x - edgePadding) / (deps.mainStage.width - edgePadding * 2);
       simSpeed = Math.min(Math.max(newSpeed, 0), 1);
       speedBarOpacity = 1;
       return true;

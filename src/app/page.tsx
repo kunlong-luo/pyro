@@ -36,7 +36,6 @@ import type { FireworksConfig } from "@/stores/fireworksStore";
 // Runtime (computed once at module level)
 // ---------------------------------------------------------------------------
 
-const fullscreen = Boolean(fscreen.fullscreenElement);
 const defaultScaleFactor = getDefaultScaleFactor();
 
 // ---------------------------------------------------------------------------
@@ -61,7 +60,7 @@ export default function FireworkSimulator() {
       isHeader: IS_HEADER,
       isHighEndDevice: IS_HIGH_END_DEVICE,
       defaultScaleFactor,
-      fullscreen,
+      fullscreen: false,
     });
   }
   const store = storeRef.current;
@@ -90,17 +89,11 @@ export default function FireworkSimulator() {
 
   // Stable callback refs so the DualCanvas effect never goes stale
   const callbacksRef = useRef({
-    onTickerReady: null as
-      | ((ticker: Ticker, trailsStage: Stage, mainStage: Stage) => void)
-      | null,
+    onTickerReady: null as ((ticker: Ticker, trailsStage: Stage, mainStage: Stage) => void) | null,
   });
   callbacksRef.current.onTickerReady = handleTickerReady;
 
-  function handleTickerReady(
-    ticker: Ticker,
-    trailsStage: Stage,
-    mainStage: Stage,
-  ) {
+  function handleTickerReady(ticker: Ticker, trailsStage: Stage, mainStage: Stage) {
     if (tickerInitializedRef.current) return;
     tickerInitializedRef.current = true;
 
@@ -167,7 +160,9 @@ export default function FireworkSimulator() {
           isHeader: IS_HEADER,
           isDesktop: IS_DESKTOP,
           state,
-          shellCtor: simulation.Shell as unknown as Parameters<typeof launchShellFromConfig>[1]["shellCtor"],
+          shellCtor: simulation.Shell as unknown as Parameters<
+            typeof launchShellFromConfig
+          >[1]["shellCtor"],
           stageWidth,
           stageHeight,
           registerUserInteraction: () => soundManager.registerInteraction(),
@@ -185,7 +180,9 @@ export default function FireworkSimulator() {
           isHeader: IS_HEADER,
           isDesktop: IS_DESKTOP,
           state,
-          shellCtor: simulation.Shell as unknown as Parameters<typeof startSequence>[0]["shellCtor"],
+          shellCtor: simulation.Shell as unknown as Parameters<
+            typeof startSequence
+          >[0]["shellCtor"],
           stageWidth,
           stageHeight,
           registerUserInteraction: () => soundManager.registerInteraction(),
@@ -214,7 +211,10 @@ export default function FireworkSimulator() {
     }
 
     setLoadingStatus("正在点燃导火线");
-    soundManager.preload().catch(() => {}).finally(doInit);
+    soundManager
+      .preload()
+      .catch(() => {})
+      .finally(doInit);
   }
 
   function doInit() {
@@ -253,7 +253,9 @@ export default function FireworkSimulator() {
 
   // Keyboard listener
   useEffect(() => {
-    function handleKeydown(e: KeyboardEvent) { interactionRef.current?.handleKeydown(e); }
+    function handleKeydown(e: KeyboardEvent) {
+      interactionRef.current?.handleKeydown(e);
+    }
     window.addEventListener("keydown", handleKeydown);
     return () => window.removeEventListener("keydown", handleKeydown);
   }, []);
@@ -275,34 +277,43 @@ export default function FireworkSimulator() {
 
   // Fullscreen listener
   useEffect(() => {
-    function onFullscreenChange() { store.setState({ fullscreen: Boolean(fscreen.fullscreenElement) }); }
+    function onFullscreenChange() {
+      store.setState({ fullscreen: Boolean(fscreen.fullscreenElement) });
+    }
     fscreen.addEventListener("fullscreenchange", onFullscreenChange);
     return () => fscreen.removeEventListener("fullscreenchange", onFullscreenChange);
   }, [store]);
 
   // Menu callbacks
-  const handleConfigChange = useCallback((config: FireworksConfig) => {
-    const prev = store.getState().config;
-    if (config.wordShell && !prev.wordShell) wordBurstTrackerRef.current?.queueBurst();
-    else if (!config.wordShell && prev.wordShell) wordBurstTrackerRef.current?.reset();
+  const handleConfigChange = useCallback(
+    (config: FireworksConfig) => {
+      const prev = store.getState().config;
+      if (config.wordShell && !prev.wordShell) wordBurstTrackerRef.current?.queueBurst();
+      else if (!config.wordShell && prev.wordShell) wordBurstTrackerRef.current?.reset();
 
-    const prevSkyLighting = Number(prev.skyLighting);
-    const nextSkyLighting = Number(config.skyLighting);
+      const prevSkyLighting = Number(prev.skyLighting);
+      const nextSkyLighting = Number(config.skyLighting);
 
-    if (nextSkyLighting === 0 && prevSkyLighting !== 0) {
-      const container = stageContainerRef.current;
-      if (container) container.style.backgroundColor = "#000";
-    }
+      if (nextSkyLighting === 0 && prevSkyLighting !== 0) {
+        const container = stageContainerRef.current;
+        if (container) container.style.backgroundColor = "#000";
+      }
 
-    store.setState({ config });
-    if (config.scaleFactor !== prev.scaleFactor) interactionRef.current?.handleResize();
-  }, [store]);
+      store.setState({ config });
+      if (config.scaleFactor !== prev.scaleFactor) interactionRef.current?.handleResize();
+    },
+    [store],
+  );
 
-  const handleBackgroundApply = useCallback((value: string) => {
-    const next: Background = { mode: "image", value, configured: true };
-    store.setState({ background: next });
-    if (backgroundManagerRef.current) backgroundManagerRef.current.applyBackground({ mode: "image", value });
-  }, [store]);
+  const handleBackgroundApply = useCallback(
+    (value: string) => {
+      const next: Background = { mode: "image", value, configured: true };
+      store.setState({ background: next });
+      if (backgroundManagerRef.current)
+        backgroundManagerRef.current.applyBackground({ mode: "image", value });
+    },
+    [store],
+  );
 
   const handleBackgroundClear = useCallback(() => {
     store.setState({ background: { mode: "none", value: "", configured: false } });
@@ -314,25 +325,42 @@ export default function FireworkSimulator() {
     else if (stageContainerRef.current) fscreen.requestFullscreen(stageContainerRef.current);
   }, []);
 
-  const handleHelpOpen = useCallback((topic: string) => { store.setState({ openHelpTopic: topic }); }, [store]);
-  const handleClose = useCallback(() => { store.setState({ menuOpen: false }); }, [store]);
+  const handleHelpOpen = useCallback(
+    (topic: string) => {
+      store.setState({ openHelpTopic: topic });
+    },
+    [store],
+  );
+  const handleClose = useCallback(() => {
+    store.setState({ menuOpen: false });
+  }, [store]);
 
   // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
 
   return (
-    <StoreContext.Provider value={store as unknown as import("zustand").StoreApi<import("@/stores/fireworksStore").FireworksState>}>
+    <StoreContext.Provider
+      value={
+        store as unknown as import("zustand").StoreApi<
+          import("@/stores/fireworksStore").FireworksState
+        >
+      }
+    >
       <SvgSprite />
       {!ready && <LoadingInit status={loadingStatus} />}
-      <div ref={stageContainerRef} className={`stage-container${ready ? "" : " remove"}`}>
+      <div ref={stageContainerRef} className={`stage-container${ready ? "" : "remove"}`}>
         <DualCanvas
           stageW={stageSize.w || 800}
           stageH={stageSize.h || 600}
           scaleFactor={1}
           onTickerReady={callbacksRef.current.onTickerReady!}
-          onPointerStart={(payload: PointerEventPayload) => interactionRef.current?.handlePointerStart(payload)}
-          onPointerMove={(payload: PointerEventPayload) => interactionRef.current?.handlePointerMove(payload)}
+          onPointerStart={(payload: PointerEventPayload) =>
+            interactionRef.current?.handlePointerStart(payload)
+          }
+          onPointerMove={(payload: PointerEventPayload) =>
+            interactionRef.current?.handlePointerMove(payload)
+          }
           onPointerEnd={() => interactionRef.current?.handlePointerEnd()}
         />
         {ready && <Controls />}

@@ -91,6 +91,7 @@ scaleFactorOptions: [0.5, 0.62, 0.75, 0.9, 1.0, 1.5, 2.0]
 ```
 
 Runtime overrides (persisted in `localStorage` key `cm_fireworks_data`):
+
 - `src/stores/fireworksStore.ts:buildDefaultConfig` – quality auto-detect, `isDesktop ? size 3 : 2`
 - Background: `src/lib/backgroundManager.ts` + `src/fireworks/background.ts` fallback `user → code default → none`
 

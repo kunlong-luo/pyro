@@ -36,12 +36,12 @@ export const SKY_LIGHT_NORMAL = fireworksAppConfig.skyLightingModes.normal;
 // ---------------------------------------------------------------------------
 
 export const COLOR = {
-	Red: "#ff0043",
-	Green: "#14fc56",
-	Blue: "#1e7fff",
-	Purple: "#e60aff",
-	Gold: "#ffbf36",
-	White: "#ffffff",
+  Red: "#ff0043",
+  Green: "#14fc56",
+  Blue: "#1e7fff",
+  Purple: "#e60aff",
+  Gold: "#ffbf36",
+  White: "#ffffff",
 } as const;
 
 export const INVISIBLE = "_INVISIBLE_";
@@ -61,15 +61,14 @@ export const COLOR_CODES = Object.values(COLOR);
 
 export const COLOR_CODES_W_INVIS = [...COLOR_CODES, INVISIBLE];
 
-export const COLOR_TUPLES: Record<string, { r: number; g: number; b: number }> =
-	COLOR_CODES.reduce(
-		(tuples, colorCode) => {
-			tuples[colorCode] = {
-				r: Number.parseInt(colorCode.slice(1, 3), 16),
-				g: Number.parseInt(colorCode.slice(3, 5), 16),
-				b: Number.parseInt(colorCode.slice(5, 7), 16),
-			};
-			return tuples;
-		},
-		{} as Record<string, { r: number; g: number; b: number }>,
-	);
+export const COLOR_TUPLES: Record<string, { r: number; g: number; b: number }> = COLOR_CODES.reduce(
+  (tuples, colorCode) => {
+    tuples[colorCode] = {
+      r: Number.parseInt(colorCode.slice(1, 3), 16),
+      g: Number.parseInt(colorCode.slice(3, 5), 16),
+      b: Number.parseInt(colorCode.slice(5, 7), 16),
+    };
+    return tuples;
+  },
+  {} as Record<string, { r: number; g: number; b: number }>,
+);

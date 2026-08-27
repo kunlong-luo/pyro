@@ -28,7 +28,7 @@ export function HelpModal() {
   };
 
   return (
-    <div className={`help-modal${isActive ? " active" : ""}`}>
+    <div className={`help-modal${isActive ? "active" : ""}`}>
       <div
         className="help-modal__overlay"
         onClick={handleClose}
@@ -40,17 +40,9 @@ export function HelpModal() {
         aria-label="关闭帮助"
       />
       <div className="help-modal__dialog">
-        <div className="help-modal__header">
-          {content?.header ?? ""}
-        </div>
-        <div className="help-modal__body">
-          {content?.body ?? ""}
-        </div>
-        <button
-          type="button"
-          className="help-modal__close-btn"
-          onClick={handleClose}
-        >
+        <div className="help-modal__header">{content?.header ?? ""}</div>
+        <div className="help-modal__body">{content?.body ?? ""}</div>
+        <button type="button" className="help-modal__close-btn" onClick={handleClose}>
           关闭
         </button>
       </div>

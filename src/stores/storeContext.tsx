@@ -17,7 +17,13 @@ export const StoreContext = createContext<StoreApi<FireworksState> | null>(null)
  * Provider component that wraps the app with the Zustand store.
  * Must be a client component because it uses React Context.
  */
-export function StoreProvider({ children, store }: { children: ReactNode; store: StoreApi<FireworksState> }) {
+export function StoreProvider({
+  children,
+  store,
+}: {
+  children: ReactNode;
+  store: StoreApi<FireworksState>;
+}) {
   return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>;
 }
 

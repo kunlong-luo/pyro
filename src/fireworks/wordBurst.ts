@@ -12,9 +12,9 @@ import { fireworksAppConfig } from "@/config/appConfig";
 // ---------------------------------------------------------------------------
 
 export interface Shell {
-	disableWord?: boolean;
-	comet?: boolean;
-	forceWordBurst?: boolean;
+  disableWord?: boolean;
+  comet?: boolean;
+  forceWordBurst?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -22,11 +22,11 @@ export interface Shell {
 // ---------------------------------------------------------------------------
 
 export interface WordBurstTracker {
-	shellsSinceLastBurst: number;
-	forceNextBurst: boolean;
-	reset(): void;
-	queueBurst(): void;
-	shouldCreateBurst(shell: Shell, wordShellEnabled: boolean): boolean;
+  shellsSinceLastBurst: number;
+  forceNextBurst: boolean;
+  reset(): void;
+  queueBurst(): void;
+  shouldCreateBurst(shell: Shell, wordShellEnabled: boolean): boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -34,36 +34,36 @@ export interface WordBurstTracker {
 // ---------------------------------------------------------------------------
 
 export function createWordBurstTracker(): WordBurstTracker {
-	return {
-		shellsSinceLastBurst: 0,
-		forceNextBurst: true,
+  return {
+    shellsSinceLastBurst: 0,
+    forceNextBurst: true,
 
-		reset() {
-			this.shellsSinceLastBurst = 0;
-			this.forceNextBurst = false;
-		},
+    reset() {
+      this.shellsSinceLastBurst = 0;
+      this.forceNextBurst = false;
+    },
 
-		queueBurst() {
-			this.forceNextBurst = true;
-		},
+    queueBurst() {
+      this.forceNextBurst = true;
+    },
 
-		shouldCreateBurst(shell: Shell, wordShellEnabled: boolean): boolean {
-			if (!wordShellEnabled || shell.disableWord || !shell.comet) {
-				return false;
-			}
+    shouldCreateBurst(shell: Shell, wordShellEnabled: boolean): boolean {
+      if (!wordShellEnabled || shell.disableWord || !shell.comet) {
+        return false;
+      }
 
-			if (shell.forceWordBurst || this.forceNextBurst) {
-				this.reset();
-				return true;
-			}
+      if (shell.forceWordBurst || this.forceNextBurst) {
+        this.reset();
+        return true;
+      }
 
-			this.shellsSinceLastBurst += 1;
-			if (this.shellsSinceLastBurst >= fireworksAppConfig.wordBurstInterval) {
-				this.shellsSinceLastBurst = 0;
-				return true;
-			}
+      this.shellsSinceLastBurst += 1;
+      if (this.shellsSinceLastBurst >= fireworksAppConfig.wordBurstInterval) {
+        this.shellsSinceLastBurst = 0;
+        return true;
+      }
 
-			return false;
-		},
-	};
+      return false;
+    },
+  };
 }

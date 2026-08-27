@@ -62,8 +62,7 @@ const vendorMaps: string[][] = [
 ];
 
 // Handle non-browser environments gracefully
-const doc: Document | Record<string, never> =
-  typeof document !== "undefined" ? document : {};
+const doc: Document | Record<string, never> = typeof document !== "undefined" ? document : {};
 const vendor: string[] = vendorMaps.find((map) => map[0] in doc) || [];
 
 // Cast for dynamic vendor-prefixed property access
@@ -91,14 +90,10 @@ export const fscreen: Fscreen = {
     doc.removeEventListener(eventType, handler);
   },
   get fullscreenEnabled() {
-    return Boolean(
-      dynamicDoc[vendor[keyIndex.fullscreenEnabled]],
-    );
+    return Boolean(dynamicDoc[vendor[keyIndex.fullscreenEnabled]]);
   },
   get fullscreenElement() {
-    return dynamicDoc[
-      vendor[keyIndex.fullscreenElement]
-    ] as Element | null;
+    return dynamicDoc[vendor[keyIndex.fullscreenElement]] as Element | null;
   },
   get onfullscreenchange() {
     const eventName = `on${vendor[keyIndex.fullscreenchange]}`.toLowerCase();

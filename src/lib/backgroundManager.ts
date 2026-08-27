@@ -104,11 +104,8 @@ export function createBackgroundManager(options: BackgroundManagerOptions): {
     };
   }
 
-  async function applyBackground(
-    candidate: string | BackgroundSettings,
-  ): Promise<ApplyResult> {
-    const rawValue =
-      typeof candidate === "string" ? candidate : candidate && candidate.value;
+  async function applyBackground(candidate: string | BackgroundSettings): Promise<ApplyResult> {
+    const rawValue = typeof candidate === "string" ? candidate : candidate && candidate.value;
     const normalizedValue = typeof rawValue === "string" ? rawValue.trim() : "";
 
     if (!normalizedValue) {

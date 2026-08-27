@@ -91,6 +91,7 @@ scaleFactorOptions: [0.5, 0.62, 0.75, 0.9, 1.0, 1.5, 2.0]
 ```
 
 运行时覆盖持久化于 `localStorage` 键 `cm_fireworks_data`：
+
 - `src/stores/fireworksStore.ts:buildDefaultConfig` – 画质自适应、`isDesktop ? size 3 : 2`
 - 背景：`src/lib/backgroundManager.ts` + `src/fireworks/background.ts` 回退链 `网页端 → 代码默认 → 无`
 

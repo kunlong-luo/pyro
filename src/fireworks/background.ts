@@ -15,9 +15,9 @@ import type { BackgroundSettings, ApplyResult } from "@/lib/backgroundManager";
 // ---------------------------------------------------------------------------
 
 export interface BackgroundManager {
-	applyBackground(candidate: string | BackgroundSettings): Promise<ApplyResult>;
-	clearBackground(): unknown;
-	setStatus(message: string, state: string): void;
+  applyBackground(candidate: string | BackgroundSettings): Promise<ApplyResult>;
+  clearBackground(): unknown;
+  setStatus(message: string, state: string): void;
 }
 
 // ---------------------------------------------------------------------------
@@ -25,25 +25,22 @@ export interface BackgroundManager {
 // ---------------------------------------------------------------------------
 
 export function getCodeDefaultBackground(): Background {
-	const defaultBackground = fireworksAppConfig.defaultBackground || {};
-	const value =
-		typeof defaultBackground.value === "string"
-			? defaultBackground.value.trim()
-			: "";
+  const defaultBackground = fireworksAppConfig.defaultBackground || {};
+  const value = typeof defaultBackground.value === "string" ? defaultBackground.value.trim() : "";
 
-	if (!value) {
-		return {
-			mode: "none",
-			value: "",
-			configured: false,
-		};
-	}
+  if (!value) {
+    return {
+      mode: "none",
+      value: "",
+      configured: false,
+    };
+  }
 
-	return {
-		mode: defaultBackground.mode === "style" ? "style" : "image",
-		value,
-		configured: false,
-	};
+  return {
+    mode: defaultBackground.mode === "style" ? "style" : "image",
+    value,
+    configured: false,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -51,32 +48,32 @@ export function getCodeDefaultBackground(): Background {
 // ---------------------------------------------------------------------------
 
 export function resolvePreferredBackground(currentBackground: Background): {
-	source: "user" | "default" | "none";
-	background: Background;
+  source: "user" | "default" | "none";
+  background: Background;
 } {
-	if (currentBackground.configured && currentBackground.value) {
-		return {
-			source: "user",
-			background: currentBackground,
-		};
-	}
+  if (currentBackground.configured && currentBackground.value) {
+    return {
+      source: "user",
+      background: currentBackground,
+    };
+  }
 
-	const codeDefaultBackground = getCodeDefaultBackground();
-	if (codeDefaultBackground.value) {
-		return {
-			source: "default",
-			background: codeDefaultBackground,
-		};
-	}
+  const codeDefaultBackground = getCodeDefaultBackground();
+  if (codeDefaultBackground.value) {
+    return {
+      source: "default",
+      background: codeDefaultBackground,
+    };
+  }
 
-	return {
-		source: "none",
-		background: {
-			mode: "none",
-			value: "",
-			configured: false,
-		},
-	};
+  return {
+    source: "none",
+    background: {
+      mode: "none",
+      value: "",
+      configured: false,
+    },
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -84,68 +81,56 @@ export function resolvePreferredBackground(currentBackground: Background): {
 // ---------------------------------------------------------------------------
 
 export function applyResolvedBackground(
-	backgroundManager: BackgroundManager,
-	currentBackground: Background,
+  backgroundManager: BackgroundManager,
+  currentBackground: Background,
 ): void {
-	const resolvedBackground = resolvePreferredBackground(currentBackground);
+  const resolvedBackground = resolvePreferredBackground(currentBackground);
 
-	if (resolvedBackground.source === "user") {
-		backgroundManager
-			.applyBackground(resolvedBackground.background as BackgroundSettings)
-			.then((result) => {
-				if (result.ok) {
-					backgroundManager.setStatus("正在使用网页端背景", "success");
-					return;
-				}
+  if (resolvedBackground.source === "user") {
+    backgroundManager
+      .applyBackground(resolvedBackground.background as BackgroundSettings)
+      .then((result) => {
+        if (result.ok) {
+          backgroundManager.setStatus("正在使用网页端背景", "success");
+          return;
+        }
 
-				const fallbackBackground = getCodeDefaultBackground();
-				if (!fallbackBackground.value) {
-					backgroundManager.clearBackground();
-					backgroundManager.setStatus(
-						"网页端背景无效，当前未显示背景",
-						"error",
-					);
-					return;
-				}
+        const fallbackBackground = getCodeDefaultBackground();
+        if (!fallbackBackground.value) {
+          backgroundManager.clearBackground();
+          backgroundManager.setStatus("网页端背景无效，当前未显示背景", "error");
+          return;
+        }
 
-				backgroundManager
-					.applyBackground(fallbackBackground as BackgroundSettings)
-					.then((fallbackResult) => {
-						if (fallbackResult.ok) {
-							backgroundManager.setStatus(
-								"网页端背景无效，已回退到代码默认背景",
-								"idle",
-							);
-							return;
-						}
+        backgroundManager
+          .applyBackground(fallbackBackground as BackgroundSettings)
+          .then((fallbackResult) => {
+            if (fallbackResult.ok) {
+              backgroundManager.setStatus("网页端背景无效，已回退到代码默认背景", "idle");
+              return;
+            }
 
-						backgroundManager.clearBackground();
-						backgroundManager.setStatus(
-							"网页端背景和代码默认背景都无效",
-							"error",
-						);
-					});
-			});
-		return;
-	}
+            backgroundManager.clearBackground();
+            backgroundManager.setStatus("网页端背景和代码默认背景都无效", "error");
+          });
+      });
+    return;
+  }
 
-	if (resolvedBackground.source === "default") {
-		backgroundManager
-			.applyBackground(resolvedBackground.background as BackgroundSettings)
-			.then((result) => {
-				if (result.ok) {
-					backgroundManager.setStatus("正在使用代码默认背景", "idle");
-					return;
-				}
+  if (resolvedBackground.source === "default") {
+    backgroundManager
+      .applyBackground(resolvedBackground.background as BackgroundSettings)
+      .then((result) => {
+        if (result.ok) {
+          backgroundManager.setStatus("正在使用代码默认背景", "idle");
+          return;
+        }
 
-				backgroundManager.clearBackground();
-				backgroundManager.setStatus(
-					"代码默认背景无效，当前未显示背景",
-					"error",
-				);
-			});
-		return;
-	}
+        backgroundManager.clearBackground();
+        backgroundManager.setStatus("代码默认背景无效，当前未显示背景", "error");
+      });
+    return;
+  }
 
-	backgroundManager.clearBackground();
+  backgroundManager.clearBackground();
 }

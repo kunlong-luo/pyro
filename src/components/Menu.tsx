@@ -23,9 +23,10 @@ import type { HelpContent } from "@/types/app";
 // Option data (mirrors populateAppControls in engine.js)
 // ---------------------------------------------------------------------------
 
-const SHELL_SIZE_OPTIONS = ['3"', '4"', '6"', '8"', '12"', '16"'].map(
-  (label, index) => ({ value: String(index), label }),
-);
+const SHELL_SIZE_OPTIONS = ['3"', '4"', '6"', '8"', '12"', '16"'].map((label, index) => ({
+  value: String(index),
+  label,
+}));
 
 const QUALITY_OPTIONS = [
   { label: "低", value: String(fireworksAppConfig.qualityLevels.low) },
@@ -42,12 +43,10 @@ const SKY_LIGHTING_OPTIONS = [
   },
 ];
 
-const SCALE_FACTOR_OPTIONS = fireworksAppConfig.scaleFactorOptions.map(
-  (value) => ({
-    value: value.toFixed(2),
-    label: `${value * 100}%`,
-  }),
-);
+const SCALE_FACTOR_OPTIONS = fireworksAppConfig.scaleFactorOptions.map((value) => ({
+  value: value.toFixed(2),
+  label: `${value * 100}%`,
+}));
 
 // ---------------------------------------------------------------------------
 // Props
@@ -147,7 +146,7 @@ export function Menu({
   const isHidden = !menuOpen;
 
   return (
-    <div className={`menu${isHidden ? " hide" : ""}`}>
+    <div className={`menu${isHidden ? "hide" : ""}`}>
       <div className="menu__inner-wrap">
         <button
           className="btn btn--bright close-menu-btn"
@@ -165,10 +164,7 @@ export function Menu({
         <form>
           {/* ---- 烟花类型 ---- */}
           <div className="form-option form-option--select">
-            <label
-              className="shell-type-label"
-              onClick={() => handleHelpClick("shellType")}
-            >
+            <label className="shell-type-label" onClick={() => handleHelpClick("shellType")}>
               烟花类型
             </label>
             <select
@@ -186,10 +182,7 @@ export function Menu({
 
           {/* ---- 烟花大小 ---- */}
           <div className="form-option form-option--select">
-            <label
-              className="shell-size-label"
-              onClick={() => handleHelpClick("shellSize")}
-            >
+            <label className="shell-size-label" onClick={() => handleHelpClick("shellSize")}>
               烟花大小
             </label>
             <select
@@ -207,10 +200,7 @@ export function Menu({
 
           {/* ---- 画质 ---- */}
           <div className="form-option form-option--select">
-            <label
-              className="quality-ui-label"
-              onClick={() => handleHelpClick("quality")}
-            >
+            <label className="quality-ui-label" onClick={() => handleHelpClick("quality")}>
               画质
             </label>
             <select
@@ -228,18 +218,13 @@ export function Menu({
 
           {/* ---- 照亮天空 ---- */}
           <div className="form-option form-option--select">
-            <label
-              className="sky-lighting-label"
-              onClick={() => handleHelpClick("skyLighting")}
-            >
+            <label className="sky-lighting-label" onClick={() => handleHelpClick("skyLighting")}>
               照亮天空
             </label>
             <select
               className="sky-lighting"
               value={config.skyLighting}
-              onChange={(e) =>
-                handleSelectChange("skyLighting", e.target.value)
-              }
+              onChange={(e) => handleSelectChange("skyLighting", e.target.value)}
             >
               {SKY_LIGHTING_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -251,18 +236,13 @@ export function Menu({
 
           {/* ---- 缩放 ---- */}
           <div className="form-option form-option--select">
-            <label
-              className="scaleFactor-label"
-              onClick={() => handleHelpClick("scaleFactor")}
-            >
+            <label className="scaleFactor-label" onClick={() => handleHelpClick("scaleFactor")}>
               缩放
             </label>
             <select
               className="scaleFactor"
               value={config.scaleFactor.toFixed(2)}
-              onChange={(e) =>
-                handleSelectChange("scaleFactor", e.target.value)
-              }
+              onChange={(e) => handleSelectChange("scaleFactor", e.target.value)}
             >
               {SCALE_FACTOR_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -274,10 +254,7 @@ export function Menu({
 
           {/* ---- 自定义背景 ---- */}
           <div className="form-option form-option--stacked">
-            <label
-              className="background-label"
-              onClick={() => handleHelpClick("background")}
-            >
+            <label className="background-label" onClick={() => handleHelpClick("background")}>
               自定义背景
             </label>
             <div className="form-option__content">
@@ -295,9 +272,7 @@ export function Menu({
                   className="background-apply-btn"
                   type="button"
                   onClick={() => {
-                    const input = document.querySelector<HTMLInputElement>(
-                      ".background-input",
-                    );
+                    const input = document.querySelector<HTMLInputElement>(".background-input");
                     if (input) handleBackgroundApply(input.value);
                   }}
                 >
@@ -317,37 +292,27 @@ export function Menu({
 
           {/* ---- 文字烟花 ---- */}
           <div className="form-option form-option--checkbox">
-            <label
-              className="word-shell-label"
-              onClick={() => handleHelpClick("wordShell")}
-            >
+            <label className="word-shell-label" onClick={() => handleHelpClick("wordShell")}>
               文字烟花
             </label>
             <input
               className="word-shell"
               type="checkbox"
               checked={config.wordShell}
-              onChange={(e) =>
-                handleCheckboxChange("wordShell", e.target.checked)
-              }
+              onChange={(e) => handleCheckboxChange("wordShell", e.target.checked)}
             />
           </div>
 
           {/* ---- 自动放烟花 ---- */}
           <div className="form-option form-option--checkbox">
-            <label
-              className="auto-launch-label"
-              onClick={() => handleHelpClick("autoLaunch")}
-            >
+            <label className="auto-launch-label" onClick={() => handleHelpClick("autoLaunch")}>
               自动放烟花
             </label>
             <input
               className="auto-launch"
               type="checkbox"
               checked={config.autoLaunch}
-              onChange={(e) =>
-                handleCheckboxChange("autoLaunch", e.target.checked)
-              }
+              onChange={(e) => handleCheckboxChange("autoLaunch", e.target.checked)}
             />
           </div>
 
@@ -356,46 +321,33 @@ export function Menu({
             className="form-option form-option--checkbox form-option--finale-mode"
             style={{ opacity: config.autoLaunch ? 1 : 0.32 }}
           >
-            <label
-              className="finale-mode-label"
-              onClick={() => handleHelpClick("finaleMode")}
-            >
+            <label className="finale-mode-label" onClick={() => handleHelpClick("finaleMode")}>
               同时放更多的烟花
             </label>
             <input
               className="finale-mode"
               type="checkbox"
               checked={config.finale}
-              onChange={(e) =>
-                handleCheckboxChange("finale", e.target.checked)
-              }
+              onChange={(e) => handleCheckboxChange("finale", e.target.checked)}
             />
           </div>
 
           {/* ---- 隐藏控制按钮 ---- */}
           <div className="form-option form-option--checkbox">
-            <label
-              className="hide-controls-label"
-              onClick={() => handleHelpClick("hideControls")}
-            >
+            <label className="hide-controls-label" onClick={() => handleHelpClick("hideControls")}>
               隐藏控制按钮
             </label>
             <input
               className="hide-controls"
               type="checkbox"
               checked={config.hideControls}
-              onChange={(e) =>
-                handleCheckboxChange("hideControls", e.target.checked)
-              }
+              onChange={(e) => handleCheckboxChange("hideControls", e.target.checked)}
             />
           </div>
 
           {/* ---- 全屏 ---- */}
           <div className="form-option form-option--checkbox form-option--fullscreen">
-            <label
-              className="fullscreen-label"
-              onClick={() => handleHelpClick("fullscreen")}
-            >
+            <label className="fullscreen-label" onClick={() => handleHelpClick("fullscreen")}>
               全屏
             </label>
             <input
@@ -408,19 +360,14 @@ export function Menu({
 
           {/* ---- 保留烟花的火花 ---- */}
           <div className="form-option form-option--checkbox">
-            <label
-              className="long-exposure-label"
-              onClick={() => handleHelpClick("longExposure")}
-            >
+            <label className="long-exposure-label" onClick={() => handleHelpClick("longExposure")}>
               保留烟花的火花
             </label>
             <input
               className="long-exposure"
               type="checkbox"
               checked={config.longExposure}
-              onChange={(e) =>
-                handleCheckboxChange("longExposure", e.target.checked)
-              }
+              onChange={(e) => handleCheckboxChange("longExposure", e.target.checked)}
             />
           </div>
         </form>
@@ -429,9 +376,7 @@ export function Menu({
         <div className="credits">
           <p className="copyright">
             Copyright&nbsp;&copy;&nbsp;2021 -{" "}
-            <span className="copyright-year">
-              {new Date().getFullYear()}
-            </span>
+            <span className="copyright-year">{new Date().getFullYear()}</span>
             &nbsp;
             <a target="_blank" href="https://www.nianbroken.top/" rel="noreferrer">
               碎念_Nian

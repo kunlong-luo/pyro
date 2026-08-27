@@ -1,7 +1,7 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { PersistStorage, StorageValue } from 'zustand/middleware';
-import { fireworksAppConfig } from '@/config/appConfig';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type { PersistStorage, StorageValue } from "zustand/middleware";
+import { fireworksAppConfig } from "@/config/appConfig";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -47,7 +47,7 @@ export interface FireworksState {
 }
 
 /** Subset of state that is persisted to localStorage. */
-type PersistedState = Pick<FireworksState, 'config' | 'background'>;
+type PersistedState = Pick<FireworksState, "config" | "background">;
 
 /** Shape written to / read from localStorage. */
 type StorageFormat = {
@@ -59,39 +59,29 @@ type StorageFormat = {
 // Validation sets (mirrors original store.js)
 // ---------------------------------------------------------------------------
 
-const qualityValues = new Set(
-  Object.values(fireworksAppConfig.qualityLevels).map(String),
-);
-const skyLightingValues = new Set(
-  Object.values(fireworksAppConfig.skyLightingModes).map(String),
-);
-const scaleFactorValues = new Set(
-  fireworksAppConfig.scaleFactorOptions.map((v) => v.toFixed(2)),
-);
-const shellSizeValues = new Set(['0', '1', '2', '3', '4', '5']);
-const legacyStorageKey = 'schemaVersion';
+const qualityValues = new Set(Object.values(fireworksAppConfig.qualityLevels).map(String));
+const skyLightingValues = new Set(Object.values(fireworksAppConfig.skyLightingModes).map(String));
+const scaleFactorValues = new Set(fireworksAppConfig.scaleFactorOptions.map((v) => v.toFixed(2)));
+const shellSizeValues = new Set(["0", "1", "2", "3", "4", "5"]);
+const legacyStorageKey = "schemaVersion";
 
 // ---------------------------------------------------------------------------
 // Small helpers
 // ---------------------------------------------------------------------------
 
 function isObject(value: unknown): value is Record<string, unknown> {
-  return value !== null && typeof value === 'object' && !Array.isArray(value);
+  return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
 function asBoolean(value: unknown, fallback: boolean): boolean {
-  return typeof value === 'boolean' ? value : fallback;
+  return typeof value === "boolean" ? value : fallback;
 }
 
 function asString(value: unknown, fallback: string): string {
-  return typeof value === 'string' && value.trim() ? value : fallback;
+  return typeof value === "string" && value.trim() ? value : fallback;
 }
 
-function asAllowedString(
-  value: unknown,
-  allowedValues: Set<string>,
-  fallback: string,
-): string {
+function asAllowedString(value: unknown, allowedValues: Set<string>, fallback: string): string {
   return allowedValues.has(String(value)) ? String(value) : fallback;
 }
 
@@ -114,8 +104,8 @@ export function normalizeBackground(
   inferConfiguredFromValue = false,
 ): Background {
   const fallback: Background = fallbackBackground ?? {
-    mode: 'none',
-    value: '',
+    mode: "none",
+    value: "",
     configured: false,
   };
 
@@ -124,29 +114,27 @@ export function normalizeBackground(
   }
 
   const value =
-    typeof rawBackground.value === 'string'
-      ? (rawBackground.value as string).trim()
-      : '';
+    typeof rawBackground.value === "string" ? (rawBackground.value as string).trim() : "";
   if (!value) {
-    return { mode: 'none', value: '', configured: false };
+    return { mode: "none", value: "", configured: false };
   }
 
   return {
-    mode: rawBackground.mode === 'style' ? 'style' : 'image',
+    mode: rawBackground.mode === "style" ? "style" : "image",
     value,
     configured:
-      typeof rawBackground.configured === 'boolean'
+      typeof rawBackground.configured === "boolean"
         ? rawBackground.configured
         : inferConfiguredFromValue,
   };
 }
 
 export function buildDefaultConfig(runtime: Runtime): FireworksConfig {
-  let defaultShellSize = '2';
+  let defaultShellSize = "2";
   if (runtime.isDesktop) {
-    defaultShellSize = '3';
+    defaultShellSize = "3";
   } else if (runtime.isHeader) {
-    defaultShellSize = '1.2';
+    defaultShellSize = "1.2";
   }
 
   return {
@@ -155,7 +143,7 @@ export function buildDefaultConfig(runtime: Runtime): FireworksConfig {
         ? fireworksAppConfig.qualityLevels.high
         : fireworksAppConfig.qualityLevels.normal,
     ),
-    shell: 'Random',
+    shell: "Random",
     size: defaultShellSize,
     wordShell: false,
     wordShellConfigured: false,
@@ -172,25 +160,16 @@ export function normalizeConfig(
   rawConfig: unknown,
   defaultConfig: FireworksConfig,
 ): FireworksConfig {
-  const config = isObject(rawConfig)
-    ? (rawConfig as Record<string, unknown>)
-    : {};
+  const config = isObject(rawConfig) ? (rawConfig as Record<string, unknown>) : {};
   return {
     quality: asAllowedString(config.quality, qualityValues, defaultConfig.quality),
     shell: asString(config.shell, defaultConfig.shell),
     size: asAllowedString(config.size, shellSizeValues, defaultConfig.size),
     wordShell: asBoolean(config.wordShell, defaultConfig.wordShell),
-    wordShellConfigured: asBoolean(
-      config.wordShellConfigured,
-      defaultConfig.wordShellConfigured,
-    ),
+    wordShellConfigured: asBoolean(config.wordShellConfigured, defaultConfig.wordShellConfigured),
     autoLaunch: asBoolean(config.autoLaunch, defaultConfig.autoLaunch),
     finale: asBoolean(config.finale, defaultConfig.finale),
-    skyLighting: asAllowedString(
-      config.skyLighting,
-      skyLightingValues,
-      defaultConfig.skyLighting,
-    ),
+    skyLighting: asAllowedString(config.skyLighting, skyLightingValues, defaultConfig.skyLighting),
     hideControls: asBoolean(config.hideControls, defaultConfig.hideControls),
     longExposure: asBoolean(config.longExposure, defaultConfig.longExposure),
     scaleFactor: asScaleFactor(config.scaleFactor, defaultConfig.scaleFactor),
@@ -220,7 +199,7 @@ export function createDefaultState(runtime: Runtime): FireworksState {
     openHelpTopic: null,
     fullscreen: runtime.fullscreen,
     config: buildDefaultConfig(runtime),
-    background: { mode: 'none', value: '', configured: false },
+    background: { mode: "none", value: "", configured: false },
   };
 }
 
@@ -261,8 +240,7 @@ function createAppStorage(): PersistStorage<PersistedState> {
 
     setItem(name: string, value: StorageValue<PersistedState>) {
       // Strip internal field before persisting
-      const { _schemaVersion: _, ...data } =
-        value.state as StorageState;
+      const { _schemaVersion: _, ...data } = value.state as StorageState;
       void _;
       localStorage.setItem(
         name,
@@ -298,7 +276,7 @@ export function createFireworksStore(runtime: Runtime) {
       merge: (persistedState: unknown, currentState: FireworksState) => {
         const base = currentState;
 
-        if (!persistedState || typeof persistedState !== 'object') {
+        if (!persistedState || typeof persistedState !== "object") {
           // No stored data – attempt legacy migration
           return applyLegacyMigration(base);
         }
@@ -314,19 +292,15 @@ export function createFireworksStore(runtime: Runtime) {
           };
         }
 
-        if (schemaVersion === '2.1' || schemaVersion === '2.0') {
+        if (schemaVersion === "2.1" || schemaVersion === "2.0") {
           return {
             ...base,
             config: normalizeLegacyWordShellConfig(stored.config, base.config),
-            background: normalizeBackground(
-              stored.background,
-              base.background,
-              true,
-            ),
+            background: normalizeBackground(stored.background, base.background, true),
           };
         }
 
-        if (schemaVersion === '1.2' || schemaVersion === '1.1') {
+        if (schemaVersion === "1.2" || schemaVersion === "1.1") {
           return {
             ...base,
             config: normalizeLegacyWordShellConfig(
@@ -345,7 +319,7 @@ export function createFireworksStore(runtime: Runtime) {
 }
 
 function applyLegacyMigration(defaultState: FireworksState): FireworksState {
-  if (localStorage.getItem(legacyStorageKey) !== '1') {
+  if (localStorage.getItem(legacyStorageKey) !== "1") {
     return defaultState;
   }
 
@@ -355,14 +329,14 @@ function applyLegacyMigration(defaultState: FireworksState): FireworksState {
   };
 
   try {
-    const rawSize = localStorage.getItem('configSize');
-    const parsedSize = typeof rawSize === 'string' ? JSON.parse(rawSize) : null;
+    const rawSize = localStorage.getItem("configSize");
+    const parsedSize = typeof rawSize === "string" ? JSON.parse(rawSize) : null;
     const sizeValue = String(parseInt(parsedSize as string, 10));
     if (shellSizeValues.has(sizeValue)) {
       nextState.config.size = sizeValue;
     }
   } catch {
-    localStorage.removeItem('configSize');
+    localStorage.removeItem("configSize");
   }
 
   return nextState;

@@ -23,7 +23,7 @@ export function Controls() {
   const soundIcon = soundEnabled ? "#icon-sound-on" : "#icon-sound-off";
 
   return (
-    <div className={`controls${isHidden ? " hide" : ""}`}>
+    <div className={`controls${isHidden ? "hide" : ""}`}>
       <button
         className="btn pause-btn"
         type="button"
