@@ -318,8 +318,9 @@ export function Menu({
 
           {/* ---- 同时放更多的烟花 ---- */}
           <div
-            className="form-option form-option--checkbox form-option--finale-mode"
-            style={{ opacity: config.autoLaunch ? 1 : 0.32 }}
+            className={`form-option form-option--checkbox form-option--finale-mode ${
+              config.autoLaunch ? "opacity-100" : "opacity-[0.32]"
+            }`}
           >
             <label className="finale-mode-label" onClick={() => handleHelpClick("finaleMode")}>
               同时放更多的烟花

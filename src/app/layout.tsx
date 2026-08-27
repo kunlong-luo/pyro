@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { SvgSprite } from "@/components/SvgSprite";
+import { metaCsp } from "@/config/csp";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -20,6 +21,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <head>
+        {/* Actual CSP enforcement on GitHub Pages: static hosting can't send
+            custom HTTP headers, so next.config.ts's headers() (kept for a
+            future non-static deployment) never takes effect here. */}
+        <meta httpEquiv="Content-Security-Policy" content={metaCsp} />
         <link rel="icon" href="/images/favicon.png" sizes="any" />
         <meta name="theme-color" content="#000000" />
         <meta name="mobile-web-app-capable" content="yes" />

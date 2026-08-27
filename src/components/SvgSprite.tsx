@@ -8,7 +8,7 @@
  */
 export function SvgSprite() {
   return (
-    <div style={{ height: 0, width: 0, position: "absolute", visibility: "hidden" }}>
+    <div className="invisible absolute h-0 w-0">
       <svg xmlns="http://www.w3.org/2000/svg">
         <symbol id="icon-play" viewBox="0 0 24 24">
           <path d="M8 5v14l11-7z" />

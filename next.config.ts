@@ -1,12 +1,10 @@
 import type { NextConfig } from "next";
 import bundleAnalyzer from "@next/bundle-analyzer";
+import { headerCsp } from "./src/config/csp";
 
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
-
-const csp =
-  "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data:; audio-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'";
 
 const nextConfig: NextConfig = {
   output: "export",
@@ -19,6 +17,10 @@ const nextConfig: NextConfig = {
   basePath: process.env.NODE_ENV === "production" ? "/Firework_Simulator" : "",
   // Silence Turbopack warning
   turbopack: {},
+  // No-op under output: "export" (no server to send headers from — Next
+  // warns on every build). Kept so these apply for free if this ever moves
+  // off static export; src/app/layout.tsx's <meta> tag covers CSP for the
+  // current GitHub Pages deployment, which can't send custom headers either.
   async headers() {
     return [
       {
@@ -26,7 +28,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: "Content-Security-Policy",
-            value: csp,
+            value: headerCsp,
           },
           {
             key: "X-Frame-Options",
