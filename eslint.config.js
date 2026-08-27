@@ -1,41 +1,21 @@
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
-import reactPlugin from "eslint-plugin-react";
-import jsxA11yPlugin from "eslint-plugin-jsx-a11y";
+import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
 import prettierConfig from "eslint-config-prettier";
 
 export default tseslint.config(
   {
-    ignores: [
-      "dist/**",
-      "out/**",
-      ".next/**",
-      "node_modules/**",
-      "js/**",
-      "css/**",
-      "audio/**",
-      "fonts/**",
-      "images/**",
-      "*.js",
-      "eslint.config.js",
-      "postcss.config.js",
-    ],
+    ignores: ["out/**", ".next/**", "node_modules/**", "eslint.config.js"],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
+  ...nextCoreWebVitals,
   {
-    plugins: {
-      react: reactPlugin,
-      "jsx-a11y": jsxA11yPlugin,
-    },
-    settings: {
-      react: {
-        version: "detect",
-      },
-    },
+    // Existing "lazy ref init" pattern (`if (!ref.current) ref.current = ...`
+    // during render) is intentional and StrictMode-safe throughout this
+    // codebase; not a behavior we want to refactor away.
     rules: {
-      "react/react-in-jsx-scope": "off",
-      "react/jsx-uses-react": "off",
+      "react-hooks/refs": "off",
     },
   },
   prettierConfig,
