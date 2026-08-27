@@ -223,6 +223,10 @@ export class Stage {
     }
   }
 
+  destroy(): void {
+    stages.delete(this);
+  }
+
   // -- sizing ---------------------------------------------------------------
 
   resize(width: number, height: number): void {
@@ -320,10 +324,12 @@ function touchHandler(event: TouchEvent): void {
   }
 }
 
-// Register global input handlers once (module side-effect)
-document.addEventListener("mousedown", mouseHandler);
-document.addEventListener("mousemove", mouseHandler);
-document.addEventListener("mouseup", mouseHandler);
-document.addEventListener("touchstart", touchHandler);
-document.addEventListener("touchmove", touchHandler);
-document.addEventListener("touchend", touchHandler);
+// Register global input handlers once (module side-effect) – only in browser
+if (typeof window !== "undefined") {
+  document.addEventListener("mousedown", mouseHandler);
+  document.addEventListener("mousemove", mouseHandler);
+  document.addEventListener("mouseup", mouseHandler);
+  document.addEventListener("touchstart", touchHandler);
+  document.addEventListener("touchmove", touchHandler);
+  document.addEventListener("touchend", touchHandler);
+}

@@ -1,61 +1,116 @@
 <div align="center">
 
-# 烟花模拟器
+# Firework Simulator
 
-一个可以模拟各种烟花效果的网页
+A web-based firework simulator with realistic particle physics, 12 shell types, Web Audio, and customizable backgrounds — now rebuilt with React 19 + TypeScript + Tailwind CSS.
 
-它可以展示各种绚丽多彩的烟花效果 并让人仿佛置身于真实烟花的绚丽世界之中
+<img src="./public/images/favicon.png" alt="preview" width="96" />
 
-<img src="./Image_Preview.png" alt="主界面" style="zoom:35%;" />
+[中文文档](./README.zh-CN.md)
 
 </div>
 
-## 预览
+## Preview
 
-- [https://nianbroken.github.io/Firework_Simulator/](https://nianbroken.github.io/Firework_Simulator/ "https://nianbroken.github.io/Firework_Simulator/")
+- Original demo: https://nianbroken.github.io/Firework_Simulator/
+- Local dev: `pnpm dev` → http://localhost:5173
 
-## 配置修改
+<img src="./Image_Preview.png" alt="preview" width="640" />
 
-### 修改默认背景
+## Features
 
-编辑 `js\app\config.js` 文件的第10行和第11行。
+- 12 shell types (Chrysanthemum, Ghost, Strobe, Palm, Ring, Crossette, Floral, Falling Leaves, Willow, Crackle, Horse Tail, Random) with 6 auto-launch sequences (including 32-shot finale)
+- Dual-canvas rendering (`mix-blend: lighten`, long-exposure) + sky lighting
+- Web Audio API with randomized pitch/volume and 20 ms burst throttling
+- Text fireworks via `literalLattice` + Zustand-persisted settings + custom backgrounds (image / gradient / CSS)
+- Full-screen, quality auto-detect (`hardwareConcurrency`), responsive (840/560 breakpoints)
+- Zero backend, static-host ready
 
-当 `mode` 为 `none` 时，不使用默认背景。
+## Tech Stack
 
-当 `mode` 为 `image` 时，在 `value` 中填入图片路径或地址，例如 `./Image_Preview.png`。
+- **React 19** + **TypeScript 6** (strict) + **Vite 8** + **Tailwind CSS 4**
+- **Zustand 5** (persist + schema migration 1.1/1.2/2.0/2.1 → 1.0)
+- **ESLint 9** + **Prettier** + **Vitest 4**
+- Canvas 2D API + Web Audio API
 
-当 `mode` 为 `style` 时，在 `value` 中填入完整的 CSS 背景样式字符串，例如 `linear-gradient(#020024, #090979, #00d4ff)`。
+## Quick Start
 
-### 修改文字烟花内容
+```bash
+pnpm install
+pnpm dev        # start dev server
+pnpm build      # production build -> dist/
+pnpm preview    # preview build
+pnpm lint       # eslint
+npx tsc --noEmit # type check
+pnpm test       # vitest (when tests present)
+```
 
-编辑 `js\app\config.js` 文件的第7行。
+Requires Node ≥ 20, pnpm ≥ 9.
 
-### 修改是否默认打开文字烟花
+## Project Structure
 
-编辑 `js\app\store.js` 文件的第78行，可选值为 `true` 或 `false`。
+```
+src/
+  App.tsx / main.tsx          # bootstrap, store provider, ticker wiring
+  index.css                   # Tailwind + translated 444-line style.css
+  config/appConfig.ts         # frozen defaults (words, backgrounds, quality)
+  types/app.ts                # QualityLevel, Selectors, HelpContent...
+  stores/fireworksStore.ts    # Zustand store + normalization/migration
+  lib/math.ts                 # MyMath
+  lib/stage.ts                # Stage + Ticker (DPR, clamp [17,68], 500ms touch)
+  lib/fscreen.ts              # fullscreen polyfill
+  lib/backgroundManager.ts    # fetch vs Image, requestId dedup
+  fireworks/constants.ts      # GRAVITY, COLOR, PI_2...
+  fireworks/device.ts         # IS_MOBILE/DESKTOP/HEADER
+  fireworks/selectors.ts      # state selectors
+  fireworks/wordBurst.ts      # every-5 tracker
+  fireworks/shells.ts         # 12 factories (+ quality param)
+  fireworks/simulation.ts     # Shell/Star/Spark/BurstFlash pools + physics
+  fireworks/audio.ts          # SoundManager factory
+  fireworks/interaction.ts    # pointer/key/resize/speed bar
+  fireworks/background.ts     # fallback chain
+  app/ui.ts                   # 1:1 port of legacy ui.js (queryNodes/renderApp)
+  components/Canvas/DualCanvas.tsx
+  components/Controls.tsx/Menu.tsx/HelpModal.tsx/LoadingInit.tsx/SvgSprite.tsx
+public/
+  audio/  fonts/  images/  favicon.png
+```
 
-## 许可证
+Legacy `js/` / `css/` have been removed; `public/` is the Vite static root. `legacy.index.html` was the original entry (now `index.html` → `src/main.tsx`).
+
+## Configuration
+
+All defaults live in `src/config/appConfig.ts`:
+
+```ts
+defaultWords: ["新年快乐", "平安喜乐", "万事顺意"]
+defaultBackground: { mode: "none", value: "" } // "image" -> URL, "style" -> linear-gradient(...)
+wordFontFamily: "Gabriola,华文琥珀"
+qualityLevels: { low: 1, normal: 2, high: 3 }
+scaleFactorOptions: [0.5, 0.62, 0.75, 0.9, 1.0, 1.5, 2.0]
+```
+
+Runtime overrides (persisted in `localStorage` key `cm_fireworks_data`):
+- `src/stores/fireworksStore.ts:buildDefaultConfig` – quality auto-detect, `isDesktop ? size 3 : 2`
+- Background: `src/lib/backgroundManager.ts` + `src/fireworks/background.ts` fallback `user → code default → none`
+
+## Architecture
+
+See [ARCHITECTURE.md](./ARCHITECTURE.md) (Chinese, detailed module graph, physics, rendering pipeline, extension points).
+
+## Deployment
+
+Static only. `pnpm build` emits `dist/` with relative `base: "./"` – deploy to GitHub Pages / Vercel / Nginx. HTTPS recommended for Audio/Fullscreen.
+
+## License
 
 `Copyright © 2022 NianBroken. All rights reserved.`
 
-本项目采用 [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0 "Apache-2.0") 许可证。简而言之，你可以自由使用、修改和分享本项目的代码，但前提是在其衍生作品中必须保留原始许可证和版权信息，并且必须以相同的许可证发布所有修改过的代码。
+Licensed under [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0).
 
-## 特别感谢
+## Credits
 
-- [Firework Simulator v2](https://codepen.io/MillerTime/pen/XgpNwb)
-
+- [Firework Simulator v2](https://codepen.io/MillerTime/pen/XgpNwb) by MillerTime
 - [haodong108/fireworks-2023](https://gitee.com/haodong108/fireworks-2023)
 
-## 恰饭
-
-[Great-Firewall](https://nianbroken.github.io/Great-Firewall/) 好用的 VPN
-
-[Ciii](https://ciii.klaio.top/) Codex 中转
-
-[Aizex](https://aizex.klaio.top/) ChatGPT 镜像站
-
-以上绝对都是性价比最高的。
-
-## 其他
-
-欢迎提交 `Issues` 和 `Pull requests`
+Issues and PRs welcome.

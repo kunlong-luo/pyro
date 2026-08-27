@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * Help modal — 100% pixel-perfect port of
  * legacy.index.html lines 145-152 + CSS lines 377-477.

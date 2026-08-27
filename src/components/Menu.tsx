@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * Settings menu — 100% pixel-perfect port of
  * legacy.index.html lines 71-143 + CSS lines 141-316.

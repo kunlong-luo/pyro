@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * Initial loading screen — 100% pixel-perfect port of
  * legacy.index.html lines 45-48.

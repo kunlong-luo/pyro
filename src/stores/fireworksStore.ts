@@ -43,6 +43,7 @@ export interface FireworksState {
   fullscreen: boolean;
   config: FireworksConfig;
   background: Background;
+  backgroundStatus?: { message: string; state: string };
 }
 
 /** Subset of state that is persisted to localStorage. */

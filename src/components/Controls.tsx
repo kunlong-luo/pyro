@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * Top-bar controls — 100% pixel-perfect port of
  * legacy.index.html lines 54-70.

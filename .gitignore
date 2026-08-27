@@ -27,3 +27,5 @@ Thumbs.db
 # Generated
 vite.config.d.ts
 vite.config.d.ts.map
+.next/
+out/

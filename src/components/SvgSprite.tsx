@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * Hidden SVG sprite sheet — 100% pixel-perfect port of the original
  * inline <svg> from legacy.index.html lines 21-42.

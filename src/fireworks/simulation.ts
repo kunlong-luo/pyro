@@ -1088,6 +1088,8 @@ export function createSimulation(deps: SimulationDeps): Simulation {
 		currentQuality = qualitySelector(state);
 		currentIsLowQuality = currentQuality === 1;
 		currentIsHighQuality = currentQuality === 3;
+		// Spark drawWidth: high quality = thinner lines (0.75), else normal (1)
+		Spark.drawWidth = currentIsHighQuality ? 0.75 : 1;
 		currentWordShellEnabled = state.config.wordShell;
 
 		const width = deps.trailsStage.width;

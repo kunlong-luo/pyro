@@ -1,3 +1,5 @@
+"use client";
+
 import { useRef, useEffect } from "react";
 import { Stage, createTicker } from "@/lib/stage";
 import type { PointerEventPayload, Ticker } from "@/lib/stage";
@@ -101,6 +103,8 @@ export function DualCanvas({
     callbacksRef.current.onTickerReady?.(ticker, trailsStage, mainStage);
 
     return () => {
+      trailsStageRef.current?.destroy();
+      mainStageRef.current?.destroy();
       trailsStageRef.current = null;
       mainStageRef.current = null;
       tickerRef.current = null;
