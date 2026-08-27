@@ -191,7 +191,17 @@ describe("Shell.launch()", () => {
     const h = makeHarness();
     const sim = createSimulation(h.deps);
     const burstSpy = vi.spyOn(sim.Shell.prototype, "burst");
-    const shell = new sim.Shell(crysanthemumShell(2, QUALITY_NORMAL) as SimulationShellOptions);
+    // Explicit config (not crysanthemumShell's randomized output): pistil
+    // and streamers both recursively call burst() on a sub-shell through
+    // the same prototype method, which would make this spy's call count
+    // non-deterministic depending on Math.random().
+    const shell = new sim.Shell({
+      spreadSize: 300 + 2 * 100,
+      starLife: 900 + 2 * 200,
+      color: COLOR.Red,
+      pistil: false,
+      streamers: false,
+    } as SimulationShellOptions);
 
     shell.launch(0.5, 0.5);
     expect(burstSpy).not.toHaveBeenCalled();
