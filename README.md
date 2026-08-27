@@ -1,82 +1,96 @@
 <div align="center">
 
-# Firework Simulator
+# Pyro
 
-A web-based firework simulator with realistic particle physics, 12 shell types, Web Audio, and customizable backgrounds — now rebuilt with React 19 + TypeScript + Tailwind CSS.
+**A web-based firework simulator with realistic particle physics.**
 
-<img src="./public/images/favicon.png" alt="preview" width="96" />
+Real 2D particle physics, 12 shell types, Web Audio, custom backgrounds — built with Next.js, React, and TypeScript.
+
+![License](https://img.shields.io/badge/license-Apache--2.0-blue)
+![Next.js](https://img.shields.io/badge/Next.js-16-black)
+![React](https://img.shields.io/badge/React-19-61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6)
+
+<img src="./public/images/favicon.png" alt="Pyro icon" width="96" />
 
 [中文文档](./README.zh-CN.md)
 
 </div>
 
-## Preview
+<img src="./Image_Preview.png" alt="Pyro preview" width="640" />
 
-- Original demo: https://nianbroken.github.io/Firework_Simulator/
-- Local dev: `pnpm dev` → http://localhost:5173
+## Live Demo
 
-<img src="./Image_Preview.png" alt="preview" width="640" />
+**https://nianbroken.github.io/Firework_Simulator/**
+
+> The demo URL still uses this project's original repo name — see [Deployment](#deployment) for why.
 
 ## Features
 
-- 12 shell types (Chrysanthemum, Ghost, Strobe, Palm, Ring, Crossette, Floral, Falling Leaves, Willow, Crackle, Horse Tail, Random) with 6 auto-launch sequences (including 32-shot finale)
-- Dual-canvas rendering (`mix-blend: lighten`, long-exposure) + sky lighting
-- Web Audio API with randomized pitch/volume and 20 ms burst throttling
-- Text fireworks via `literalLattice` + Zustand-persisted settings + custom backgrounds (image / gradient / CSS)
-- Full-screen, quality auto-detect (`hardwareConcurrency`), responsive (840/560 breakpoints)
-- Zero backend, static-host ready
+- **12 shell types** — Chrysanthemum, Ghost, Strobe, Palm, Ring, Crossette, Floral, Falling Leaves, Willow, Crackle, Horse Tail, Random — plus 6 auto-launch sequences, including a 32-shot finale
+- **Dual-canvas rendering** (`mix-blend-mode: lighten`, long-exposure trails) with dynamic sky lighting
+- **Web Audio** with randomized pitch/volume and 20ms burst throttling
+- **Text fireworks** via point-lattice word bursts, with custom backgrounds (image / gradient / CSS)
+- Fullscreen mode, automatic quality detection (`navigator.hardwareConcurrency`), responsive down to mobile
+- Persisted settings (Zustand + versioned migration), zero backend — fully static
 
 ## Tech Stack
 
-- **React 19** + **TypeScript 6** (strict) + **Vite 8** + **Tailwind CSS 4**
-- **Zustand 5** (persist + schema migration 1.1/1.2/2.0/2.1 → 1.0)
-- **ESLint 9** + **Prettier** + **Vitest 4**
-- Canvas 2D API + Web Audio API
+|           |                                                       |
+| --------- | ----------------------------------------------------- |
+| Framework | Next.js 16 (App Router, Turbopack, static export)     |
+| UI        | React 19 + TypeScript 6 (strict) + Tailwind CSS 4     |
+| State     | Zustand 5 (persisted, schema-migrated)                |
+| Rendering | Canvas 2D + Web Audio API                             |
+| Tooling   | ESLint 9 (`eslint-config-next`) + Prettier + Vitest 4 |
 
 ## Quick Start
 
 ```bash
 pnpm install
-pnpm dev        # start dev server
-pnpm build      # production build -> dist/
-pnpm preview    # preview build
-pnpm lint       # eslint
-npx tsc --noEmit # type check
-pnpm test       # vitest (when tests present)
+pnpm dev             # dev server at localhost:3000
+pnpm build            # static export -> out/
+pnpm start            # serve a production build
+
+pnpm lint              # eslint
+pnpm typecheck         # tsc --noEmit
+pnpm format:check      # prettier --check
+pnpm test              # vitest
+pnpm test:coverage     # vitest run --coverage
 ```
 
-Requires Node ≥ 20, pnpm ≥ 9.
+Requires Node 20+ and pnpm 9+.
 
 ## Project Structure
 
 ```
 src/
-  App.tsx / main.tsx          # bootstrap, store provider, ticker wiring
-  index.css                   # Tailwind + translated 444-line style.css
+  app/                        # Next.js App Router entry
+    layout.tsx / page.tsx / globals.css
   config/appConfig.ts         # frozen defaults (words, backgrounds, quality)
   types/app.ts                # QualityLevel, Selectors, HelpContent...
   stores/fireworksStore.ts    # Zustand store + normalization/migration
-  lib/math.ts                 # MyMath
-  lib/stage.ts                # Stage + Ticker (DPR, clamp [17,68], 500ms touch)
-  lib/fscreen.ts              # fullscreen polyfill
-  lib/backgroundManager.ts    # fetch vs Image, requestId dedup
-  fireworks/constants.ts      # GRAVITY, COLOR, PI_2...
-  fireworks/device.ts         # IS_MOBILE/DESKTOP/HEADER
-  fireworks/selectors.ts      # state selectors
-  fireworks/wordBurst.ts      # every-5 tracker
-  fireworks/shells.ts         # 12 factories (+ quality param)
-  fireworks/simulation.ts     # Shell/Star/Spark/BurstFlash pools + physics
-  fireworks/audio.ts          # SoundManager factory
-  fireworks/interaction.ts    # pointer/key/resize/speed bar
-  fireworks/background.ts     # fallback chain
-  app/ui.ts                   # 1:1 port of legacy ui.js (queryNodes/renderApp)
-  components/Canvas/DualCanvas.tsx
-  components/Controls.tsx/Menu.tsx/HelpModal.tsx/LoadingInit.tsx/SvgSprite.tsx
+  lib/
+    math.ts                   # MyMath
+    stage.ts                  # Stage + Ticker (DPR, clamp [17,68], 500ms touch)
+    fscreen.ts                # fullscreen polyfill
+    backgroundManager.ts      # fetch vs Image, requestId dedup
+  fireworks/
+    constants.ts               # GRAVITY, COLOR, PI_2...
+    device.ts                  # IS_MOBILE/DESKTOP/HEADER
+    selectors.ts                # state selectors
+    wordBurst.ts                # every-5 tracker
+    shells.ts                   # 12 shell factories (+ quality param)
+    simulation.ts                # Shell/Star/Spark/BurstFlash pools + physics
+    audio.ts                     # SoundManager factory
+    interaction.ts               # pointer/key/resize/speed bar
+    background.ts                # fallback chain
+  components/
+    Canvas/DualCanvas.tsx
+    Controls.tsx / Menu.tsx / HelpModal.tsx / LoadingInit.tsx / SvgSprite.tsx
 public/
   audio/  fonts/  images/  favicon.png
 ```
-
-Legacy `js/` / `css/` have been removed; `public/` is the Vite static root. `legacy.index.html` was the original entry (now `index.html` → `src/main.tsx`).
 
 ## Configuration
 
@@ -90,18 +104,20 @@ qualityLevels: { low: 1, normal: 2, high: 3 }
 scaleFactorOptions: [0.5, 0.62, 0.75, 0.9, 1.0, 1.5, 2.0]
 ```
 
-Runtime overrides (persisted in `localStorage` key `cm_fireworks_data`):
+Runtime overrides persist to `localStorage`:
 
-- `src/stores/fireworksStore.ts:buildDefaultConfig` – quality auto-detect, `isDesktop ? size 3 : 2`
-- Background: `src/lib/backgroundManager.ts` + `src/fireworks/background.ts` fallback `user → code default → none`
+- `src/stores/fireworksStore.ts` (`buildDefaultConfig`) — quality auto-detect, `isDesktop ? size 3 : 2`
+- Background resolution: `src/lib/backgroundManager.ts` + `src/fireworks/background.ts`, fallback chain `user → code default → none`
 
 ## Architecture
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) (Chinese, detailed module graph, physics, rendering pipeline, extension points).
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for the module graph, physics model, and rendering pipeline (Chinese).
 
 ## Deployment
 
-Static only. `pnpm build` emits `dist/` with relative `base: "./"` – deploy to GitHub Pages / Vercel / Nginx. HTTPS recommended for Audio/Fullscreen.
+Static export only (`output: "export"` in `next.config.ts`) — `pnpm build` emits `out/`, deployable to any static host (GitHub Pages, Vercel, Nginx). HTTPS is recommended for Audio/Fullscreen APIs.
+
+The production `basePath`/`assetPrefix` are still `/Firework_Simulator`, matching this repo's actual (unchanged) name and GitHub Pages path — only the project's display name and package name were rebranded to Pyro, not the repository itself.
 
 ## License
 

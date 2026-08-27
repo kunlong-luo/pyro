@@ -1,48 +1,62 @@
 <div align="center">
 
-# 烟花模拟器
+# Pyro
 
-基于 Web 的烟花模拟器，具备真实粒子物理、12 种弹壳、Web Audio 与自定义背景，现已用 React 19 + TypeScript + Tailwind CSS 重构。
+**基于 Web 的烟花模拟器，具备真实粒子物理效果。**
 
-<img src="./public/images/favicon.png" alt="preview" width="96" />
+真实 2D 粒子物理、12 种弹壳、Web Audio、自定义背景 —— 基于 Next.js + React + TypeScript 构建。
+
+![License](https://img.shields.io/badge/license-Apache--2.0-blue)
+![Next.js](https://img.shields.io/badge/Next.js-16-black)
+![React](https://img.shields.io/badge/React-19-61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6)
+
+<img src="./public/images/favicon.png" alt="Pyro icon" width="96" />
 
 [English](./README.md)
 
 </div>
 
-## 预览
+<img src="./Image_Preview.png" alt="Pyro 预览" width="640" />
 
-- 线上演示（原版）：https://nianbroken.github.io/Firework_Simulator/
-- 本地开发：`pnpm dev` → http://localhost:5173
+## 在线演示
 
-<img src="./Image_Preview.png" alt="preview" width="640" />
+**https://nianbroken.github.io/Firework_Simulator/**
+
+> 演示地址仍沿用本项目原本的仓库名，原因见下方[部署](#部署)说明。
 
 ## 功能特性
 
-- 12 种弹壳（菊花、幽灵、频闪、棕榈、圆环、十字、花朵、落叶、垂柳、噼啪、马尾、随机）+ 6 种自动发射序列（含 32 连发射 finale）
-- 双 Canvas 渲染（`mix-blend: lighten`、长曝光）+ 夜空光照
-- Web Audio 随机音高/音量 + 20ms 微爆限流
-- 文字烟花（`literalLattice` 点阵）+ Zustand 持久化设置 + 自定义背景（图片/渐变/CSS）
-- 全屏、画质自适应（`hardwareConcurrency`）、响应式（840/560）
-- 纯静态，无后端
+- **12 种弹壳** —— 菊花、幽灵、频闪、棕榈、圆环、十字、花朵、落叶、垂柳、噼啪、马尾、随机，另有 6 种自动发射序列（含 32 连发 finale）
+- **双 Canvas 渲染**（`mix-blend-mode: lighten`、长曝光拖尾）+ 动态夜空光照
+- **Web Audio** 随机音高/音量 + 20ms 微爆限流
+- **文字烟花**（点阵文字弹幕）+ 自定义背景（图片 / 渐变 / CSS）
+- 全屏模式、画质自动检测（`navigator.hardwareConcurrency`）、响应式适配移动端
+- 设置持久化（Zustand + 版本化迁移），纯静态、无后端
 
 ## 技术栈
 
-- **React 19** + **TypeScript 6**（strict）+ **Vite 8** + **Tailwind CSS 4**
-- **Zustand 5**（persist + 1.1/1.2/2.0/2.1 → 1.0 迁移）
-- **ESLint 9** + **Prettier** + **Vitest 4**
-- Canvas 2D + Web Audio API
+|          |                                                       |
+| -------- | ----------------------------------------------------- |
+| 框架     | Next.js 16（App Router、Turbopack、静态导出）         |
+| UI       | React 19 + TypeScript 6（strict）+ Tailwind CSS 4     |
+| 状态管理 | Zustand 5（持久化 + schema 迁移）                     |
+| 渲染     | Canvas 2D + Web Audio API                             |
+| 工具链   | ESLint 9（`eslint-config-next`）+ Prettier + Vitest 4 |
 
 ## 快速开始
 
 ```bash
 pnpm install
-pnpm dev        # 本地开发
-pnpm build      # 生产构建 -> dist/
-pnpm preview    # 预览构建
-pnpm lint       # 代码检查
-npx tsc --noEmit # 类型检查
-pnpm test       # 单测（待补充）
+pnpm dev             # 本地开发 localhost:3000
+pnpm build            # 静态导出 -> out/
+pnpm start             # 预览生产构建
+
+pnpm lint               # 代码检查
+pnpm typecheck          # tsc --noEmit
+pnpm format:check       # prettier --check
+pnpm test               # 单元测试
+pnpm test:coverage      # 单元测试 + 覆盖率
 ```
 
 要求 Node ≥ 20，pnpm ≥ 9。
@@ -51,36 +65,36 @@ pnpm test       # 单测（待补充）
 
 ```
 src/
-  App.tsx / main.tsx          # 启动、Store、Ticker 装配
-  index.css                   # Tailwind + 原 444 行 style.css 翻译
+  app/                        # Next.js App Router 入口
+    layout.tsx / page.tsx / globals.css
   config/appConfig.ts         # 冻结默认值（文字、背景、画质）
   types/app.ts                # QualityLevel、Selectors、HelpContent...
   stores/fireworksStore.ts    # Zustand 状态 + 归一化/迁移
-  lib/math.ts                 # MyMath
-  lib/stage.ts                # Stage + Ticker（DPR、截断 [17,68]、500ms 触摸去重）
-  lib/fscreen.ts              # 全屏 polyfill
-  lib/backgroundManager.ts    # fetch vs Image、requestId 防竞态
-  fireworks/constants.ts      # GRAVITY、COLOR、PI_2...
-  fireworks/device.ts         # IS_MOBILE/DESKTOP/HEADER
-  fireworks/selectors.ts      # 状态选择器
-  fireworks/wordBurst.ts      # 每 5 发触发器
-  fireworks/shells.ts         # 12 工厂（+ quality 参）
-  fireworks/simulation.ts     # Shell/Star/Spark/BurstFlash 对象池 + 物理
-  fireworks/audio.ts          # SoundManager 工厂
-  fireworks/interaction.ts    # 指针/键盘/缩放/速度条
-  fireworks/background.ts     # 回退链
-  app/ui.ts                   # 原 ui.js 1:1 移植（queryNodes/renderApp）
-  components/Canvas/DualCanvas.tsx
-  components/Controls.tsx/Menu.tsx/HelpModal.tsx/LoadingInit.tsx/SvgSprite.tsx
+  lib/
+    math.ts                   # MyMath
+    stage.ts                  # Stage + Ticker（DPR、截断 [17,68]、500ms 触摸去重）
+    fscreen.ts                # 全屏 polyfill
+    backgroundManager.ts      # fetch vs Image、requestId 防竞态
+  fireworks/
+    constants.ts               # GRAVITY、COLOR、PI_2...
+    device.ts                  # IS_MOBILE/DESKTOP/HEADER
+    selectors.ts                # 状态选择器
+    wordBurst.ts                 # 每 5 发触发器
+    shells.ts                    # 12 种弹壳工厂（+ quality 参数）
+    simulation.ts                 # Shell/Star/Spark/BurstFlash 对象池 + 物理
+    audio.ts                      # SoundManager 工厂
+    interaction.ts                # 指针/键盘/缩放/速度条
+    background.ts                 # 背景回退链
+  components/
+    Canvas/DualCanvas.tsx
+    Controls.tsx / Menu.tsx / HelpModal.tsx / LoadingInit.tsx / SvgSprite.tsx
 public/
   audio/  fonts/  images/  favicon.png
 ```
 
-旧 `js/` / `css/` 已移除，`public/` 为 Vite 静态根，`legacy.index.html` 为原入口现已改为 `index.html → src/main.tsx`。
-
 ## 配置修改
 
-默认值在 `src/config/appConfig.ts`：
+默认值都在 `src/config/appConfig.ts`：
 
 ```ts
 defaultWords: ["新年快乐", "平安喜乐", "万事顺意"]
@@ -90,18 +104,20 @@ qualityLevels: { low: 1, normal: 2, high: 3 }
 scaleFactorOptions: [0.5, 0.62, 0.75, 0.9, 1.0, 1.5, 2.0]
 ```
 
-运行时覆盖持久化于 `localStorage` 键 `cm_fireworks_data`：
+运行时覆盖持久化于 `localStorage`：
 
-- `src/stores/fireworksStore.ts:buildDefaultConfig` – 画质自适应、`isDesktop ? size 3 : 2`
-- 背景：`src/lib/backgroundManager.ts` + `src/fireworks/background.ts` 回退链 `网页端 → 代码默认 → 无`
+- `src/stores/fireworksStore.ts`（`buildDefaultConfig`）—— 画质自适应，`isDesktop ? size 3 : 2`
+- 背景解析：`src/lib/backgroundManager.ts` + `src/fireworks/background.ts`，回退链 `用户设置 → 代码默认 → 无`
 
 ## 架构
 
-详见 [ARCHITECTURE.md](./ARCHITECTURE.md)（中文，含模块图、物理、渲染管线、扩展点）。
+详见 [ARCHITECTURE.md](./ARCHITECTURE.md)（模块图、物理模型、渲染管线）。
 
 ## 部署
 
-纯静态。`pnpm build` 产物 `dist/` 使用相对 `base: "./"`，可直接托管至 GitHub Pages / Vercel / Nginx，HTTPS 下 Audio/全屏更稳定。
+纯静态导出（`next.config.ts` 中 `output: "export"`）—— `pnpm build` 产物为 `out/`，可托管至任意静态服务（GitHub Pages / Vercel / Nginx）。Audio/全屏 API 建议在 HTTPS 下使用。
+
+生产环境的 `basePath`/`assetPrefix` 目前仍是 `/Firework_Simulator`，与本仓库实际（未改名的）名称和 GitHub Pages 路径保持一致——这次改名只涉及项目的展示名称与 `package.json` 包名（改为 Pyro），并未重命名 GitHub 仓库本身。
 
 ## 许可证
 
