@@ -34,6 +34,8 @@ import {
   seqTwoRandom,
   seqTriple,
   seqPyramid,
+  seqSmallBarrage,
+  seqSmallBarrageCooldown,
   startSequence,
   type ShellContext,
   type SequenceContext,
@@ -640,6 +642,24 @@ describe("seqPyramid", () => {
   });
 });
 
+describe("seqSmallBarrage", () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it("launches the center shell immediately, then schedules the rest of the barrage", () => {
+    const ctx = makeSequenceContext({ isDesktop: false }); // barrageCount = 5
+    const delay = seqSmallBarrage(ctx);
+
+    expect(FakeShell.instances).toHaveLength(1);
+    expect(delay).toBe(3400 + 5 * 120);
+
+    vi.runAllTimers();
+
+    // count=0 (sync) then pairs at count=1,3 (2 iterations * 2 shells) = 1 + 4 = 5
+    expect(FakeShell.instances).toHaveLength(5);
+  });
+});
+
 // ---------------------------------------------------------------------------
 // startSequence (module-level state machine)
 // ---------------------------------------------------------------------------
@@ -678,5 +698,105 @@ describe("startSequence", () => {
 
     const finalDelay = (fresh.startSequence as typeof startSequence)(ctx);
     expect(finalDelay).toBe(6000);
+  });
+
+  // Outside finale mode, startSequence rolls Math.random() to pick one of
+  // five sequences. Each one has a distinct final shell count once its
+  // timers run out, which is what disambiguates the branch actually taken.
+  describe("random-roll dispatch (finale off)", () => {
+    beforeEach(() => vi.useFakeTimers());
+    afterEach(() => {
+      vi.useRealTimers();
+      vi.restoreAllMocks();
+    });
+
+    async function freshNonFirstCallContext(ctxOverrides?: Partial<SequenceContext>) {
+      vi.resetModules();
+      const fresh = await import("./shells");
+      const ctx = makeSequenceContext({
+        state: makeState({ finale: false }),
+        ...ctxOverrides,
+      });
+      (fresh.startSequence as typeof startSequence)(ctx); // burn the "first call" branch
+      FakeShell.instances = [];
+      return { fresh, ctx };
+    }
+
+    it("< 0.08 with the cooldown elapsed -> seqSmallBarrage", async () => {
+      const { fresh, ctx } = await freshNonFirstCallContext();
+      // seqSmallBarrageLastCalled is stamped at module import time; clear
+      // its cooldown by moving the (now fake) clock forward past it.
+      vi.advanceTimersByTime(seqSmallBarrageCooldown + 1000);
+      vi.spyOn(Math, "random").mockReturnValueOnce(0.05);
+
+      (fresh.startSequence as typeof startSequence)(ctx);
+      vi.runAllTimers();
+
+      expect(FakeShell.instances).toHaveLength(11); // isDesktop:true barrageCount
+    });
+
+    it("< 0.08 but still within the cooldown -> falls through to a later branch", async () => {
+      const { fresh, ctx } = await freshNonFirstCallContext();
+      // No time advance: seqSmallBarrageLastCalled (stamped at import) is
+      // still "recent" relative to the fake clock's current instant.
+      vi.spyOn(Math, "random").mockReturnValueOnce(0.05);
+
+      (fresh.startSequence as typeof startSequence)(ctx);
+      vi.runAllTimers();
+
+      // Same 0.05 roll, but since it fails the cooldown gate it should have
+      // landed on the next branch down (seqPyramid) instead.
+      expect(FakeShell.instances).toHaveLength(15);
+    });
+
+    it("0.08-0.1 -> seqPyramid", async () => {
+      const { fresh, ctx } = await freshNonFirstCallContext();
+      vi.spyOn(Math, "random").mockReturnValueOnce(0.09);
+
+      (fresh.startSequence as typeof startSequence)(ctx);
+      vi.runAllTimers();
+
+      expect(FakeShell.instances).toHaveLength(15); // isDesktop:true barrageCountHalf(7)*2+1
+    });
+
+    it("0.1-0.6 and not header -> seqRandomShell", async () => {
+      const { fresh, ctx } = await freshNonFirstCallContext({ isHeader: false });
+      vi.spyOn(Math, "random").mockReturnValueOnce(0.5);
+
+      (fresh.startSequence as typeof startSequence)(ctx);
+      vi.runAllTimers();
+
+      expect(FakeShell.instances).toHaveLength(1);
+    });
+
+    it("0.1-0.6 but header -> falls through to seqTwoRandom instead of seqRandomShell", async () => {
+      const { fresh, ctx } = await freshNonFirstCallContext({ isHeader: true });
+      vi.spyOn(Math, "random").mockReturnValueOnce(0.5);
+
+      (fresh.startSequence as typeof startSequence)(ctx);
+      vi.runAllTimers();
+
+      expect(FakeShell.instances).toHaveLength(2);
+    });
+
+    it("0.6-0.8 -> seqTwoRandom", async () => {
+      const { fresh, ctx } = await freshNonFirstCallContext();
+      vi.spyOn(Math, "random").mockReturnValueOnce(0.7);
+
+      (fresh.startSequence as typeof startSequence)(ctx);
+      vi.runAllTimers();
+
+      expect(FakeShell.instances).toHaveLength(2);
+    });
+
+    it(">= 0.8 -> seqTriple", async () => {
+      const { fresh, ctx } = await freshNonFirstCallContext();
+      vi.spyOn(Math, "random").mockReturnValueOnce(0.9);
+
+      (fresh.startSequence as typeof startSequence)(ctx);
+      vi.runAllTimers();
+
+      expect(FakeShell.instances).toHaveLength(3);
+    });
   });
 });
