@@ -178,9 +178,17 @@ export function createSoundManager(deps: SoundManagerDeps): SoundManager {
             .then((response) => response.arrayBuffer()),
         );
 
-        Promise.all(sourceRequests).then((buffers) => {
-          source.rawBuffers = buffers;
-        });
+        Promise.all(sourceRequests)
+          .then((buffers) => {
+            source.rawBuffers = buffers;
+          })
+          .catch(() => {
+            // Swallowed here: the same underlying request promises are also
+            // in `requests` below, so the failure is still surfaced through
+            // the Promise.all(requests) this function returns. Without this
+            // catch, a failed fetch would produce a second, unhandled
+            // rejection on this separate derived promise.
+          });
         requests.push(...sourceRequests);
       }
 
