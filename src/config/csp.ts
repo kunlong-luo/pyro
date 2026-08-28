@@ -10,6 +10,12 @@
  * `out/` build output that no other inline script or `eval()` exists, so
  * 'unsafe-eval' was dropped and style-src no longer needs 'unsafe-inline'
  * (the two JSX `style={{...}}` usages were converted to Tailwind classes).
+ *
+ * No `media-src`: src/fireworks/audio.ts has no `<audio>`/`<video>` element
+ * to gate — it loads sound effects via `fetch()` + Web Audio `decodeAudioData`,
+ * already covered by `connect-src`. The list used to carry a non-standard
+ * `audio-src` directive that no browser recognizes (CSP silently ignores
+ * unknown directives), so it was never doing anything either way.
  */
 const cspDirectives = [
   "default-src 'self'",
@@ -17,7 +23,6 @@ const cspDirectives = [
   "style-src 'self'",
   "font-src 'self' data:",
   "img-src 'self' data:",
-  "audio-src 'self' data:",
   "connect-src 'self'",
   "base-uri 'self'",
   "form-action 'self'",
