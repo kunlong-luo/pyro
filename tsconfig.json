@@ -38,6 +38,7 @@
     "src",
     "next-env.d.ts",
     "*.config.ts",
+    "vitest.setup.ts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
