@@ -164,10 +164,15 @@ export function Menu({
         <form>
           {/* ---- 烟花类型 ---- */}
           <div className="form-option form-option--select">
-            <label className="shell-type-label" onClick={() => handleHelpClick("shellType")}>
+            <label
+              className="shell-type-label"
+              htmlFor="shell-type"
+              onClick={() => handleHelpClick("shellType")}
+            >
               烟花类型
             </label>
             <select
+              id="shell-type"
               className="shell-type"
               value={config.shell}
               onChange={(e) => handleSelectChange("shell", e.target.value)}
@@ -182,10 +187,15 @@ export function Menu({
 
           {/* ---- 烟花大小 ---- */}
           <div className="form-option form-option--select">
-            <label className="shell-size-label" onClick={() => handleHelpClick("shellSize")}>
+            <label
+              className="shell-size-label"
+              htmlFor="shell-size"
+              onClick={() => handleHelpClick("shellSize")}
+            >
               烟花大小
             </label>
             <select
+              id="shell-size"
               className="shell-size"
               value={config.size}
               onChange={(e) => handleSelectChange("size", e.target.value)}
@@ -200,10 +210,15 @@ export function Menu({
 
           {/* ---- 画质 ---- */}
           <div className="form-option form-option--select">
-            <label className="quality-ui-label" onClick={() => handleHelpClick("quality")}>
+            <label
+              className="quality-ui-label"
+              htmlFor="quality-ui"
+              onClick={() => handleHelpClick("quality")}
+            >
               画质
             </label>
             <select
+              id="quality-ui"
               className="quality-ui"
               value={config.quality}
               onChange={(e) => handleSelectChange("quality", e.target.value)}
@@ -218,10 +233,15 @@ export function Menu({
 
           {/* ---- 照亮天空 ---- */}
           <div className="form-option form-option--select">
-            <label className="sky-lighting-label" onClick={() => handleHelpClick("skyLighting")}>
+            <label
+              className="sky-lighting-label"
+              htmlFor="sky-lighting"
+              onClick={() => handleHelpClick("skyLighting")}
+            >
               照亮天空
             </label>
             <select
+              id="sky-lighting"
               className="sky-lighting"
               value={config.skyLighting}
               onChange={(e) => handleSelectChange("skyLighting", e.target.value)}
@@ -236,10 +256,15 @@ export function Menu({
 
           {/* ---- 缩放 ---- */}
           <div className="form-option form-option--select">
-            <label className="scaleFactor-label" onClick={() => handleHelpClick("scaleFactor")}>
+            <label
+              className="scaleFactor-label"
+              htmlFor="scaleFactor"
+              onClick={() => handleHelpClick("scaleFactor")}
+            >
               缩放
             </label>
             <select
+              id="scaleFactor"
               className="scaleFactor"
               value={config.scaleFactor.toFixed(2)}
               onChange={(e) => handleSelectChange("scaleFactor", e.target.value)}
@@ -254,11 +279,16 @@ export function Menu({
 
           {/* ---- 自定义背景 ---- */}
           <div className="form-option form-option--stacked">
-            <label className="background-label" onClick={() => handleHelpClick("background")}>
+            <label
+              className="background-label"
+              htmlFor="background-input"
+              onClick={() => handleHelpClick("background")}
+            >
               自定义背景
             </label>
             <div className="form-option__content">
               <input
+                id="background-input"
                 className="background-input"
                 type="text"
                 placeholder="图片地址，或 linear-gradient(...)"
@@ -292,10 +322,15 @@ export function Menu({
 
           {/* ---- 文字烟花 ---- */}
           <div className="form-option form-option--checkbox">
-            <label className="word-shell-label" onClick={() => handleHelpClick("wordShell")}>
+            <label
+              className="word-shell-label"
+              htmlFor="word-shell"
+              onClick={() => handleHelpClick("wordShell")}
+            >
               文字烟花
             </label>
             <input
+              id="word-shell"
               className="word-shell"
               type="checkbox"
               checked={config.wordShell}
@@ -305,10 +340,15 @@ export function Menu({
 
           {/* ---- 自动放烟花 ---- */}
           <div className="form-option form-option--checkbox">
-            <label className="auto-launch-label" onClick={() => handleHelpClick("autoLaunch")}>
+            <label
+              className="auto-launch-label"
+              htmlFor="auto-launch"
+              onClick={() => handleHelpClick("autoLaunch")}
+            >
               自动放烟花
             </label>
             <input
+              id="auto-launch"
               className="auto-launch"
               type="checkbox"
               checked={config.autoLaunch}
@@ -322,10 +362,15 @@ export function Menu({
               config.autoLaunch ? "opacity-100" : "opacity-[0.32]"
             }`}
           >
-            <label className="finale-mode-label" onClick={() => handleHelpClick("finaleMode")}>
+            <label
+              className="finale-mode-label"
+              htmlFor="finale-mode"
+              onClick={() => handleHelpClick("finaleMode")}
+            >
               同时放更多的烟花
             </label>
             <input
+              id="finale-mode"
               className="finale-mode"
               type="checkbox"
               checked={config.finale}
@@ -335,10 +380,15 @@ export function Menu({
 
           {/* ---- 隐藏控制按钮 ---- */}
           <div className="form-option form-option--checkbox">
-            <label className="hide-controls-label" onClick={() => handleHelpClick("hideControls")}>
+            <label
+              className="hide-controls-label"
+              htmlFor="hide-controls"
+              onClick={() => handleHelpClick("hideControls")}
+            >
               隐藏控制按钮
             </label>
             <input
+              id="hide-controls"
               className="hide-controls"
               type="checkbox"
               checked={config.hideControls}
@@ -348,10 +398,15 @@ export function Menu({
 
           {/* ---- 全屏 ---- */}
           <div className="form-option form-option--checkbox form-option--fullscreen">
-            <label className="fullscreen-label" onClick={() => handleHelpClick("fullscreen")}>
+            <label
+              className="fullscreen-label"
+              htmlFor="fullscreen"
+              onClick={() => handleHelpClick("fullscreen")}
+            >
               全屏
             </label>
             <input
+              id="fullscreen"
               className="fullscreen"
               type="checkbox"
               checked={fullscreen}
@@ -361,10 +416,15 @@ export function Menu({
 
           {/* ---- 保留烟花的火花 ---- */}
           <div className="form-option form-option--checkbox">
-            <label className="long-exposure-label" onClick={() => handleHelpClick("longExposure")}>
+            <label
+              className="long-exposure-label"
+              htmlFor="long-exposure"
+              onClick={() => handleHelpClick("longExposure")}
+            >
               保留烟花的火花
             </label>
             <input
+              id="long-exposure"
               className="long-exposure"
               type="checkbox"
               checked={config.longExposure}

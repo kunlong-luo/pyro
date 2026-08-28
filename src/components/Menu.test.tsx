@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { cleanup } from "@testing-library/react";
+import { cleanup, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Menu } from "./Menu";
 import { renderWithStore } from "./testUtils";
@@ -109,5 +109,53 @@ describe("Menu interactions", () => {
 
     await user.click(document.querySelector(".shell-type-label")!);
     expect(callbacks.onHelpOpen).toHaveBeenCalledWith("shellType");
+  });
+
+  it("toggles fullscreen via the fullscreen checkbox", async () => {
+    const user = userEvent.setup();
+    const callbacks = makeCallbacks();
+    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+
+    await user.click(screen.getByLabelText("全屏"));
+    expect(callbacks.onToggleFullscreen).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    ["文字烟花", "wordShell"],
+    ["同时放更多的烟花", "finale"],
+    ["隐藏控制按钮", "hideControls"],
+    ["保留烟花的火花", "longExposure"],
+  ] as const)("toggles %s via its label-associated checkbox", async (labelText, field) => {
+    const user = userEvent.setup();
+    const callbacks = makeCallbacks();
+    const { store } = renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+
+    const before = store.getState().config[field];
+    await user.click(screen.getByLabelText(labelText));
+    expect(store.getState().config[field]).toBe(!before);
+  });
+
+  it.each([
+    ["烟花大小", "size", "5"],
+    ["照亮天空", "skyLighting", "0"],
+  ] as const)(
+    "changes config via the %s select (found by its associated label)",
+    async (labelText, field, optionValue) => {
+      const user = userEvent.setup();
+      const callbacks = makeCallbacks();
+      const { store } = renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+
+      await user.selectOptions(screen.getByLabelText(labelText), optionValue);
+      expect(store.getState().config[field as "size" | "skyLighting"]).toBe(optionValue);
+    },
+  );
+
+  it("parses the scale-factor select's option value as a float, not a raw string", async () => {
+    const user = userEvent.setup();
+    const callbacks = makeCallbacks();
+    const { store } = renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+
+    await user.selectOptions(screen.getByLabelText("缩放"), "0.75");
+    expect(store.getState().config.scaleFactor).toBe(0.75);
   });
 });
