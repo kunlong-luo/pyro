@@ -109,10 +109,6 @@ scaleFactorOptions: [0.5, 0.62, 0.75, 0.9, 1.0, 1.5, 2.0]
 - `src/stores/fireworksStore.ts`（`buildDefaultConfig`）—— 画质自适应，`isDesktop ? size 3 : 2`
 - 背景解析：`src/lib/backgroundManager.ts` + `src/fireworks/background.ts`，回退链 `用户设置 → 代码默认 → 无`
 
-## 架构
-
-详见 [ARCHITECTURE.md](./ARCHITECTURE.md)（模块图、物理模型、渲染管线）。
-
 ## 部署
 
 纯静态导出（`next.config.ts` 中 `output: "export"`）—— `pnpm build` 产物为 `out/`，可托管至任意静态服务（GitHub Pages / Vercel / Nginx）。Audio/全屏 API 建议在 HTTPS 下使用。

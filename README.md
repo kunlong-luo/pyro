@@ -109,10 +109,6 @@ Runtime overrides persist to `localStorage`:
 - `src/stores/fireworksStore.ts` (`buildDefaultConfig`) — quality auto-detect, `isDesktop ? size 3 : 2`
 - Background resolution: `src/lib/backgroundManager.ts` + `src/fireworks/background.ts`, fallback chain `user → code default → none`
 
-## Architecture
-
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for the module graph, physics model, and rendering pipeline (Chinese).
-
 ## Deployment
 
 Static export only (`output: "export"` in `next.config.ts`) — `pnpm build` emits `out/`, deployable to any static host (GitHub Pages, Vercel, Nginx). HTTPS is recommended for Audio/Fullscreen APIs.
