@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 
 import { SvgSprite } from "@/components/SvgSprite";
 import { DualCanvas } from "@/components/Canvas/DualCanvas";
@@ -27,6 +27,7 @@ import {
 import { canPlaySoundSelector } from "@/fireworks/selectors";
 import { createBackgroundManager } from "@/lib/backgroundManager";
 import { fscreen } from "@/lib/fscreen";
+import { initGlobalHandlers, cleanupGlobalHandlers } from "@/lib/stage";
 import type { Ticker, Stage } from "@/lib/stage";
 import type { PointerEventPayload } from "@/lib/stage";
 import type { Background } from "@/stores/fireworksStore";
@@ -52,172 +53,33 @@ export default function FireworkSimulator() {
     return { w, h };
   });
 
-  // StrictMode-safe refs: never recreated across double-mount
-  const storeRef = useRef<ReturnType<typeof createFireworksStore> | null>(null);
-  if (!storeRef.current) {
-    storeRef.current = createFireworksStore({
-      isDesktop: IS_DESKTOP,
-      isHeader: IS_HEADER,
-      isHighEndDevice: IS_HIGH_END_DEVICE,
-      defaultScaleFactor,
-      fullscreen: false,
-    });
-  }
-  const store = storeRef.current;
+  // Created once via useMemo - stable across renders, no ref needed
+  const store = useMemo(
+    () =>
+      createFireworksStore({
+        isDesktop: IS_DESKTOP,
+        isHeader: IS_HEADER,
+        isHighEndDevice: IS_HIGH_END_DEVICE,
+        defaultScaleFactor,
+        fullscreen: false,
+      }),
+    []
+  );
 
-  const soundManagerRef = useRef<ReturnType<typeof createSoundManager> | null>(null);
-  const wordBurstTrackerRef = useRef<ReturnType<typeof createWordBurstTracker> | null>(null);
-  const backgroundManagerRef = useRef<ReturnType<typeof createBackgroundManager> | null>(null);
+  const wordBurstTracker = useMemo(() => createWordBurstTracker(), []);
 
-  if (!soundManagerRef.current) {
-    soundManagerRef.current = createSoundManager({
-      getCanPlaySound: () => {
-        const s = store.getState();
-        return !s.paused && s.soundEnabled;
-      },
-      getSimSpeed: () => interactionRef.current?.getSimSpeed() ?? 1,
-    });
-  }
-  if (!wordBurstTrackerRef.current) {
-    wordBurstTrackerRef.current = createWordBurstTracker();
-  }
-
+  // Refs for mutable values that change after initialization
   const interactionRef = useRef<ReturnType<typeof createInteraction> | null>(null);
   const simulationRef = useRef<ReturnType<typeof createSimulation> | null>(null);
   const tickerInitializedRef = useRef(false);
   const stageContainerRef = useRef<HTMLDivElement>(null);
+  const backgroundManagerRef = useRef<ReturnType<typeof createBackgroundManager> | null>(null);
 
-  // Stable callback refs so the DualCanvas effect never goes stale
-  const callbacksRef = useRef({
-    onTickerReady: null as ((ticker: Ticker, trailsStage: Stage, mainStage: Stage) => void) | null,
-  });
-  callbacksRef.current.onTickerReady = handleTickerReady;
+  // Sound manager needs interactionRef for getSimSpeed - create after interaction exists
+  const soundManagerRef = useRef<ReturnType<typeof createSoundManager> | null>(null);
 
-  function handleTickerReady(ticker: Ticker, trailsStage: Stage, mainStage: Stage) {
-    if (tickerInitializedRef.current) return;
-    tickerInitializedRef.current = true;
-
-    const soundManager = soundManagerRef.current!;
-    const wordBurstTracker = wordBurstTrackerRef.current!;
-    const stageContainer = stageContainerRef.current!;
-
-    // Create backgroundManager early so doInit can use it
-    if (!backgroundManagerRef.current) {
-      let containerEl: HTMLElement | null =
-        stageContainer.querySelector<HTMLElement>(".canvas-container");
-      if (!containerEl) containerEl = stageContainer;
-      backgroundManagerRef.current = createBackgroundManager({
-        container: containerEl,
-        onStatusChange: (msg, state) => {
-          store.setState({ backgroundStatus: { message: msg, state } });
-        },
-      });
-    }
-
-    const canvasContainer = stageContainer.querySelector(".canvas-container") as HTMLElement;
-
-    const simulation = createSimulation({
-      getState: () => store.getState(),
-      getSimSpeed: () => interactionRef.current?.getSimSpeed() ?? 1,
-      getSpeedBarOpacity: () => interactionRef.current?.getSpeedBarOpacity() ?? 0,
-      trailsStage,
-      mainStage,
-      soundManager,
-      wordBurstTracker,
-      canvasContainer: canvasContainer ?? stageContainer,
-    });
-    simulationRef.current = simulation;
-
-    const interaction = createInteraction({
-      getState: () => store.getState(),
-      mainStage,
-      soundManager,
-      togglePause: () => {
-        const s = store.getState();
-        store.setState({ paused: !s.paused });
-      },
-      toggleSound: () => {
-        const s = store.getState();
-        store.setState({ soundEnabled: !s.soundEnabled });
-      },
-      toggleMenu: (open?: boolean) => {
-        const next = open ?? !store.getState().menuOpen;
-        store.setState({ menuOpen: next });
-      },
-      isRunning: () => {
-        const s = store.getState();
-        return !s.paused && !s.menuOpen;
-      },
-      launchShellFromConfig: (event) => {
-        const s = store.getState();
-        const state = s;
-        const quality = Number(state.config.quality) as 1 | 2 | 3;
-        // Read stage dimensions at call time (not closure 0)
-        const stageWidth = mainStage.width;
-        const stageHeight = mainStage.height;
-        launchShellFromConfig(event, {
-          quality,
-          isHeader: IS_HEADER,
-          isDesktop: IS_DESKTOP,
-          state,
-          shellCtor: simulation.Shell as unknown as Parameters<
-            typeof launchShellFromConfig
-          >[1]["shellCtor"],
-          stageWidth,
-          stageHeight,
-          registerUserInteraction: () => soundManager.registerInteraction(),
-          wordBurstTracker,
-        });
-      },
-      startSequence: () => {
-        const s = store.getState();
-        const state = s;
-        const quality = Number(state.config.quality) as 1 | 2 | 3;
-        const stageWidth = mainStage.width;
-        const stageHeight = mainStage.height;
-        return startSequence({
-          quality,
-          isHeader: IS_HEADER,
-          isDesktop: IS_DESKTOP,
-          state,
-          shellCtor: simulation.Shell as unknown as Parameters<
-            typeof startSequence
-          >[0]["shellCtor"],
-          stageWidth,
-          stageHeight,
-          registerUserInteraction: () => soundManager.registerInteraction(),
-          wordBurstTracker,
-        });
-      },
-      stageContainer,
-      stages: [trailsStage, mainStage],
-      scaleFactorSelector: () => store.getState().config.scaleFactor,
-    });
-
-    interactionRef.current = interaction;
-
-    ticker.addListener((frameTime, lag) => {
-      interaction.updateGlobals(frameTime, lag);
-      simulation.update(frameTime, lag);
-    });
-
-    interaction.handleResize();
-    // Sync DualCanvas size to actual container size after handleResize
-    setStageSize({ w: mainStage.width, h: mainStage.height });
-
-    if (IS_HEADER) {
-      doInit();
-      return;
-    }
-
-    setLoadingStatus("正在点燃导火线");
-    soundManager
-      .preload()
-      .catch(() => {})
-      .finally(doInit);
-  }
-
-  function doInit() {
+  // Stable callback for onTickerReady - reads latest refs
+const doInit = useCallback(() => {
     setReady(true);
 
     const s = store.getState();
@@ -238,7 +100,150 @@ export default function FireworkSimulator() {
     }
     // Ensure stages have correct size after container becomes visible
     setTimeout(() => interactionRef.current?.handleResize(), 0);
-  }
+  }, [store]);
+
+  // Stable callback for onTickerReady - reads latest refs
+  const handleTickerReady = useCallback(
+    (ticker: Ticker, trailsStage: Stage, mainStage: Stage) => {
+      if (tickerInitializedRef.current) return;
+      tickerInitializedRef.current = true;
+
+      const stageContainer = stageContainerRef.current!;
+
+      // Create backgroundManager early so doInit can use it
+      if (!backgroundManagerRef.current) {
+        let containerEl: HTMLElement | null = stageContainer.querySelector<HTMLElement>(".canvas-container");
+        if (!containerEl) containerEl = stageContainer;
+        backgroundManagerRef.current = createBackgroundManager({
+          container: containerEl,
+          onStatusChange: (msg, state) => {
+            store.setState({ backgroundStatus: { message: msg, state } });
+          },
+        });
+      }
+
+      const canvasContainer = stageContainer.querySelector(".canvas-container") as HTMLElement;
+
+      const simulation = createSimulation({
+        getState: () => store.getState(),
+        getSimSpeed: () => interactionRef.current?.getSimSpeed() ?? 1,
+        getSpeedBarOpacity: () => interactionRef.current?.getSpeedBarOpacity() ?? 0,
+        trailsStage,
+        mainStage,
+        soundManager: soundManagerRef.current!,
+        wordBurstTracker,
+        canvasContainer: canvasContainer ?? stageContainer,
+      });
+      simulationRef.current = simulation;
+
+      const interaction = createInteraction({
+        getState: () => store.getState(),
+        mainStage,
+        soundManager: soundManagerRef.current!,
+        togglePause: () => {
+          const s = store.getState();
+          store.setState({ paused: !s.paused });
+        },
+        toggleSound: () => {
+          const s = store.getState();
+          store.setState({ soundEnabled: !s.soundEnabled });
+        },
+        toggleMenu: (open?: boolean) => {
+          const next = open ?? !store.getState().menuOpen;
+          store.setState({ menuOpen: next });
+        },
+        isRunning: () => {
+          const s = store.getState();
+          return !s.paused && !s.menuOpen;
+        },
+        launchShellFromConfig: (event) => {
+          const s = store.getState();
+          const state = s;
+          const quality = Number(state.config.quality) as 1 | 2 | 3;
+          const stageWidth = mainStage.width;
+          const stageHeight = mainStage.height;
+          launchShellFromConfig(event, {
+            quality,
+            isHeader: IS_HEADER,
+            isDesktop: IS_DESKTOP,
+            state,
+            shellCtor: simulation.Shell as unknown as Parameters<
+              typeof launchShellFromConfig
+            >[1]["shellCtor"],
+            stageWidth,
+            stageHeight,
+            registerUserInteraction: () => soundManagerRef.current!.registerInteraction(),
+            wordBurstTracker,
+          });
+        },
+        startSequence: () => {
+          const s = store.getState();
+          const state = s;
+          const quality = Number(state.config.quality) as 1 | 2 | 3;
+          const stageWidth = mainStage.width;
+          const stageHeight = mainStage.height;
+          return startSequence({
+            quality,
+            isHeader: IS_HEADER,
+            isDesktop: IS_DESKTOP,
+            state,
+            shellCtor: simulation.Shell as unknown as Parameters<
+              typeof startSequence
+            >[0]["shellCtor"],
+            stageWidth,
+            stageHeight,
+            registerUserInteraction: () => soundManagerRef.current!.registerInteraction(),
+            wordBurstTracker,
+          });
+        },
+        stageContainer,
+        stages: [trailsStage, mainStage],
+        scaleFactorSelector: () => store.getState().config.scaleFactor,
+      });
+
+      interactionRef.current = interaction;
+
+      // Create sound manager now that interaction exists
+      if (!soundManagerRef.current) {
+        soundManagerRef.current = createSoundManager({
+          getCanPlaySound: () => {
+            const s = store.getState();
+            return !s.paused && s.soundEnabled;
+          },
+          getSimSpeed: () => interaction.getSimSpeed(),
+        });
+      }
+
+      ticker.addListener((frameTime, lag) => {
+        interaction.updateGlobals(frameTime, lag);
+        simulation.update(frameTime, lag);
+      });
+
+      interaction.handleResize();
+      // Sync DualCanvas size to actual container size after handleResize
+      setStageSize({ w: mainStage.width, h: mainStage.height });
+
+      if (IS_HEADER) {
+        doInit();
+        return;
+      }
+
+      setLoadingStatus("正在点燃导火线");
+      soundManagerRef.current
+        .preload()
+        .catch(() => {})
+        .finally(doInit);
+    },
+    [store, wordBurstTracker, doInit]
+  );
+
+  // Stable callback for onTickerReady prop - avoids accessing ref during render
+  const onTickerReady = useCallback(
+    (ticker: Ticker, trailsStage: Stage, mainStage: Stage) => {
+      handleTickerReady(ticker, trailsStage, mainStage);
+    },
+    [handleTickerReady]
+  );
 
   // Subscribe to sound state changes
   useEffect(() => {
@@ -258,6 +263,12 @@ export default function FireworkSimulator() {
     }
     window.addEventListener("keydown", handleKeydown);
     return () => window.removeEventListener("keydown", handleKeydown);
+  }, []);
+
+  // Initialize global input handlers (mouse/touch) for Stage
+  useEffect(() => {
+    initGlobalHandlers();
+    return () => cleanupGlobalHandlers();
   }, []);
 
   // Window resize listener
@@ -288,8 +299,8 @@ export default function FireworkSimulator() {
   const handleConfigChange = useCallback(
     (config: FireworksConfig) => {
       const prev = store.getState().config;
-      if (config.wordShell && !prev.wordShell) wordBurstTrackerRef.current?.queueBurst();
-      else if (!config.wordShell && prev.wordShell) wordBurstTrackerRef.current?.reset();
+      if (config.wordShell && !prev.wordShell) wordBurstTracker.queueBurst();
+      else if (!config.wordShell && prev.wordShell) wordBurstTracker.reset();
 
       const prevSkyLighting = Number(prev.skyLighting);
       const nextSkyLighting = Number(config.skyLighting);
@@ -302,7 +313,7 @@ export default function FireworkSimulator() {
       store.setState({ config });
       if (config.scaleFactor !== prev.scaleFactor) interactionRef.current?.handleResize();
     },
-    [store],
+    [store, wordBurstTracker]
   );
 
   const handleBackgroundApply = useCallback(
@@ -312,7 +323,7 @@ export default function FireworkSimulator() {
       if (backgroundManagerRef.current)
         backgroundManagerRef.current.applyBackground({ mode: "image", value });
     },
-    [store],
+    [store]
   );
 
   const handleBackgroundClear = useCallback(() => {
@@ -329,7 +340,7 @@ export default function FireworkSimulator() {
     (topic: string) => {
       store.setState({ openHelpTopic: topic });
     },
-    [store],
+    [store]
   );
   const handleClose = useCallback(() => {
     store.setState({ menuOpen: false });
@@ -354,7 +365,7 @@ export default function FireworkSimulator() {
           stageW={stageSize.w || 800}
           stageH={stageSize.h || 600}
           scaleFactor={1}
-          onTickerReady={callbacksRef.current.onTickerReady!}
+          onTickerReady={onTickerReady}
           onPointerStart={(payload: PointerEventPayload) =>
             interactionRef.current?.handlePointerStart(payload)
           }

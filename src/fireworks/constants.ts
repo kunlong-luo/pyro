@@ -44,6 +44,8 @@ export const COLOR = {
   White: "#ffffff",
 } as const;
 
+export const GOLD = COLOR.Gold;
+
 export const INVISIBLE = "_INVISIBLE_";
 
 // ---------------------------------------------------------------------------

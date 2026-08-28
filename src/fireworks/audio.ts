@@ -182,12 +182,14 @@ export function createSoundManager(deps: SoundManagerDeps): SoundManager {
           .then((buffers) => {
             source.rawBuffers = buffers;
           })
-          .catch(() => {
+          .catch((err) => {
             // Swallowed here: the same underlying request promises are also
             // in `requests` below, so the failure is still surfaced through
             // the Promise.all(requests) this function returns. Without this
             // catch, a failed fetch would produce a second, unhandled
             // rejection on this separate derived promise.
+            // Log for debugging — do not remove.
+            console.warn(`[SoundManager] Failed to preload audio for ${type}:`, err);
           });
         requests.push(...sourceRequests);
       }

@@ -259,10 +259,11 @@ export class Stage {
 }
 
 // ---------------------------------------------------------------------------
-// Global mouse / touch handlers (module-level, not on Stage class)
+// Global mouse / touch handlers (explicit init/cleanup, no module side-effects)
 // ---------------------------------------------------------------------------
 
 let lastTouchTimestamp = 0;
+let handlersRegistered = false;
 
 function mouseHandler(event: MouseEvent): void {
   if (Date.now() - lastTouchTimestamp < 500) {
@@ -310,12 +311,37 @@ function touchHandler(event: TouchEvent): void {
   }
 }
 
-// Register global input handlers once (module side-effect) – only in browser
-if (typeof window !== "undefined") {
+/**
+ * Register global mouse/touch event listeners on `document`.
+ * Call once at app startup (e.g., in root layout or main component).
+ * Safe to call multiple times — subsequent calls are no-ops.
+ */
+export function initGlobalHandlers(): void {
+  if (typeof window === "undefined" || handlersRegistered) return;
+
   document.addEventListener("mousedown", mouseHandler);
   document.addEventListener("mousemove", mouseHandler);
   document.addEventListener("mouseup", mouseHandler);
-  document.addEventListener("touchstart", touchHandler);
-  document.addEventListener("touchmove", touchHandler);
+  document.addEventListener("touchstart", touchHandler, { passive: true });
+  document.addEventListener("touchmove", touchHandler, { passive: true });
   document.addEventListener("touchend", touchHandler);
+
+  handlersRegistered = true;
+}
+
+/**
+ * Remove global mouse/touch event listeners from `document`.
+ * Call during app teardown or tests cleanup.
+ */
+export function cleanupGlobalHandlers(): void {
+  if (typeof window === "undefined" || !handlersRegistered) return;
+
+  document.removeEventListener("mousedown", mouseHandler);
+  document.removeEventListener("mousemove", mouseHandler);
+  document.removeEventListener("mouseup", mouseHandler);
+  document.removeEventListener("touchstart", touchHandler);
+  document.removeEventListener("touchmove", touchHandler);
+  document.removeEventListener("touchend", touchHandler);
+
+  handlersRegistered = false;
 }

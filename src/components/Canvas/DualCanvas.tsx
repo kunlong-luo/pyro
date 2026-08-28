@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useLayoutEffect } from "react";
 import { Stage, createTicker } from "@/lib/stage";
 import type { PointerEventPayload, Ticker } from "@/lib/stage";
 
@@ -57,13 +57,17 @@ export function DualCanvas({
     onResize,
     onTickerReady,
   });
-  callbacksRef.current = {
-    onPointerStart,
-    onPointerMove,
-    onPointerEnd,
-    onResize,
-    onTickerReady,
-  };
+
+  // Update callbacks ref after every render (useLayoutEffect to avoid flicker)
+  useLayoutEffect(() => {
+    callbacksRef.current = {
+      onPointerStart,
+      onPointerMove,
+      onPointerEnd,
+      onResize,
+      onTickerReady,
+    };
+  });
 
   // =========================================================================
   // Mount: create Stage instances + Ticker, wire pointer events
