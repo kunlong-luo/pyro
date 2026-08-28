@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import {
   getCodeDefaultBackground,
   resolvePreferredBackground,
@@ -90,5 +90,102 @@ describe("applyResolvedBackground", () => {
     await vi.waitFor(() => expect(manager.clearBackground).toHaveBeenCalled());
 
     expect(manager.setStatus).toHaveBeenCalledWith("网页端背景无效，当前未显示背景", "error");
+  });
+});
+
+// The shipped appConfig has an empty defaultBackground.value (see the
+// getCodeDefaultBackground describe block above), so the "fall back to /
+// use the code default" branches below are unreachable with the real
+// config. Mock a non-empty default per test to exercise them directly —
+// vi.doMock + a fresh dynamic import keeps the override scoped to just
+// that test instead of leaking into the rest of this file.
+async function importWithCodeDefaultBackground(value: string) {
+  // The top-level static import of "./background" above already cached a
+  // module graph built on the real (unmocked) appConfig — clear it so the
+  // dynamic import below picks up the mock instead of that cached instance.
+  vi.resetModules();
+  vi.doMock("@/config/appConfig", async (importOriginal) => {
+    const actual = await importOriginal<typeof import("@/config/appConfig")>();
+    return {
+      ...actual,
+      fireworksAppConfig: {
+        ...actual.fireworksAppConfig,
+        defaultBackground: { mode: "image", value },
+      },
+    };
+  });
+  return import("./background");
+}
+
+describe("applyResolvedBackground — code-default fallback branches", () => {
+  afterEach(() => {
+    vi.doUnmock("@/config/appConfig");
+    vi.resetModules();
+  });
+
+  it("falls back to the code default when the user background fails to apply", async () => {
+    const { applyResolvedBackground: applyWithMockedDefault } =
+      await importWithCodeDefaultBackground("https://code-default/bg.png");
+    const manager = makeManager();
+    manager.applyBackground
+      .mockResolvedValueOnce({ ok: false })
+      .mockResolvedValueOnce({ ok: true });
+    const userBackground: Background = {
+      mode: "image",
+      value: "https://x/y.png",
+      configured: true,
+    };
+
+    applyWithMockedDefault(manager, userBackground);
+    await vi.waitFor(() =>
+      expect(manager.setStatus).toHaveBeenCalledWith(
+        "网页端背景无效，已回退到代码默认背景",
+        "idle",
+      ),
+    );
+    expect(manager.applyBackground).toHaveBeenCalledTimes(2);
+  });
+
+  it("clears and reports an error when both the user background and the code default fail", async () => {
+    const { applyResolvedBackground: applyWithMockedDefault } =
+      await importWithCodeDefaultBackground("https://code-default/bg.png");
+    const manager = makeManager();
+    manager.applyBackground.mockResolvedValue({ ok: false });
+    const userBackground: Background = {
+      mode: "image",
+      value: "https://x/y.png",
+      configured: true,
+    };
+
+    applyWithMockedDefault(manager, userBackground);
+    await vi.waitFor(() =>
+      expect(manager.setStatus).toHaveBeenCalledWith("网页端背景和代码默认背景都无效", "error"),
+    );
+    expect(manager.clearBackground).toHaveBeenCalledTimes(1);
+  });
+
+  it("applies the code default directly and reports success when there is no user background", async () => {
+    const { applyResolvedBackground: applyWithMockedDefault } =
+      await importWithCodeDefaultBackground("https://code-default/bg.png");
+    const manager = makeManager();
+    manager.applyBackground.mockResolvedValue({ ok: true });
+
+    applyWithMockedDefault(manager, { mode: "none", value: "", configured: false });
+    await vi.waitFor(() =>
+      expect(manager.setStatus).toHaveBeenCalledWith("正在使用代码默认背景", "idle"),
+    );
+  });
+
+  it("clears and reports an error when the code default itself fails and there is no user background", async () => {
+    const { applyResolvedBackground: applyWithMockedDefault } =
+      await importWithCodeDefaultBackground("https://code-default/bg.png");
+    const manager = makeManager();
+    manager.applyBackground.mockResolvedValue({ ok: false });
+
+    applyWithMockedDefault(manager, { mode: "none", value: "", configured: false });
+    await vi.waitFor(() =>
+      expect(manager.setStatus).toHaveBeenCalledWith("代码默认背景无效，当前未显示背景", "error"),
+    );
+    expect(manager.clearBackground).toHaveBeenCalledTimes(1);
   });
 });
