@@ -36,5 +36,11 @@ jobs:
       - name: Test
         run: pnpm run test:coverage
 
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: E2E
+        run: pnpm run e2e
+
       - name: Build
         run: pnpm run build

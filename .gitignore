@@ -31,3 +31,7 @@ vite.config.d.ts.map
 out/
 coverage/
 .playwright-mcp/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/

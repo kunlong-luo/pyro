@@ -36,6 +36,7 @@
   },
   "include": [
     "src",
+    "e2e",
     "next-env.d.ts",
     "*.config.ts",
     "vitest.setup.ts",
