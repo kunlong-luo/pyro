@@ -92,6 +92,61 @@ describe("DualCanvas", () => {
     );
   });
 
+  it("routes pointermove and pointerend events to their respective props", () => {
+    stubCanvasContext();
+    const onTickerReady = vi.fn();
+    const onPointerMove = vi.fn();
+    const onPointerEnd = vi.fn();
+
+    render(
+      <DualCanvas
+        stageW={800}
+        stageH={600}
+        scaleFactor={1}
+        onTickerReady={onTickerReady}
+        onPointerMove={onPointerMove}
+        onPointerEnd={onPointerEnd}
+      />,
+    );
+    const [, , mainStage] = onTickerReady.mock.calls[0] as [Ticker, Stage, Stage];
+
+    act(() => {
+      mainStage.pointerEvent("move", 5, 6);
+      mainStage.pointerEvent("end", 7, 8);
+    });
+
+    expect(onPointerMove).toHaveBeenCalledWith(expect.objectContaining({ x: 5, y: 6 }));
+    expect(onPointerEnd).toHaveBeenCalledWith(expect.objectContaining({ x: 7, y: 8 }));
+  });
+
+  it("re-resizes both stages on a window resize event", () => {
+    stubCanvasContext();
+    const onTickerReady = vi.fn();
+    const onResize = vi.fn();
+
+    render(
+      <DualCanvas
+        stageW={800}
+        stageH={600}
+        scaleFactor={1}
+        onTickerReady={onTickerReady}
+        onResize={onResize}
+      />,
+    );
+    const [, trailsStage, mainStage] = onTickerReady.mock.calls[0] as [Ticker, Stage, Stage];
+    onResize.mockClear();
+    const trailsResizeSpy = vi.spyOn(trailsStage, "resize");
+    const mainResizeSpy = vi.spyOn(mainStage, "resize");
+
+    act(() => {
+      window.dispatchEvent(new Event("resize"));
+    });
+
+    expect(trailsResizeSpy).toHaveBeenCalledWith(800, 600);
+    expect(mainResizeSpy).toHaveBeenCalledWith(800, 600);
+    expect(onResize).toHaveBeenCalledWith(800, 600);
+  });
+
   it("destroys both stages on unmount", () => {
     stubCanvasContext();
     const onTickerReady = vi.fn();

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, afterEach } from "vitest";
-import { cleanup } from "@testing-library/react";
+import { cleanup, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HelpModal } from "./HelpModal";
 import { renderWithStore } from "./testUtils";
@@ -47,5 +47,24 @@ describe("HelpModal content and dismissal", () => {
 
     await user.click(container.querySelector(".help-modal__overlay")!);
     expect(store.getState().openHelpTopic).toBeNull();
+  });
+
+  it("clears openHelpTopic when Escape is pressed while the overlay has focus", () => {
+    const { store, container } = renderWithStore(<HelpModal />, { openHelpTopic: "shellType" });
+
+    const overlay = container.querySelector(".help-modal__overlay")! as HTMLElement;
+    overlay.focus();
+    fireEvent.keyDown(overlay, { key: "Escape" });
+
+    expect(store.getState().openHelpTopic).toBeNull();
+  });
+
+  it("ignores other keys on the overlay", () => {
+    const { store, container } = renderWithStore(<HelpModal />, { openHelpTopic: "shellType" });
+
+    const overlay = container.querySelector(".help-modal__overlay")! as HTMLElement;
+    fireEvent.keyDown(overlay, { key: "Enter" });
+
+    expect(store.getState().openHelpTopic).toBe("shellType");
   });
 });
