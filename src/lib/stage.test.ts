@@ -152,5 +152,205 @@ describe("Stage", () => {
     stubCanvasContext();
     const stage = new Stage(document.createElement("canvas"));
     expect(() => stage.addEventListener("bogus" as never, () => {})).toThrow(/无效事件类型/);
+    expect(() => stage.dispatchEvent("bogus" as never, {} as never)).toThrow(/无效事件类型/);
+  });
+
+  it("destroy() removes the stage from the module registry", () => {
+    stubCanvasContext();
+    const stage = new Stage(document.createElement("canvas"));
+    stage.resize(800, 600);
+    vi.spyOn(stage.canvas, "getBoundingClientRect").mockReturnValue({
+      left: 0,
+      top: 0,
+      width: 800,
+      height: 600,
+      right: 800,
+      bottom: 600,
+      x: 0,
+      y: 0,
+      toJSON() {},
+    } as DOMRect);
+    const onPointerStart = vi.fn();
+    stage.addEventListener("pointerstart", onPointerStart);
+
+    document.dispatchEvent(new MouseEvent("mousedown", { clientX: 100, clientY: 100 }));
+    expect(onPointerStart).toHaveBeenCalledTimes(1);
+
+    stage.destroy();
+    onPointerStart.mockClear();
+    document.dispatchEvent(new MouseEvent("mousedown", { clientX: 100, clientY: 100 }));
+    expect(onPointerStart).not.toHaveBeenCalled();
+  });
+
+  it("scales the canvas backing store up when the device pixel ratio is above 1", () => {
+    Stage.disableHighDPI = false;
+    vi.stubGlobal("devicePixelRatio", 2);
+    stubCanvasContext();
+    const canvas = document.createElement("canvas");
+    canvas.width = 400;
+    canvas.height = 300;
+
+    const stage = new Stage(canvas);
+
+    expect(stage.dpr).toBe(2);
+    expect(stage.naturalWidth).toBe(800);
+    expect(stage.naturalHeight).toBe(600);
+    expect(canvas.width).toBe(800);
+    expect(canvas.height).toBe(600);
+    expect(canvas.style.width).toBe("400px");
+    expect(canvas.style.height).toBe("300px");
+    stage.destroy();
+  });
+
+  it("divides out a reported backingStorePixelRatio when computing dpr", () => {
+    Stage.disableHighDPI = false;
+    vi.stubGlobal("devicePixelRatio", 2);
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(
+      () => ({ backingStorePixelRatio: 2 }) as unknown as CanvasRenderingContext2D,
+    );
+    const stage = new Stage(document.createElement("canvas"));
+
+    expect(stage.dpr).toBe(1); // devicePixelRatio(2) / backingStorePixelRatio(2)
+    stage.destroy();
+  });
+});
+
+describe("Stage.windowToCanvas", () => {
+  it("maps a window-space point to canvas-space, accounting for CSS scaling", () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 800;
+    canvas.height = 600;
+    vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({
+      left: 10,
+      top: 20,
+      width: 400, // CSS size is half the backing-store size
+      height: 300,
+      right: 410,
+      bottom: 320,
+      x: 10,
+      y: 20,
+      toJSON() {},
+    } as DOMRect);
+
+    expect(Stage.windowToCanvas(canvas, 110, 170)).toEqual({ x: 200, y: 300 });
+  });
+});
+
+describe("global mouse/touch DOM handlers", () => {
+  function makePositionedStage(): Stage {
+    stubCanvasContext();
+    Stage.disableHighDPI = true;
+    const stage = new Stage(document.createElement("canvas"));
+    stage.resize(800, 600);
+    vi.spyOn(stage.canvas, "getBoundingClientRect").mockReturnValue({
+      left: 0,
+      top: 0,
+      width: 800,
+      height: 600,
+      right: 800,
+      bottom: 600,
+      x: 0,
+      y: 0,
+      toJSON() {},
+    } as DOMRect);
+    return stage;
+  }
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("routes a mousedown/mousemove/mouseup sequence to the matching stage pointer events", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(1_000_000);
+    const stage = makePositionedStage();
+    const events: string[] = [];
+    stage.addEventListener("pointerstart", (p) => events.push(`start:${p!.x},${p!.y}`));
+    stage.addEventListener("pointermove", (p) => events.push(`move:${p!.x},${p!.y}`));
+    stage.addEventListener("pointerend", (p) => events.push(`end:${p!.x},${p!.y}`));
+
+    document.dispatchEvent(new MouseEvent("mousedown", { clientX: 100, clientY: 150 }));
+    document.dispatchEvent(new MouseEvent("mousemove", { clientX: 110, clientY: 160 }));
+    document.dispatchEvent(new MouseEvent("mouseup", { clientX: 110, clientY: 160 }));
+
+    expect(events).toEqual(["start:100,150", "move:110,160", "end:110,160"]);
+    stage.destroy();
+  });
+
+  it("suppresses mouse events fired within 500ms of the last touch event", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(2_000_000);
+    const stage = makePositionedStage();
+    const onStart = vi.fn();
+    stage.addEventListener("pointerstart", onStart);
+    stage.addEventListener("pointermove", onStart);
+
+    document.dispatchEvent(
+      new TouchEvent("touchstart", {
+        changedTouches: [{ clientX: 50, clientY: 50 } as unknown as Touch],
+      }),
+    );
+    onStart.mockClear();
+
+    vi.setSystemTime(2_000_400); // 400ms later — still inside the 500ms window
+    document.dispatchEvent(new MouseEvent("mousedown", { clientX: 100, clientY: 100 }));
+    expect(onStart).not.toHaveBeenCalled();
+
+    vi.setSystemTime(2_000_600); // 600ms after the touch — window has elapsed
+    document.dispatchEvent(new MouseEvent("mousedown", { clientX: 100, clientY: 100 }));
+    expect(onStart).toHaveBeenCalledTimes(1);
+    stage.destroy();
+  });
+
+  it("touchstart fires a synthetic pointermove (for hover state) followed by pointerstart", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(3_000_000);
+    const stage = makePositionedStage();
+    const events: string[] = [];
+    stage.addEventListener("pointermove", (p) => events.push(`move:${p!.x},${p!.y}`));
+    stage.addEventListener("pointerstart", (p) => events.push(`start:${p!.x},${p!.y}`));
+
+    document.dispatchEvent(
+      new TouchEvent("touchstart", {
+        changedTouches: [{ clientX: 200, clientY: 250 } as unknown as Touch],
+      }),
+    );
+
+    expect(events).toEqual(["move:200,250", "start:200,250"]);
+    stage.destroy();
+  });
+
+  it("touchmove fires only pointermove; touchend replays the last known touch position", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(4_000_000);
+    const stage = makePositionedStage();
+    const events: string[] = [];
+    stage.addEventListener("pointermove", (p) => events.push(`move:${p!.x},${p!.y}`));
+    stage.addEventListener("pointerend", (p) => events.push(`end:${p!.x},${p!.y}`));
+
+    document.dispatchEvent(
+      new TouchEvent("touchstart", {
+        changedTouches: [{ clientX: 10, clientY: 10 } as unknown as Touch],
+      }),
+    );
+    events.length = 0;
+
+    document.dispatchEvent(
+      new TouchEvent("touchmove", {
+        changedTouches: [{ clientX: 30, clientY: 40 } as unknown as Touch],
+      }),
+    );
+    expect(events).toEqual(["move:30,40"]);
+
+    events.length = 0;
+    // touchend carries no useful clientX/clientY of its own — the handler
+    // replays lastPointerPos captured on the most recent start/move instead.
+    document.dispatchEvent(
+      new TouchEvent("touchend", {
+        changedTouches: [{ clientX: 0, clientY: 0 } as unknown as Touch],
+      }),
+    );
+    expect(events).toEqual(["end:30,40"]);
+    stage.destroy();
   });
 });
