@@ -349,7 +349,7 @@ export default function FireworkSimulator() {
     >
       <SvgSprite />
       {!ready && <LoadingInit status={loadingStatus} />}
-      <div ref={stageContainerRef} className={`stage-container${ready ? "" : "remove"}`}>
+      <div ref={stageContainerRef} className={`stage-container ${ready ? "" : "remove"}`}>
         <DualCanvas
           stageW={stageSize.w || 800}
           stageH={stageSize.h || 600}

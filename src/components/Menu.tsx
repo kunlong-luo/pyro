@@ -146,7 +146,7 @@ export function Menu({
   const isHidden = !menuOpen;
 
   return (
-    <div className={`menu${isHidden ? "hide" : ""}`}>
+    <div className={`menu ${isHidden ? "hide" : ""}`}>
       <div className="menu__inner-wrap">
         <button
           className="btn btn--bright close-menu-btn"

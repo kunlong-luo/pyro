@@ -28,7 +28,7 @@ export function HelpModal() {
   };
 
   return (
-    <div className={`help-modal${isActive ? "active" : ""}`}>
+    <div className={`help-modal ${isActive ? "active" : ""}`}>
       <div
         className="help-modal__overlay"
         onClick={handleClose}
