@@ -30,3 +30,4 @@ vite.config.d.ts.map
 .next/
 out/
 coverage/
+.playwright-mcp/
