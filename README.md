@@ -115,6 +115,8 @@ Static export only (`output: "export"` in `next.config.ts`) — `pnpm build` emi
 
 The production `basePath`/`assetPrefix` are still `/Firework_Simulator`, matching this repo's actual (unchanged) name and GitHub Pages path — only the project's display name and package name were rebranded to Pyro, not the repository itself.
 
+`.github/workflows/deploy.yml` builds and publishes `out/` to GitHub Pages automatically on every push to `main` (or via manual dispatch). It requires a one-time repo setting: **Settings → Pages → Source → GitHub Actions** (not "Deploy from a branch") — without it the `deploy` job fails with a permissions error.
+
 ## License
 
 `Copyright © 2022 NianBroken. All rights reserved.`

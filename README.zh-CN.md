@@ -115,6 +115,8 @@ scaleFactorOptions: [0.5, 0.62, 0.75, 0.9, 1.0, 1.5, 2.0]
 
 生产环境的 `basePath`/`assetPrefix` 目前仍是 `/Firework_Simulator`，与本仓库实际（未改名的）名称和 GitHub Pages 路径保持一致——这次改名只涉及项目的展示名称与 `package.json` 包名（改为 Pyro），并未重命名 GitHub 仓库本身。
 
+`.github/workflows/deploy.yml` 会在每次推送到 `main`（或手动触发）时自动构建并发布 `out/` 到 GitHub Pages。需要先在仓库里做一次性设置：**Settings → Pages → Source → GitHub Actions**（不是 "Deploy from a branch"）——没设置的话 `deploy` job 会报权限错误失败。
+
 ## 许可证
 
 `Copyright © 2022 NianBroken. All rights reserved.`
