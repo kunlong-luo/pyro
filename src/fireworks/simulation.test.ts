@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi } from "vitest";
 import { createSimulation, type SimulationDeps, type SimulationShellOptions } from "./simulation";
-import type { ShellInstance } from "./shells";
 import {
   crysanthemumShell,
   ghostShell,
@@ -26,11 +25,6 @@ import type { SoundManager } from "./audio";
 // ---------------------------------------------------------------------------
 // Mocks / fixtures
 // ---------------------------------------------------------------------------
-
-/** The public Simulation.Shell type only exposes `launch()`; `burst()` is
- * also public at runtime (used directly by these tests to exercise burst
- * branches without needing a full launch -> comet-death cycle). */
-type ShellWithBurst = ShellInstance & { burst(x: number, y: number): void };
 
 /** A canvas 2D context mock recording calls without doing real rendering. */
 function createMockCtx() {
@@ -182,7 +176,7 @@ describe("Shell.launch()", () => {
     const sim = createSimulation(h.deps);
     const shell = new sim.Shell(crysanthemumShell(2, QUALITY_NORMAL) as SimulationShellOptions);
 
-    shell.launch(0.5, 0.5);
+    shell.launch(h.deps, 0.5, 0.5);
 
     expect(h.soundManager.playSound).toHaveBeenCalledWith("lift");
   });
@@ -203,7 +197,7 @@ describe("Shell.launch()", () => {
       streamers: false,
     } as SimulationShellOptions);
 
-    shell.launch(0.5, 0.5);
+    shell.launch(h.deps, 0.5, 0.5);
     expect(burstSpy).not.toHaveBeenCalled();
 
     // Comet life is a few hundred to a couple thousand ms; 400 frames at
@@ -230,9 +224,9 @@ describe("Shell.burst()", () => {
       spreadSize: 300,
       starLife: 900,
       color: 42 as unknown as string,
-    }) as ShellWithBurst;
+    });
 
-    expect(() => shell.burst(100, 100)).toThrow(/无效的烟花颜色配置/);
+    expect(() => shell.burst(h.deps, 100, 100)).toThrow(/无效的烟花颜色配置/);
   });
 
   it("handles a single-color burst without throwing", () => {
@@ -242,8 +236,8 @@ describe("Shell.burst()", () => {
       spreadSize: 300,
       starLife: 900,
       color: COLOR.Red,
-    }) as ShellWithBurst;
-    expect(() => shell.burst(100, 100)).not.toThrow();
+    });
+    expect(() => shell.burst(h.deps, 100, 100)).not.toThrow();
   });
 
   it("handles a two-color array burst (both split-arc and half-count branches)", () => {
@@ -257,8 +251,8 @@ describe("Shell.burst()", () => {
           spreadSize: 300,
           starLife: 900,
           color: [COLOR.Red, COLOR.Blue],
-        }) as ShellWithBurst;
-        expect(() => shell.burst(100, 100)).not.toThrow();
+        });
+        expect(() => shell.burst(h.deps, 100, 100)).not.toThrow();
       } finally {
         spy.mockRestore();
       }
@@ -269,8 +263,8 @@ describe("Shell.burst()", () => {
     const h = makeHarness();
     const sim = createSimulation(h.deps);
     const options = ringShell(2, QUALITY_NORMAL) as SimulationShellOptions;
-    const shell = new sim.Shell(options) as ShellWithBurst;
-    expect(() => shell.burst(100, 100)).not.toThrow();
+    const shell = new sim.Shell(options);
+    expect(() => shell.burst(h.deps, 100, 100)).not.toThrow();
   });
 
   it("recursively bursts a pistil sub-shell without throwing", () => {
@@ -282,8 +276,8 @@ describe("Shell.burst()", () => {
       color: COLOR.Red,
       pistil: true,
       pistilColor: COLOR.White,
-    }) as ShellWithBurst;
-    expect(() => shell.burst(100, 100)).not.toThrow();
+    });
+    expect(() => shell.burst(h.deps, 100, 100)).not.toThrow();
   });
 
   it("recursively bursts a streamers sub-shell without throwing", () => {
@@ -294,8 +288,8 @@ describe("Shell.burst()", () => {
       starLife: 900,
       color: COLOR.Red,
       streamers: true,
-    }) as ShellWithBurst;
-    expect(() => shell.burst(100, 100)).not.toThrow();
+    });
+    expect(() => shell.burst(h.deps, 100, 100)).not.toThrow();
   });
 
   it("triggers a word burst via literalLattice when the tracker forces one", () => {
@@ -317,8 +311,8 @@ describe("Shell.burst()", () => {
       spreadSize: 300,
       starLife: 900,
       color: COLOR.Red,
-    }) as ShellWithBurst;
-    shell.burst(100, 100);
+    });
+    shell.burst(h.deps, 100, 100);
 
     expect(latticeSpy).toHaveBeenCalled();
     latticeSpy.mockRestore();
@@ -338,8 +332,8 @@ describe("Shell.burst()", () => {
       spreadSize: 300,
       starLife: 900,
       color: COLOR.Red,
-    }) as ShellWithBurst;
-    shell.burst(100, 100);
+    });
+    shell.burst(h.deps, 100, 100);
 
     expect(latticeSpy).not.toHaveBeenCalled();
     latticeSpy.mockRestore();
@@ -374,7 +368,7 @@ describe("full shell lifecycle (integration across all 12 shell types)", () => {
       const shell = new sim.Shell(factory(2, QUALITY_NORMAL) as SimulationShellOptions);
 
       expect(() => {
-        shell.launch(0.5, 0.5);
+        shell.launch(h.deps, 0.5, 0.5);
         // Long enough for launch, burst, and every spawned star/spark to fully
         // decay (star lives run up to a few seconds; willow's is the longest).
         for (let i = 0; i < 600; i += 1) {
@@ -405,7 +399,7 @@ describe("sky lighting", () => {
     h.setState(makeState({ paused: false, configOverrides: { skyLighting: "2" } }));
     const sim = createSimulation(h.deps);
     const shell = new sim.Shell(crysanthemumShell(2, QUALITY_NORMAL) as SimulationShellOptions);
-    shell.launch(0.5, 0.5);
+    shell.launch(h.deps, 0.5, 0.5);
 
     sim.update(17, 1);
 

@@ -63,7 +63,7 @@ export default function FireworkSimulator() {
         defaultScaleFactor,
         fullscreen: false,
       }),
-    []
+    [],
   );
 
   const wordBurstTracker = useMemo(() => createWordBurstTracker(), []);
@@ -75,11 +75,10 @@ export default function FireworkSimulator() {
   const stageContainerRef = useRef<HTMLDivElement>(null);
   const backgroundManagerRef = useRef<ReturnType<typeof createBackgroundManager> | null>(null);
 
-  // Sound manager needs interactionRef for getSimSpeed - create after interaction exists
   const soundManagerRef = useRef<ReturnType<typeof createSoundManager> | null>(null);
 
   // Stable callback for onTickerReady - reads latest refs
-const doInit = useCallback(() => {
+  const doInit = useCallback(() => {
     setReady(true);
 
     const s = store.getState();
@@ -112,7 +111,8 @@ const doInit = useCallback(() => {
 
       // Create backgroundManager early so doInit can use it
       if (!backgroundManagerRef.current) {
-        let containerEl: HTMLElement | null = stageContainer.querySelector<HTMLElement>(".canvas-container");
+        let containerEl: HTMLElement | null =
+          stageContainer.querySelector<HTMLElement>(".canvas-container");
         if (!containerEl) containerEl = stageContainer;
         backgroundManagerRef.current = createBackgroundManager({
           container: containerEl,
@@ -124,13 +124,30 @@ const doInit = useCallback(() => {
 
       const canvasContainer = stageContainer.querySelector(".canvas-container") as HTMLElement;
 
+      // Create the sound manager before simulation/interaction, which both
+      // take it as a direct (non-lazy) SoundManager reference — creating it
+      // afterward would bake a still-null soundManagerRef.current into their
+      // closures permanently. Its own getSimSpeed dep goes through
+      // interactionRef (not yet set) rather than the interaction variable
+      // below, breaking the circular dependency the same way simulation's
+      // getSimSpeed/getSpeedBarOpacity already do.
+      if (!soundManagerRef.current) {
+        soundManagerRef.current = createSoundManager({
+          getCanPlaySound: () => {
+            const s = store.getState();
+            return !s.paused && s.soundEnabled;
+          },
+          getSimSpeed: () => interactionRef.current?.getSimSpeed() ?? 1,
+        });
+      }
+
       const simulation = createSimulation({
         getState: () => store.getState(),
         getSimSpeed: () => interactionRef.current?.getSimSpeed() ?? 1,
         getSpeedBarOpacity: () => interactionRef.current?.getSpeedBarOpacity() ?? 0,
         trailsStage,
         mainStage,
-        soundManager: soundManagerRef.current!,
+        soundManager: soundManagerRef.current,
         wordBurstTracker,
         canvasContainer: canvasContainer ?? stageContainer,
       });
@@ -139,7 +156,7 @@ const doInit = useCallback(() => {
       const interaction = createInteraction({
         getState: () => store.getState(),
         mainStage,
-        soundManager: soundManagerRef.current!,
+        soundManager: soundManagerRef.current,
         togglePause: () => {
           const s = store.getState();
           store.setState({ paused: !s.paused });
@@ -203,17 +220,6 @@ const doInit = useCallback(() => {
 
       interactionRef.current = interaction;
 
-      // Create sound manager now that interaction exists
-      if (!soundManagerRef.current) {
-        soundManagerRef.current = createSoundManager({
-          getCanPlaySound: () => {
-            const s = store.getState();
-            return !s.paused && s.soundEnabled;
-          },
-          getSimSpeed: () => interaction.getSimSpeed(),
-        });
-      }
-
       ticker.addListener((frameTime, lag) => {
         interaction.updateGlobals(frameTime, lag);
         simulation.update(frameTime, lag);
@@ -234,7 +240,7 @@ const doInit = useCallback(() => {
         .catch(() => {})
         .finally(doInit);
     },
-    [store, wordBurstTracker, doInit]
+    [store, wordBurstTracker, doInit],
   );
 
   // Stable callback for onTickerReady prop - avoids accessing ref during render
@@ -242,7 +248,7 @@ const doInit = useCallback(() => {
     (ticker: Ticker, trailsStage: Stage, mainStage: Stage) => {
       handleTickerReady(ticker, trailsStage, mainStage);
     },
-    [handleTickerReady]
+    [handleTickerReady],
   );
 
   // Subscribe to sound state changes
@@ -313,7 +319,7 @@ const doInit = useCallback(() => {
       store.setState({ config });
       if (config.scaleFactor !== prev.scaleFactor) interactionRef.current?.handleResize();
     },
-    [store, wordBurstTracker]
+    [store, wordBurstTracker],
   );
 
   const handleBackgroundApply = useCallback(
@@ -323,7 +329,7 @@ const doInit = useCallback(() => {
       if (backgroundManagerRef.current)
         backgroundManagerRef.current.applyBackground({ mode: "image", value });
     },
-    [store]
+    [store],
   );
 
   const handleBackgroundClear = useCallback(() => {
@@ -340,7 +346,7 @@ const doInit = useCallback(() => {
     (topic: string) => {
       store.setState({ openHelpTopic: topic });
     },
-    [store]
+    [store],
   );
   const handleClose = useCallback(() => {
     store.setState({ menuOpen: false });

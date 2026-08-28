@@ -1,10 +1,4 @@
-import {
-  COLOR,
-  COLOR_CODES_W_INVIS,
-  GRAVITY,
-  INVISIBLE,
-  PI_2,
-} from "@/fireworks/constants";
+import { COLOR, COLOR_CODES_W_INVIS, GRAVITY, INVISIBLE, PI_2 } from "@/fireworks/constants";
 import { MyMath } from "@/lib/math";
 import { fireworksAppConfig } from "@/config/appConfig";
 import type { Stage } from "@/lib/stage";
@@ -12,13 +6,23 @@ import type { SoundManager } from "@/fireworks/audio";
 import type { WordBurstTracker } from "@/fireworks/wordBurst";
 import type { FireworksState } from "@/stores/fireworksStore";
 import type { ShellOptions as BaseShellOptions } from "@/fireworks/shells";
+import { isRunning, qualitySelector, shellSizeSelector } from "@/fireworks/selectors";
 import {
-  isRunning,
-  qualitySelector,
-  shellSizeSelector,
-} from "@/fireworks/selectors";
-import { Star, Spark, BurstFlash, randomColor, createParticleArc, createBurst, createWordBurst } from "./particles/pools";
-import { crossetteEffect, floralEffect, fallingLeavesEffect, crackleEffect, type EffectDeps } from "./particles/effects";
+  Star,
+  Spark,
+  BurstFlash,
+  randomColor,
+  createParticleArc,
+  createBurst,
+  createWordBurst,
+} from "./particles/pools";
+import {
+  crossetteEffect,
+  floralEffect,
+  fallingLeavesEffect,
+  crackleEffect,
+  type EffectDeps,
+} from "./particles/effects";
 import { render } from "./render/render";
 
 // ---------------------------------------------------------------------------
@@ -173,7 +177,9 @@ export function createSimulation(deps: SimulationDeps): Simulation {
     BurstFlash,
     createParticleArc,
     createBurst,
-    soundManager: deps.soundManager as unknown as { playSound: (type: string, scale?: number) => void },
+    soundManager: deps.soundManager as unknown as {
+      playSound: (type: string, scale?: number) => void;
+    },
     currentQuality: 2,
     currentIsHighQuality: false,
     randomColor,
@@ -283,12 +289,7 @@ export function createSimulation(deps: SimulationDeps): Simulation {
   // Burst logic (uses closure state)
   // ---------------------------------------------------------------------------
 
-  function burstShell(
-    deps: SimulationDeps,
-    shell: ShellInstance,
-    x: number,
-    y: number
-  ): void {
+  function burstShell(deps: SimulationDeps, shell: ShellInstance, x: number, y: number): void {
     const speed = shell.spreadSize / 96;
     let color: string | null = null;
     let onDeath: ((star: StarInstance) => void) | undefined;
@@ -326,17 +327,35 @@ export function createSimulation(deps: SimulationDeps): Simulation {
     }
 
     if (shell.glitter === "light") {
-      sparkFreq = 400; sparkSpeed = 0.3; sparkLife = 300; sparkLifeVariation = 2;
+      sparkFreq = 400;
+      sparkSpeed = 0.3;
+      sparkLife = 300;
+      sparkLifeVariation = 2;
     } else if (shell.glitter === "medium") {
-      sparkFreq = 200; sparkSpeed = 0.44; sparkLife = 700; sparkLifeVariation = 2;
+      sparkFreq = 200;
+      sparkSpeed = 0.44;
+      sparkLife = 700;
+      sparkLifeVariation = 2;
     } else if (shell.glitter === "heavy") {
-      sparkFreq = 80; sparkSpeed = 0.8; sparkLife = 1400; sparkLifeVariation = 2;
+      sparkFreq = 80;
+      sparkSpeed = 0.8;
+      sparkLife = 1400;
+      sparkLifeVariation = 2;
     } else if (shell.glitter === "thick") {
-      sparkFreq = 16; sparkSpeed = currentIsHighQuality ? 1.65 : 1.5; sparkLife = 1400; sparkLifeVariation = 3;
+      sparkFreq = 16;
+      sparkSpeed = currentIsHighQuality ? 1.65 : 1.5;
+      sparkLife = 1400;
+      sparkLifeVariation = 3;
     } else if (shell.glitter === "streamer") {
-      sparkFreq = 32; sparkSpeed = 1.05; sparkLife = 620; sparkLifeVariation = 2;
+      sparkFreq = 32;
+      sparkSpeed = 1.05;
+      sparkLife = 620;
+      sparkLifeVariation = 2;
     } else if (shell.glitter === "willow") {
-      sparkFreq = 120; sparkSpeed = 0.34; sparkLife = 1400; sparkLifeVariation = 3.8;
+      sparkFreq = 120;
+      sparkSpeed = 0.34;
+      sparkLife = 1400;
+      sparkLifeVariation = 3.8;
     }
 
     sparkFreq = (sparkFreq ?? 0) / currentQuality;
@@ -438,8 +457,7 @@ export function createSimulation(deps: SimulationDeps): Simulation {
           const initialSpeedX = Math.sin(angle) * speed * ringSquash;
           const initialSpeedY = Math.cos(angle) * speed;
           const nextSpeed = MyMath.pointDist(0, 0, initialSpeedX, initialSpeedY);
-          const nextAngle =
-            MyMath.pointAngle(0, 0, initialSpeedX, initialSpeedY) + ringStartAngle;
+          const nextAngle = MyMath.pointAngle(0, 0, initialSpeedX, initialSpeedY) + ringStartAngle;
           const star = Star.add(
             x,
             y,
@@ -559,7 +577,6 @@ export function createSimulation(deps: SimulationDeps): Simulation {
     currentSimSpeed = deps.getSimSpeed();
     currentSpeedBarOpacity = deps.getSpeedBarOpacity();
     currentQuality = qualitySelector(state);
-    currentIsLowQuality = currentQuality === 1;
     currentIsHighQuality = currentQuality === 3;
     Spark.drawWidth = currentIsHighQuality ? 0.75 : 1;
     currentWordShellEnabled = state.config.wordShell;
@@ -674,15 +691,20 @@ export function createSimulation(deps: SimulationDeps): Simulation {
       }
     }
 
-    render({
-      getState: deps.getState,
-      trailsStage: deps.trailsStage,
-      mainStage: deps.mainStage,
-      canvasContainer: deps.canvasContainer,
-      currentSpeedBarOpacity,
-      currentSimSpeed,
-      currentIsHighQuality,
-    }, speed, width, height);
+    render(
+      {
+        getState: deps.getState,
+        trailsStage: deps.trailsStage,
+        mainStage: deps.mainStage,
+        canvasContainer: deps.canvasContainer,
+        currentSpeedBarOpacity,
+        currentSimSpeed,
+        currentIsHighQuality,
+      },
+      speed,
+      width,
+      height,
+    );
   }
 
   return { update, Shell };

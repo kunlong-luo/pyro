@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { createTicker, Stage } from "./stage";
+import { createTicker, Stage, initGlobalHandlers, cleanupGlobalHandlers } from "./stage";
 import type { PointerEventPayload } from "./stage";
 
 function stubCanvasContext(): void {
@@ -156,6 +156,7 @@ describe("Stage", () => {
   });
 
   it("destroy() removes the stage from the module registry", () => {
+    initGlobalHandlers();
     stubCanvasContext();
     const stage = new Stage(document.createElement("canvas"));
     stage.resize(800, 600);
@@ -180,6 +181,7 @@ describe("Stage", () => {
     onPointerStart.mockClear();
     document.dispatchEvent(new MouseEvent("mousedown", { clientX: 100, clientY: 100 }));
     expect(onPointerStart).not.toHaveBeenCalled();
+    cleanupGlobalHandlers();
   });
 
   it("scales the canvas backing store up when the device pixel ratio is above 1", () => {
@@ -256,8 +258,13 @@ describe("global mouse/touch DOM handlers", () => {
     return stage;
   }
 
+  beforeEach(() => {
+    initGlobalHandlers();
+  });
+
   afterEach(() => {
     vi.useRealTimers();
+    cleanupGlobalHandlers();
   });
 
   it("routes a mousedown/mousemove/mouseup sequence to the matching stage pointer events", () => {
