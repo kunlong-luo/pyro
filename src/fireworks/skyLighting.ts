@@ -3,11 +3,7 @@
  * Computes sky color based on active particles and applies to container.
  */
 
-import {
-  COLOR_CODES,
-  COLOR_TUPLES,
-  SKY_LIGHT_NONE,
-} from "@/fireworks/constants";
+import { COLOR_CODES, COLOR_TUPLES, SKY_LIGHT_NONE } from "@/fireworks/constants";
 import { skyLightingSelector } from "@/fireworks/selectors";
 import type { FireworksState } from "@/stores/fireworksStore";
 import { Star } from "./particles/pools";

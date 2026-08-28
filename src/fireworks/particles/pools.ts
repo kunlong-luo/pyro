@@ -3,11 +3,7 @@
  * Manages Star, Spark, and BurstFlash object pools with reuse.
  */
 
-import {
-  COLOR_CODES,
-  COLOR_CODES_W_INVIS,
-  PI_2,
-} from "@/fireworks/constants";
+import { COLOR_CODES, COLOR_CODES_W_INVIS, PI_2 } from "@/fireworks/constants";
 import { MyMath } from "@/lib/math";
 import type { LatticeResult } from "@/lib/math";
 
@@ -330,7 +326,13 @@ export function createWordBurst(
   wordPointDensity: number,
   wordFontFamily: string,
 ): void {
-  const map = getWordDots(wordText, wordFontSizeMin, wordFontSizeMax, wordPointDensity, wordFontFamily);
+  const map = getWordDots(
+    wordText,
+    wordFontSizeMin,
+    wordFontSizeMax,
+    wordPointDensity,
+    wordFontFamily,
+  );
   if (!map) {
     return;
   }

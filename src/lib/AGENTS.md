@@ -6,24 +6,24 @@ Low-level canvas/ticker/math/background utilities. No business logic.
 
 Five files, flat:
 
-| File | Lines | Role |
-|------|-------|------|
-| `stage.ts` | 321 | `Stage` class (canvas + dpr), `createTicker()` (RAF loop), global mouse/touch handlers |
-| `math.ts` | 151 | `MyMath` namespace: dist/angle/splitVector/random/clamp/literalLattice (canvas text → points) |
-| `backgroundManager.ts` | 172 | `createBackgroundManager()`: image/style bg apply, preload, cancel, status |
-| `fscreen.ts` | 42 | Fullscreen API wrapper (vendor prefixes) |
-| `constants.ts` | (in fireworks/) | Physics/color constants — see `../fireworks/constants.ts` |
+| File                   | Lines           | Role                                                                                          |
+| ---------------------- | --------------- | --------------------------------------------------------------------------------------------- |
+| `stage.ts`             | 321             | `Stage` class (canvas + dpr), `createTicker()` (RAF loop), global mouse/touch handlers        |
+| `math.ts`              | 151             | `MyMath` namespace: dist/angle/splitVector/random/clamp/literalLattice (canvas text → points) |
+| `backgroundManager.ts` | 172             | `createBackgroundManager()`: image/style bg apply, preload, cancel, status                    |
+| `fscreen.ts`           | 42              | Fullscreen API wrapper (vendor prefixes)                                                      |
+| `constants.ts`         | (in fireworks/) | Physics/color constants — see `../fireworks/constants.ts`                                     |
 
 ## Where to Look
 
-| Task | Location |
-|------|----------|
-| New visual effect (particles) | `../fireworks/simulation.ts` (particle pools) |
+| Task                           | Location                                           |
+| ------------------------------ | -------------------------------------------------- |
+| New visual effect (particles)  | `../fireworks/simulation.ts` (particle pools)      |
 | Physics tuning (gravity, drag) | `math.ts` constants + `../fireworks/simulation.ts` |
-| Canvas rendering order | `stage.ts` `render` methods |
-| Background image/style | `backgroundManager.ts` `applyBackground()` |
-| Timing / frame budget | `stage.ts` `createTicker()` (16.67ms target) |
-| Text → particle lattice | `math.ts` `literalLattice()` |
+| Canvas rendering order         | `stage.ts` `render` methods                        |
+| Background image/style         | `backgroundManager.ts` `applyBackground()`         |
+| Timing / frame budget          | `stage.ts` `createTicker()` (16.67ms target)       |
+| Text → particle lattice        | `math.ts` `literalLattice()`                       |
 
 ## Conventions
 

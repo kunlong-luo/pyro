@@ -6,17 +6,17 @@ Particle simulation engine. TypeScript 1:1 port of original JS. Closure-based fa
 
 No subdirectories. Flat module with clear responsibility boundaries:
 
-| File | Lines | Role |
-|------|-------|------|
-| `simulation.ts` | 1156 | Physics engine, particle pools, Shell class, render loop |
-| `shells.ts` | 717 | Shell factories, selection helpers, launch sequences |
-| `audio.ts` | 260 | Web Audio API manager, sound preload/playback |
-| `interaction.ts` | 258 | Pointer/keyboard handlers, speed control |
-| `background.ts` | 136 | Background resolution fallback chain |
-| `constants.ts` | 74 | Colors, physics constants, derived arrays |
-| `wordBurst.ts` | 69 | Word-burst timing tracker |
-| `selectors.ts` | 52 | State selectors (pure functions) |
-| `device.ts` | 49 | Viewport detection, scale factor |
+| File             | Lines | Role                                                     |
+| ---------------- | ----- | -------------------------------------------------------- |
+| `simulation.ts`  | 1156  | Physics engine, particle pools, Shell class, render loop |
+| `shells.ts`      | 717   | Shell factories, selection helpers, launch sequences     |
+| `audio.ts`       | 260   | Web Audio API manager, sound preload/playback            |
+| `interaction.ts` | 258   | Pointer/keyboard handlers, speed control                 |
+| `background.ts`  | 136   | Background resolution fallback chain                     |
+| `constants.ts`   | 74    | Colors, physics constants, derived arrays                |
+| `wordBurst.ts`   | 69    | Word-burst timing tracker                                |
+| `selectors.ts`   | 52    | State selectors (pure functions)                         |
+| `device.ts`      | 49    | Viewport detection, scale factor                         |
 
 ## Where to Look
 

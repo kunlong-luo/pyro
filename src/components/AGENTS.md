@@ -6,26 +6,26 @@ UI layer for the firework simulator. Flat structure with Canvas subdir.
 
 One subdirectory + flat files:
 
-| Dir/File | Role |
-|----------|------|
+| Dir/File                | Role                                                      |
+| ----------------------- | --------------------------------------------------------- |
 | `Canvas/DualCanvas.tsx` | Two `<canvas>` layers (trails + main) + RAF ticker wiring |
-| `Menu.tsx` | Settings panel (all form options, help modal trigger) |
-| `Controls.tsx` | Top-bar buttons (pause, sound, menu, fullscreen) |
-| `HelpModal.tsx` | Overlay dialog with categorized help content |
-| `LoadingInit.tsx` | Loading spinner + status text |
-| `SvgSprite.tsx` | Inline SVG symbol definitions (icons) |
-| `testUtils.tsx` | Shared `renderWithStore()` for component tests |
+| `Menu.tsx`              | Settings panel (all form options, help modal trigger)     |
+| `Controls.tsx`          | Top-bar buttons (pause, sound, menu, fullscreen)          |
+| `HelpModal.tsx`         | Overlay dialog with categorized help content              |
+| `LoadingInit.tsx`       | Loading spinner + status text                             |
+| `SvgSprite.tsx`         | Inline SVG symbol definitions (icons)                     |
+| `testUtils.tsx`         | Shared `renderWithStore()` for component tests            |
 
 ## Where to Look
 
-| Task | Location |
-|------|----------|
-| Add a new menu option | `Menu.tsx` + `appConfig.ts` selectors |
-| Add a toolbar button | `Controls.tsx` |
-| Change canvas rendering order | `Canvas/DualCanvas.tsx` |
-| Add an icon | `SvgSprite.tsx` (symbol) + CSS `use` reference |
-| Modify loading UX | `LoadingInit.tsx` |
-| Write component test | Co-locate `*.test.tsx` + use `renderWithStore()` |
+| Task                          | Location                                         |
+| ----------------------------- | ------------------------------------------------ |
+| Add a new menu option         | `Menu.tsx` + `appConfig.ts` selectors            |
+| Add a toolbar button          | `Controls.tsx`                                   |
+| Change canvas rendering order | `Canvas/DualCanvas.tsx`                          |
+| Add an icon                   | `SvgSprite.tsx` (symbol) + CSS `use` reference   |
+| Modify loading UX             | `LoadingInit.tsx`                                |
+| Write component test          | Co-locate `*.test.tsx` + use `renderWithStore()` |
 
 ## Conventions
 

@@ -6,6 +6,7 @@
 import { COLOR, INVISIBLE, PI_2, PI_HALF } from "@/fireworks/constants";
 import { Star, Spark, BurstFlash, createParticleArc, createBurst } from "./pools";
 import type { StarInstance } from "./pools";
+import type { SoundManager } from "@/fireworks/audio";
 
 // Effect functions need access to pools and deps - these will be passed in
 export interface EffectDeps {
@@ -14,7 +15,7 @@ export interface EffectDeps {
   BurstFlash: typeof BurstFlash;
   createParticleArc: typeof createParticleArc;
   createBurst: typeof createBurst;
-  soundManager: { playSound: (type: string, scale?: number) => void };
+  soundManager: SoundManager;
   currentQuality: number;
   currentIsHighQuality: boolean;
   randomColor: () => string;

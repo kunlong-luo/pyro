@@ -52,6 +52,27 @@ test("both canvases are sized to match the stage, not left at their default 300x
   expect(box!.height).toBeGreaterThan(150);
 });
 
+test("clicking the canvas actually launches a firework (no silent Shell.launch crash)", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("pageerror", (err) => errors.push(err.message));
+  page.on("console", (msg) => {
+    if (msg.type() === "error" && /Cannot read properties/.test(msg.text())) {
+      errors.push(msg.text());
+    }
+  });
+
+  const canvas = page.locator("#main-canvas");
+  await canvas.click({ position: { x: 200, y: 200 } });
+  // Let the interaction handler and a few frames run
+  await page.waitForTimeout(800);
+
+  expect(errors, `pageerror/console should not contain launch crash: ${errors.join("\n")}`).toEqual(
+    [],
+  );
+});
+
 test("loads with no Content-Security-Policy violations from the app's own code", async ({
   page,
 }) => {

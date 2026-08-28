@@ -184,9 +184,7 @@ export default function FireworkSimulator() {
             isHeader: IS_HEADER,
             isDesktop: IS_DESKTOP,
             state,
-            shellCtor: simulation.Shell as unknown as Parameters<
-              typeof launchShellFromConfig
-            >[1]["shellCtor"],
+            shellCtor: simulation.Shell,
             stageWidth,
             stageHeight,
             registerUserInteraction: () => soundManagerRef.current!.registerInteraction(),
@@ -204,9 +202,7 @@ export default function FireworkSimulator() {
             isHeader: IS_HEADER,
             isDesktop: IS_DESKTOP,
             state,
-            shellCtor: simulation.Shell as unknown as Parameters<
-              typeof startSequence
-            >[0]["shellCtor"],
+            shellCtor: simulation.Shell,
             stageWidth,
             stageHeight,
             registerUserInteraction: () => soundManagerRef.current!.registerInteraction(),

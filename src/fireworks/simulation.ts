@@ -39,63 +39,13 @@ export interface SimulationShellOptions extends Omit<BaseShellOptions, "shellSiz
   disableWord?: boolean;
 }
 
-// ---------------------------------------------------------------------------
-// Particle instance types (moved from particles/pools)
-// ---------------------------------------------------------------------------
-
-/** A single star particle in the simulation. */
-export interface StarInstance {
-  visible: boolean;
-  heavy: boolean;
-  x: number;
-  y: number;
-  prevX: number;
-  prevY: number;
-  color: string;
-  speedX: number;
-  speedY: number;
-  life: number;
-  fullLife: number;
-  size: number;
-  spinAngle: number;
-  spinSpeed: number;
-  sparkFreq: number;
-  sparkSpeed: number;
-  sparkTimer: number;
-  sparkColor: string;
-  sparkLife: number;
-  sparkLifeVariation: number;
-  spinRadius: number;
-  strobe: boolean;
-  strobeFreq?: number;
-  onDeath: ((star: StarInstance) => void) | null;
-  secondColor: string | null;
-  transitionTime: number;
-  colorChanged: boolean;
-  updateFrame: number;
-}
-
-/** A single spark particle in the simulation. */
-export interface SparkInstance {
-  x: number;
-  y: number;
-  prevX: number;
-  prevY: number;
-  color: string;
-  speedX: number;
-  speedY: number;
-  life: number;
-}
-
-/** A single burst-flash instance. */
-export interface BurstFlashInstance {
-  x: number;
-  y: number;
-  radius: number;
-}
-
-/** Map of color-code string to particle array. */
-export type ParticleCollection<T> = Record<string, T[]>;
+import type {
+  StarInstance,
+  SparkInstance,
+  BurstFlashInstance,
+  ParticleCollection,
+} from "./particles/pools";
+export type { StarInstance, SparkInstance, BurstFlashInstance, ParticleCollection };
 
 // ---------------------------------------------------------------------------
 // Dependency interface
@@ -153,8 +103,8 @@ export interface ShellInstance {
   disableWord: boolean;
   forceWordBurst?: boolean;
   comet: StarInstance | null;
-  launch(deps: SimulationDeps, position: number, launchHeight: number): void;
-  burst(deps: SimulationDeps, x: number, y: number): void;
+  launch(position: number, launchHeight: number): void;
+  burst(x: number, y: number): void;
 }
 
 // ---------------------------------------------------------------------------
@@ -177,9 +127,7 @@ export function createSimulation(deps: SimulationDeps): Simulation {
     BurstFlash,
     createParticleArc,
     createBurst,
-    soundManager: deps.soundManager as unknown as {
-      playSound: (type: string, scale?: number) => void;
-    },
+    soundManager: deps.soundManager,
     currentQuality: 2,
     currentIsHighQuality: false,
     randomColor,
@@ -233,7 +181,7 @@ export function createSimulation(deps: SimulationDeps): Simulation {
       }
     }
 
-    launch(deps: SimulationDeps, position: number, launchHeight: number): void {
+    launch(position: number, launchHeight: number): void {
       const width = deps.trailsStage.width;
       const height = deps.trailsStage.height;
       const horizontalPadding = 60;
@@ -276,12 +224,12 @@ export function createSimulation(deps: SimulationDeps): Simulation {
         comet.transitionTime = Math.pow(Math.random(), 1.5) * 700 + 500;
       }
 
-      comet.onDeath = (activeComet) => this.burst(deps, activeComet.x, activeComet.y);
+      comet.onDeath = (activeComet) => this.burst(activeComet.x, activeComet.y);
       deps.soundManager.playSound("lift");
     }
 
-    burst(deps: SimulationDeps, x: number, y: number): void {
-      burstShell(deps, this, x, y);
+    burst(x: number, y: number): void {
+      burstShell(this, x, y);
     }
   }
 
@@ -289,7 +237,7 @@ export function createSimulation(deps: SimulationDeps): Simulation {
   // Burst logic (uses closure state)
   // ---------------------------------------------------------------------------
 
-  function burstShell(deps: SimulationDeps, shell: ShellInstance, x: number, y: number): void {
+  function burstShell(shell: ShellInstance, x: number, y: number): void {
     const speed = shell.spreadSize / 96;
     let color: string | null = null;
     let onDeath: ((star: StarInstance) => void) | undefined;
@@ -535,7 +483,7 @@ export function createSimulation(deps: SimulationDeps): Simulation {
           typeof shell.pistilColor === "string" && shell.pistilColor === COLOR.Gold
             ? COLOR.Gold
             : COLOR.White,
-      }).burst(deps, x, y);
+      }).burst(x, y);
     }
 
     if (shell.streamers) {
@@ -547,7 +495,7 @@ export function createSimulation(deps: SimulationDeps): Simulation {
         color: COLOR.White,
         disableWord: true,
         glitter: "streamer",
-      }).burst(deps, x, y);
+      }).burst(x, y);
     }
 
     BurstFlash.add(x, y, shell.spreadSize / 4);
