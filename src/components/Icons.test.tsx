@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { Icon } from "./Icons";
 
@@ -55,5 +55,14 @@ describe("Icon", () => {
     render(<Icon name="icon-play" className="custom-class" />);
     const svg = screen.getByTestId("icon");
     expect(svg).toHaveClass("custom-class");
+  });
+
+  it("renders nothing and warns for unknown icon", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    // @ts-expect-error - testing unknown icon
+    render(<Icon name="icon-unknown" />);
+    expect(screen.queryByTestId("icon")).not.toBeInTheDocument();
+    expect(warnSpy).toHaveBeenCalledWith('Icon "icon-unknown" not found');
+    warnSpy.mockRestore();
   });
 });
