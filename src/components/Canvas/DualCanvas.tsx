@@ -129,24 +129,6 @@ export function DualCanvas({
   }, [stageW, stageH]);
 
   // =========================================================================
-  // Window resize: re-sync stages when the viewport changes
-  // =========================================================================
-  useEffect(() => {
-    function handleWindowResize() {
-      const trailsStage = trailsStageRef.current;
-      const mainStage = mainStageRef.current;
-      if (!trailsStage || !mainStage) return;
-
-      trailsStage.resize(stageW, stageH);
-      mainStage.resize(stageW, stageH);
-      callbacksRef.current.onResize?.(stageW, stageH);
-    }
-
-    window.addEventListener("resize", handleWindowResize);
-    return () => window.removeEventListener("resize", handleWindowResize);
-  }, [stageW, stageH]);
-
-  // =========================================================================
   // Render
   // =========================================================================
   return (

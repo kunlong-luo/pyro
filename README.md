@@ -92,6 +92,8 @@ public/
   audio/  fonts/  images/  favicon.png
 ```
 
+See [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) for detailed architecture documentation.
+
 ## Configuration
 
 All defaults live in `src/config/appConfig.ts`:

@@ -218,6 +218,10 @@ export class Stage {
 
   destroy(): void {
     stages.delete(this);
+    this._listeners.resize.length = 0;
+    this._listeners.pointerstart.length = 0;
+    this._listeners.pointermove.length = 0;
+    this._listeners.pointerend.length = 0;
   }
 
   // -- sizing ---------------------------------------------------------------

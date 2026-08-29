@@ -158,4 +158,131 @@ describe("Menu interactions", () => {
     await user.selectOptions(screen.getByLabelText("缩放"), "0.75");
     expect(store.getState().config.scaleFactor).toBe(0.75);
   });
+
+  it("opens help topic when the hide-controls label is clicked", async () => {
+    const user = userEvent.setup();
+    const callbacks = makeCallbacks();
+    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+
+    await user.click(document.querySelector(".hide-controls-label")!);
+    expect(callbacks.onHelpOpen).toHaveBeenCalledWith("hideControls");
+  });
+
+  it("opens help topic when the fullscreen label is clicked", async () => {
+    const user = userEvent.setup();
+    const callbacks = makeCallbacks();
+    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+
+    await user.click(document.querySelector(".fullscreen-label")!);
+    expect(callbacks.onHelpOpen).toHaveBeenCalledWith("fullscreen");
+  });
+
+  it("opens help topic when the long-exposure label is clicked", async () => {
+    const user = userEvent.setup();
+    const callbacks = makeCallbacks();
+    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+
+    await user.click(document.querySelector(".long-exposure-label")!);
+    expect(callbacks.onHelpOpen).toHaveBeenCalledWith("longExposure");
+  });
+
+  it("opens help topic when the shell-size label is clicked", async () => {
+    const user = userEvent.setup();
+    const callbacks = makeCallbacks();
+    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+
+    await user.click(document.querySelector(".shell-size-label")!);
+    expect(callbacks.onHelpOpen).toHaveBeenCalledWith("shellSize");
+  });
+
+  it("opens help topic when the quality label is clicked", async () => {
+    const user = userEvent.setup();
+    const callbacks = makeCallbacks();
+    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+
+    await user.click(document.querySelector(".quality-ui-label")!);
+    expect(callbacks.onHelpOpen).toHaveBeenCalledWith("quality");
+  });
+
+  it("opens help topic when the sky-lighting label is clicked", async () => {
+    const user = userEvent.setup();
+    const callbacks = makeCallbacks();
+    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+
+    await user.click(document.querySelector(".sky-lighting-label")!);
+    expect(callbacks.onHelpOpen).toHaveBeenCalledWith("skyLighting");
+  });
+
+  it("opens help topic when the scaleFactor label is clicked", async () => {
+    const user = userEvent.setup();
+    const callbacks = makeCallbacks();
+    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+
+    await user.click(document.querySelector(".scaleFactor-label")!);
+    expect(callbacks.onHelpOpen).toHaveBeenCalledWith("scaleFactor");
+  });
+
+  it("opens help topic when the background label is clicked", async () => {
+    const user = userEvent.setup();
+    const callbacks = makeCallbacks();
+    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+
+    await user.click(document.querySelector(".background-label")!);
+    expect(callbacks.onHelpOpen).toHaveBeenCalledWith("background");
+  });
+
+  it("opens help topic when the word-shell label is clicked", async () => {
+    const user = userEvent.setup();
+    const callbacks = makeCallbacks();
+    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+
+    await user.click(document.querySelector(".word-shell-label")!);
+    expect(callbacks.onHelpOpen).toHaveBeenCalledWith("wordShell");
+  });
+
+  it("opens help topic when the auto-launch label is clicked", async () => {
+    const user = userEvent.setup();
+    const callbacks = makeCallbacks();
+    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+
+    await user.click(document.querySelector(".auto-launch-label")!);
+    expect(callbacks.onHelpOpen).toHaveBeenCalledWith("autoLaunch");
+  });
+
+  it("opens help topic when the finale-mode label is clicked", async () => {
+    const user = userEvent.setup();
+    const callbacks = makeCallbacks();
+    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+
+    await user.click(document.querySelector(".finale-mode-label")!);
+    expect(callbacks.onHelpOpen).toHaveBeenCalledWith("finaleMode");
+  });
+
+  it("uses the configured background value as the input defaultValue", () => {
+    renderWithStore(<Menu {...makeCallbacks()} />, {
+      menuOpen: true,
+      background: { mode: "image", value: "https://example.com/bg.png", configured: true },
+    });
+    const input = document.querySelector<HTMLInputElement>(".background-input")!;
+    expect(input.value).toBe("https://example.com/bg.png");
+  });
+
+  it("does not call onBackgroundApply when input has no value and apply is clicked", async () => {
+    const user = userEvent.setup();
+    const callbacks = makeCallbacks();
+    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+
+    await user.click(document.querySelector(".background-apply-btn")!);
+    expect(callbacks.onBackgroundApply).toHaveBeenCalledWith("");
+  });
+
+  it("does not call onBackgroundClear or onHelpOpen for non-Enter keydown", async () => {
+    const user = userEvent.setup();
+    const callbacks = makeCallbacks();
+    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+
+    const input = document.querySelector<HTMLInputElement>(".background-input")!;
+    await user.type(input, "x");
+    expect(callbacks.onBackgroundApply).not.toHaveBeenCalled();
+  });
 });

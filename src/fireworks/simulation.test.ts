@@ -413,3 +413,20 @@ describe("sky lighting", () => {
     expect(h.deps.canvasContainer.style.backgroundColor).toMatch(/^rgb\(/);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Speed-bar rendering branch
+// ---------------------------------------------------------------------------
+
+describe("speed-bar rendering", () => {
+  it("renders the speed bar when opacity is non-zero", () => {
+    const h = makeHarness({ getSpeedBarOpacity: () => 0.8 });
+    h.setState(makeState({ paused: false }));
+    const sim = createSimulation(h.deps);
+
+    sim.update(17, 1);
+
+    expect(h.mainCtx.globalAlpha).toBe(1);
+    expect(h.mainCtx.fillRect).toHaveBeenCalled();
+  });
+});

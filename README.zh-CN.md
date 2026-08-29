@@ -92,6 +92,8 @@ public/
   audio/  fonts/  images/  favicon.png
 ```
 
+详细架构说明请参阅 [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)。
+
 ## 配置修改
 
 默认值都在 `src/config/appConfig.ts`：

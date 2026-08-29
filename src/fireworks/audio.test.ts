@@ -213,3 +213,59 @@ describe("pauseAll / resumeAll", () => {
     expect(FakeAudioContext.instanceCount).toBe(0);
   });
 });
+
+// ---------------------------------------------------------------------------
+// decodeBuffers (triggered via ensureContext when rawBuffers exist)
+// ---------------------------------------------------------------------------
+
+describe("decodeBuffers", () => {
+  it("decodes rawBuffers into audio buffers when ensureContext is called with preloaded data", async () => {
+    const manager = createSoundManager(makeDeps());
+
+    manager.sources.lift.rawBuffers = [new ArrayBuffer(4), new ArrayBuffer(4)];
+    manager.sources.burst.rawBuffers = [new ArrayBuffer(4)];
+
+    manager.registerInteraction();
+
+    const ctx = manager.ensureContext() as unknown as FakeAudioContext;
+
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(ctx.decodeAudioData).toHaveBeenCalledTimes(3);
+    expect(manager.sources.lift.buffers).toHaveLength(2);
+    expect(manager.sources.burst.buffers).toHaveLength(1);
+  });
+
+  it("sets empty buffer arrays when rawBuffers is empty", async () => {
+    const manager = createSoundManager(makeDeps());
+
+    manager.sources.lift.rawBuffers = [];
+
+    manager.registerInteraction();
+    manager.ensureContext();
+
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(manager.sources.lift.buffers).toEqual([]);
+  });
+
+  it("catches decode errors and sets empty buffer arrays", async () => {
+    class FailingDecodeContext extends FakeAudioContext {
+      override decodeAudioData = vi.fn(
+        (_buf: ArrayBuffer, _resolve: (b: AudioBuffer) => void, reject?: (e: Error) => void) =>
+          reject?.(new Error("decode failed")),
+      );
+    }
+    vi.stubGlobal("AudioContext", FailingDecodeContext);
+
+    const manager = createSoundManager(makeDeps());
+    manager.sources.lift.rawBuffers = [new ArrayBuffer(4)];
+
+    manager.registerInteraction();
+    manager.ensureContext();
+
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(manager.sources.lift.buffers).toEqual([]);
+  });
+});

@@ -119,7 +119,7 @@ describe("DualCanvas", () => {
     expect(onPointerEnd).toHaveBeenCalledWith(expect.objectContaining({ x: 7, y: 8 }));
   });
 
-  it("re-resizes both stages on a window resize event", () => {
+  it("does not directly handle window resize — parent drives resize via props (de-duplicated)", () => {
     stubCanvasContext();
     const onTickerReady = vi.fn();
     const onResize = vi.fn();
@@ -142,9 +142,12 @@ describe("DualCanvas", () => {
       window.dispatchEvent(new Event("resize"));
     });
 
-    expect(trailsResizeSpy).toHaveBeenCalledWith(800, 600);
-    expect(mainResizeSpy).toHaveBeenCalledWith(800, 600);
-    expect(onResize).toHaveBeenCalledWith(800, 600);
+    // Parent (useFireworksSimulator) is now the single window-resize owner and
+    // drives DualCanvas via stageW/stageH props; DualCanvas no longer has its
+    // own window listener, so a raw window event must not trigger a resize.
+    expect(trailsResizeSpy).not.toHaveBeenCalled();
+    expect(mainResizeSpy).not.toHaveBeenCalled();
+    expect(onResize).not.toHaveBeenCalled();
   });
 
   it("destroys both stages on unmount", () => {

@@ -254,6 +254,10 @@ export function createSoundManager(deps: SoundManagerDeps): SoundManager {
       bufferSource.buffer = buffer;
       bufferSource.connect(gainNode);
       gainNode.connect(ctx!.destination);
+      bufferSource.onended = () => {
+        bufferSource.disconnect();
+        gainNode.disconnect();
+      };
       bufferSource.start(0);
     },
   };
