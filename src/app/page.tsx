@@ -1,6 +1,5 @@
 "use client";
 
-import { SvgSprite } from "@/components/SvgSprite";
 import { DualCanvas } from "@/components/Canvas/DualCanvas";
 import { Controls } from "@/components/Controls";
 import { Menu } from "@/components/Menu";
@@ -41,7 +40,6 @@ export default function FireworkSimulator() {
         >
       }
     >
-      <SvgSprite />
       {!ready && <LoadingInit status={loadingStatus} />}
       <div ref={stageContainerRef} className={`stage-container ${ready ? "" : "remove"}`}>
         <DualCanvas

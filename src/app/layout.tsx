@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { SvgSprite } from "@/components/SvgSprite";
 import { metaCsp } from "@/config/csp";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -36,7 +35,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           跳到主要内容
         </a>
 
-        <SvgSprite />
         <main id="main" className="bg-black text-white">
           {children}
         </main>

@@ -5,11 +5,12 @@
  * legacy.index.html lines 54-70.
  *
  * Three buttons: pause, sound, settings.
- * SVG sprite icons via <use href="#icon-*">.
+ * Lucide-react icons via <Icon name="..." />.
  */
 
 import { useStore } from "zustand";
 import { useFireworksStore } from "@/stores/storeContext";
+import { Icon } from "./Icons";
 
 export function Controls() {
   const store = useFireworksStore();
@@ -19,8 +20,7 @@ export function Controls() {
   const hideControls = useStore(store, (s) => s.config.hideControls);
 
   const isHidden = menuOpen || hideControls;
-  const pauseIcon = paused ? "#icon-play" : "#icon-pause";
-  const soundIcon = soundEnabled ? "#icon-sound-on" : "#icon-sound-off";
+  const soundIconName = soundEnabled ? "icon-sound-on" : "icon-sound-off";
 
   return (
     <div className={`controls ${isHidden ? "hide" : ""}`}>
@@ -32,9 +32,7 @@ export function Controls() {
           store.setState({ paused: !store.getState().paused });
         }}
       >
-        <svg fill="white" width="24" height="24" aria-hidden="true">
-          <use href={pauseIcon} xlinkHref={pauseIcon} />
-        </svg>
+        <Icon name={paused ? "icon-play" : "icon-pause"} size={24} className="text-white" />
       </button>
       <button
         className="btn sound-btn"
@@ -44,9 +42,7 @@ export function Controls() {
           store.setState({ soundEnabled: !store.getState().soundEnabled });
         }}
       >
-        <svg fill="white" width="24" height="24" aria-hidden="true">
-          <use href={soundIcon} xlinkHref={soundIcon} />
-        </svg>
+        <Icon name={soundIconName} size={24} className="text-white" />
       </button>
       <button
         className="btn settings-btn"
@@ -56,9 +52,7 @@ export function Controls() {
           store.setState({ menuOpen: true });
         }}
       >
-        <svg fill="white" width="24" height="24" aria-hidden="true">
-          <use href="#icon-settings" xlinkHref="#icon-settings" />
-        </svg>
+        <Icon name="icon-settings" size={24} className="text-white" />
       </button>
     </div>
   );

@@ -18,6 +18,7 @@ import { fireworksAppConfig } from "@/config/appConfig";
 import { shellNames } from "@/fireworks/shells";
 import type { FireworksConfig } from "@/stores/fireworksStore";
 import type { HelpContent } from "@/types/app";
+import { Icon } from "./Icons";
 
 // ---------------------------------------------------------------------------
 // Option data (mirrors populateAppControls in engine.js)
@@ -154,9 +155,7 @@ export function Menu({
           aria-label="关闭设置"
           onClick={onClose}
         >
-          <svg fill="white" width="24" height="24" aria-hidden="true">
-            <use href="#icon-close" xlinkHref="#icon-close" />
-          </svg>
+          <Icon name="icon-close" size={24} className="text-white" />
         </button>
         <div className="menu__header">设置</div>
         <div className="menu__subheader">若想了解更多信息 请点击任意标签</div>
