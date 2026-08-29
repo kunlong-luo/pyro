@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Play,
-  Pause,
-  X,
-  Settings,
-  Volume2,
-  VolumeX,
-} from "lucide-react";
+import { Play, Pause, X, Settings, Volume2, VolumeX } from "lucide-react";
 
 // Map of icon names to lucide-react components
 const iconMap = {
@@ -39,7 +32,9 @@ export function Icon({ name, size = 24, className, "aria-hidden": ariaHidden = t
     return null;
   }
 
-  return <IconComponent size={size} className={className} aria-hidden={ariaHidden} data-testid="icon" />;
+  return (
+    <IconComponent size={size} className={className} aria-hidden={ariaHidden} data-testid="icon" />
+  );
 }
 
 /**

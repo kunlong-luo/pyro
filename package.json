@@ -1,8 +1,30 @@
 {
   "name": "pyro",
-  "private": true,
   "version": "0.1.0",
-  "type": "module",
+  "private": true,
+  "description": "Web-based firework simulator with real 2D particle physics — 12 shell types, Web Audio, custom backgrounds, text word-bursts, and auto-launch sequences.",
+  "keywords": [
+    "fireworks",
+    "firework-simulator",
+    "canvas",
+    "particle-simulation",
+    "web-audio",
+    "nextjs",
+    "react",
+    "typescript",
+    "zustand",
+    "tailwindcss"
+  ],
+  "author": "NianBroken",
+  "license": "Apache-2.0",
+  "homepage": "https://nianbroken.github.io/Firework_Simulator/",
+  "bugs": {
+    "url": "https://github.com/NianBroken/Firework_Simulator/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NianBroken/Firework_Simulator.git"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

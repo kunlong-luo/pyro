@@ -1,0 +1,23 @@
+---
+blank_issues_enabled: false
+contact_links:
+  - name: ❓ Questions & support
+    url: https://github.com/NianBroken/Firework_Simulator/discussions
+    about: Please ask general questions or seek help in Discussions rather than opening an issue.
+  - name: 📖 Contributing guidelines
+    url: https://github.com/NianBroken/Firework_Simulator/blob/main/CONTRIBUTING.md
+    about: Read these before opening your first issue or PR.
+  - name: 🔒 Reporting a security vulnerability
+    url: https://github.com/NianBroken/Firework_Simulator/security/policy
+    about: Please use GitHub's private vulnerability disclosure for security issues — do not open a public issue.
+---
+Please only use the templates above for bug reports and feature requests.
+
+For everything else (help getting it to run on your fork, idea brainstorming,
+showing off a cool customization you made, etc.) — start a
+[Discussion](https://github.com/NianBroken/Firework_Simulator/discussions)
+instead so the community can chip in!
+
+If you are reporting a security concern, see the
+[Security Policy](https://github.com/NianBroken/Firework_Simulator/blob/main/SECURITY.md)
+and use the private disclosure channel.

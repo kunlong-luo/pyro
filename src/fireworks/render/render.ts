@@ -21,6 +21,9 @@ export interface RenderDeps {
   currentIsHighQuality: boolean;
 }
 
+// Static gradient cache for BurstFlash (avoids recreating gradients each frame)
+const burstGradientCache = new Map<number, CanvasGradient>();
+
 export function render(deps: RenderDeps, speed: number, width: number, height: number): void {
   const { dpr } = deps.trailsStage;
   const trailsContext = deps.trailsStage.ctx;
@@ -41,37 +44,38 @@ export function render(deps: RenderDeps, speed: number, width: number, height: n
 
   while (BurstFlash.active.length) {
     const flash = BurstFlash.active.pop()!;
-    const burstGradient = trailsContext.createRadialGradient(
-      flash.x,
-      flash.y,
-      0,
-      flash.x,
-      flash.y,
-      flash.radius,
-    );
-    burstGradient.addColorStop(
-      RENDER.burstGradientStops[0].stop,
-      RENDER.burstGradientStops[0].color,
-    );
-    burstGradient.addColorStop(
-      RENDER.burstGradientStops[1].stop,
-      RENDER.burstGradientStops[1].color,
-    );
-    burstGradient.addColorStop(
-      RENDER.burstGradientStops[2].stop,
-      RENDER.burstGradientStops[2].color,
-    );
-    burstGradient.addColorStop(
-      RENDER.burstGradientStops[3].stop,
-      RENDER.burstGradientStops[3].color,
-    );
+    // Cache radial gradient by radius to avoid recreating each frame
+    let burstGradient = burstGradientCache.get(flash.radius);
+    if (!burstGradient) {
+      burstGradient = trailsContext.createRadialGradient(0, 0, 0, 0, 0, flash.radius);
+      burstGradient.addColorStop(
+        RENDER.burstGradientStops[0].stop,
+        RENDER.burstGradientStops[0].color,
+      );
+      burstGradient.addColorStop(
+        RENDER.burstGradientStops[1].stop,
+        RENDER.burstGradientStops[1].color,
+      );
+      burstGradient.addColorStop(
+        RENDER.burstGradientStops[2].stop,
+        RENDER.burstGradientStops[2].color,
+      );
+      burstGradient.addColorStop(
+        RENDER.burstGradientStops[3].stop,
+        RENDER.burstGradientStops[3].color,
+      );
+      burstGradientCache.set(flash.radius, burstGradient);
+    }
+    // Translate gradient to flash position
+    if (typeof trailsContext.save === "function") {
+      trailsContext.save();
+    }
+    trailsContext.translate(flash.x, flash.y);
     trailsContext.fillStyle = burstGradient;
-    trailsContext.fillRect(
-      flash.x - flash.radius,
-      flash.y - flash.radius,
-      flash.radius * 2,
-      flash.radius * 2,
-    );
+    trailsContext.fillRect(-flash.radius, -flash.radius, flash.radius * 2, flash.radius * 2);
+    if (typeof trailsContext.restore === "function") {
+      trailsContext.restore();
+    }
     BurstFlash.returnInstance(flash);
   }
 
