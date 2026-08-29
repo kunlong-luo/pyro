@@ -102,6 +102,23 @@ describe("Menu interactions", () => {
     expect(callbacks.onBackgroundClear).toHaveBeenCalledTimes(1);
   });
 
+  it("does not call handleBackgroundApply when background input element is not found", async () => {
+    const callbacks = makeCallbacks();
+    const originalQuerySelector = document.querySelector;
+    document.querySelector = vi.fn((selector) => {
+      if (selector === ".background-input") return null;
+      return originalQuerySelector.call(document, selector);
+    });
+
+    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+
+    await userEvent.setup().click(document.querySelector(".background-apply-btn")!);
+
+    expect(callbacks.onBackgroundApply).not.toHaveBeenCalled();
+
+    document.querySelector = originalQuerySelector;
+  });
+
   it("opens the matching help topic when a label is clicked", async () => {
     const user = userEvent.setup();
     const callbacks = makeCallbacks();
@@ -277,12 +294,38 @@ describe("Menu interactions", () => {
   });
 
   it("does not call onBackgroundClear or onHelpOpen for non-Enter keydown", async () => {
-    const user = userEvent.setup();
     const callbacks = makeCallbacks();
     renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
 
     const input = document.querySelector<HTMLInputElement>(".background-input")!;
-    await user.type(input, "x");
+    await userEvent.type(input, "x");
     expect(callbacks.onBackgroundApply).not.toHaveBeenCalled();
+  });
+
+  it("does not call handleBackgroundApply when background input element is not found", async () => {
+    const callbacks = makeCallbacks();
+    const originalQuerySelector = document.querySelector;
+    document.querySelector = vi.fn((selector) => {
+      if (selector === ".background-input") return null;
+      return originalQuerySelector.call(document, selector);
+    });
+
+    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+
+    await userEvent.setup().click(document.querySelector(".background-apply-btn")!);
+
+    expect(callbacks.onBackgroundApply).not.toHaveBeenCalled();
+
+    document.querySelector = originalQuerySelector;
+  });
+
+  it("updates config.shell via the shell-type select", async () => {
+    const user = userEvent.setup();
+    const callbacks = makeCallbacks();
+    const { store } = renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+
+    const shellSelect = document.querySelector<HTMLSelectElement>(".shell-type")!;
+    await user.selectOptions(shellSelect, "Crysanthemum");
+    expect(store.getState().config.shell).toBe("Crysanthemum");
   });
 });

@@ -166,4 +166,13 @@ describe("DualCanvas", () => {
     expect(trailsDestroySpy).toHaveBeenCalledTimes(1);
     expect(mainDestroySpy).toHaveBeenCalledTimes(1);
   });
+
+  it("mounts without crashing when no callback props are provided", () => {
+    stubCanvasContext();
+
+    render(<DualCanvas stageW={400} stageH={300} scaleFactor={1} />);
+
+    expect(document.getElementById("trails-canvas")).not.toBeNull();
+    expect(document.getElementById("main-canvas")).not.toBeNull();
+  });
 });

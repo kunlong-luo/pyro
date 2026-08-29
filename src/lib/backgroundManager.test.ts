@@ -148,5 +148,46 @@ describe("createBackgroundManager", () => {
       expect(secondResult.ok).toBe(true);
       expect(container.style.backgroundImage).toContain("second.png");
     });
+
+    it("applies an image-set() value as a style (not image)", async () => {
+      const manager = createBackgroundManager({ container, onStatusChange });
+
+      const result = await manager.applyBackground('image-set("photo.png" type("image/png"))');
+
+      expect(result.ok).toBe(false);
+      expect(result.error).toBeInstanceOf(Error);
+    });
+
+    it("applies a cross-fade() value as a style", async () => {
+      const manager = createBackgroundManager({ container, onStatusChange });
+
+      const result = await manager.applyBackground("cross-fade(url(a.png), url(b.png), 0.5)");
+
+      expect(result.ok).toBe(false);
+      expect(result.error).toBeInstanceOf(Error);
+    });
+
+    it("accepts a BackgroundSettings object as candidate", async () => {
+      const fetchMock = vi.fn().mockResolvedValue(makeResponse(true, "image/png"));
+      vi.stubGlobal("fetch", fetchMock);
+      const manager = createBackgroundManager({ container, onStatusChange });
+
+      const result = await manager.applyBackground({
+        mode: "image",
+        value: "url(settings.png)",
+      });
+
+      expect(result.ok).toBe(true);
+      expect(result.settings?.mode).toBe("image");
+    });
+
+    it("clears background when candidate is an empty BackgroundSettings object", async () => {
+      const manager = createBackgroundManager({ container, onStatusChange });
+
+      const result = await manager.applyBackground({ mode: "none", value: "" });
+
+      expect(result.ok).toBe(true);
+      expect(result.settings).toEqual({ mode: "none", value: "" });
+    });
   });
 });

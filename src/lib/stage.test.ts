@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { createTicker, Stage, initGlobalHandlers, cleanupGlobalHandlers } from "./stage";
-import type { PointerEventPayload } from "./stage";
+import type { PointerEventPayload, StageEventName } from "./stage";
 
 function stubCanvasContext(): void {
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(
@@ -153,6 +153,32 @@ describe("Stage", () => {
     const stage = new Stage(document.createElement("canvas"));
     expect(() => stage.addEventListener("bogus" as never, () => {})).toThrow(/无效事件类型/);
     expect(() => stage.dispatchEvent("bogus" as never, {} as never)).toThrow(/无效事件类型/);
+  });
+
+  it("throws when addEventListener('ticker') is called without a Ticker instance", () => {
+    stubCanvasContext();
+    const stage = new Stage(document.createElement("canvas"));
+    expect(() => stage.addEventListener("ticker" as StageEventName, vi.fn())).toThrow(
+      /addEventListener\('ticker',.*\) 需要传入 Ticker 实例/,
+    );
+  });
+
+  it("resolves a canvas element by string ID", () => {
+    stubCanvasContext();
+    const canvas = document.createElement("canvas");
+    canvas.id = "my-canvas";
+    document.body.appendChild(canvas);
+
+    const stage = new Stage("my-canvas");
+    expect(stage.canvas).toBe(canvas);
+
+    document.body.removeChild(canvas);
+    stage.destroy();
+  });
+
+  it("throws when the string ID does not resolve to a canvas element", () => {
+    stubCanvasContext();
+    expect(() => new Stage("nonexistent-id")).toThrow(/未找到目标画布节点/);
   });
 
   it("destroy() removes the stage from the module registry", () => {

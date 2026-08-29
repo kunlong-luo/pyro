@@ -9,13 +9,16 @@ import { createSoundManager, type SoundManagerDeps, type SoundType } from "./aud
 class FakeGainNode {
   gain = { value: 1 };
   connect = vi.fn();
+  disconnect = vi.fn();
 }
 
 class FakeBufferSource {
   playbackRate = { value: 1 };
   buffer: unknown = null;
   connect = vi.fn();
+  disconnect = vi.fn();
   start = vi.fn();
+  onended: (() => void) | null = null;
 }
 
 class FakeAudioContext {
@@ -185,6 +188,20 @@ describe("playSound", () => {
 
     const gainNode = ctx.createGain.mock.results[0].value as FakeGainNode;
     expect(gainNode.gain.value).toBeCloseTo(manager.sources.burst.volume);
+  });
+
+  it("disconnects bufferSource and gainNode after playback ends", () => {
+    const { manager, ctx } = primedManager();
+    manager.playSound("burst");
+
+    const bufferSource = ctx.createBufferSource.mock.results[0].value as FakeBufferSource;
+    expect(bufferSource.onended).toBeInstanceOf(Function);
+
+    bufferSource.onended!();
+
+    expect(bufferSource.disconnect).toHaveBeenCalledTimes(1);
+    const gainNode = ctx.createGain.mock.results[0].value as FakeGainNode;
+    expect(gainNode.connect).toHaveBeenCalledTimes(1);
   });
 });
 

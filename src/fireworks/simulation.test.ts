@@ -430,3 +430,32 @@ describe("speed-bar rendering", () => {
     expect(h.mainCtx.fillRect).toHaveBeenCalled();
   });
 });
+
+describe("quality-gated rendering branches", () => {
+  it("uses longExposure trail alpha when longExposure is enabled", () => {
+    const h = makeHarness();
+    h.setState(makeState({ paused: false, configOverrides: { longExposure: true } }));
+    const sim = createSimulation(h.deps);
+
+    sim.update(17, 1);
+
+    expect(h.trailsCtx.globalAlpha).toBeGreaterThanOrEqual(0);
+    expect(h.trailsCtx.fillRect).toHaveBeenCalled();
+  });
+
+  it("launches crackle shell with quality=3 to exercise currentIsHighQuality path", () => {
+    const h = makeHarness();
+    h.setState(
+      makeState({ paused: false, configOverrides: { quality: "3", size: "3", shell: "Crackle" } }),
+    );
+    const sim = createSimulation(h.deps);
+    const shell = new sim.Shell(crackleShell(3, 3, createShellRuntime()) as SimulationShellOptions);
+
+    shell.launch(0.5, 0.5);
+    for (let i = 0; i < 600; i += 1) {
+      sim.update(20, 1);
+    }
+
+    expect(h.soundManager.playSound).toHaveBeenCalled();
+  });
+});

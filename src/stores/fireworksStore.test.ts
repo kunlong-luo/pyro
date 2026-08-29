@@ -355,6 +355,25 @@ describe("createFireworksStore", () => {
     expect(state.config.size).toBe(defaultConfig.size);
   });
 
+  it("falls through to legacy migration when schemaVersion is unknown", () => {
+    localStorage.setItem(storageKey, JSON.stringify({ schemaVersion: "9.9", data: {} }));
+    localStorage.setItem("schemaVersion", "1");
+    localStorage.setItem("configSize", JSON.stringify(3));
+
+    const store = createFireworksStore(defaultRuntime);
+    expect(store.getState().config.size).toBe("3");
+  });
+
+  it("removes configSize from localStorage when legacy JSON.parse fails", () => {
+    localStorage.setItem(storageKey, JSON.stringify({ schemaVersion: "9.9", data: {} }));
+    localStorage.setItem("schemaVersion", "1");
+    localStorage.setItem("configSize", "NOT_VALID_JSON");
+
+    const store = createFireworksStore(defaultRuntime);
+    expect(store.getState().config.size).toBe(defaultConfig.size);
+    expect(localStorage.getItem("configSize")).toBeNull();
+  });
+
   it("handles corrupt localStorage data gracefully", () => {
     localStorage.setItem(storageKey, "NOT_JSON");
 
