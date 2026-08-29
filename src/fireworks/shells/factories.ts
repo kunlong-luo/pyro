@@ -254,7 +254,7 @@ export const floralShell: ShellFactory = (size = 1, _quality, runtime) => ({
   starLifeVariation: 0.5,
   color:
     Math.random() < 0.65
-      ? "random"
+      ? randomColor(undefined, runtime)
       : Math.random() < 0.15
         ? randomColor(undefined, runtime)
         : [randomColor(undefined, runtime), randomColor({ notSame: true }, runtime)],
