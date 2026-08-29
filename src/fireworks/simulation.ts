@@ -579,9 +579,11 @@ export function createSimulation(deps: SimulationDeps): Simulation {
 
     for (const colorCode of COLOR_CODES_W_INVIS) {
       const stars = Star.active[colorCode];
-      for (let index = stars.length - 1; index >= 0; index -= 1) {
-        const star = stars[index];
+      const aliveStars: StarInstance[] = [];
+      for (let i = 0; i < stars.length; i++) {
+        const star = stars[i];
         if (star.updateFrame === currentFrame) {
+          aliveStars.push(star);
           continue;
         }
 
@@ -589,7 +591,6 @@ export function createSimulation(deps: SimulationDeps): Simulation {
         star.life -= timeStep;
 
         if (star.life <= 0) {
-          stars.splice(index, 1);
           Star.returnInstance(star);
           continue;
         }
@@ -636,14 +637,18 @@ export function createSimulation(deps: SimulationDeps): Simulation {
           }
         }
 
+        let staysInBucket = true;
+
         if (star.life < star.transitionTime) {
           if (star.secondColor && !star.colorChanged) {
             star.colorChanged = true;
             star.color = star.secondColor;
-            stars.splice(index, 1);
-            Star.active[star.secondColor].push(star);
-            if (star.secondColor === INVISIBLE) {
-              star.sparkFreq = 0;
+            if (star.secondColor !== colorCode) {
+              staysInBucket = false;
+              Star.active[star.secondColor].push(star);
+              if (star.secondColor === INVISIBLE) {
+                star.sparkFreq = 0;
+              }
             }
           }
 
@@ -651,15 +656,21 @@ export function createSimulation(deps: SimulationDeps): Simulation {
             star.visible = Math.floor(star.life / star.strobeFreq!) % 3 === 0;
           }
         }
+
+        if (staysInBucket) {
+          aliveStars.push(star);
+        }
       }
 
+      Star.active[colorCode] = aliveStars;
+
       const sparks = Spark.active[colorCode];
-      for (let index = sparks.length - 1; index >= 0; index -= 1) {
-        const spark = sparks[index];
+      const aliveSparks: SparkInstance[] = [];
+      for (let i = 0; i < sparks.length; i++) {
+        const spark = sparks[i];
         spark.life -= timeStep;
 
         if (spark.life <= 0) {
-          sparks.splice(index, 1);
           Spark.returnInstance(spark);
           continue;
         }
@@ -671,7 +682,10 @@ export function createSimulation(deps: SimulationDeps): Simulation {
         spark.speedX *= sparkDrag;
         spark.speedY *= sparkDrag;
         spark.speedY += gravityAcceleration;
+        aliveSparks.push(spark);
       }
+
+      Spark.active[colorCode] = aliveSparks;
     }
 
     render(
