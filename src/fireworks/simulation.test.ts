@@ -13,6 +13,7 @@ import {
   willowShell,
   crackleShell,
   horsetailShell,
+  createShellRuntime,
 } from "./shells";
 import { COLOR, QUALITY_NORMAL } from "./constants";
 import { createDefaultState } from "@/stores/fireworksStore";
@@ -174,7 +175,9 @@ describe("Shell.launch()", () => {
   it("plays the lift sound immediately", () => {
     const h = makeHarness();
     const sim = createSimulation(h.deps);
-    const shell = new sim.Shell(crysanthemumShell(2, QUALITY_NORMAL) as SimulationShellOptions);
+    const shell = new sim.Shell(
+      crysanthemumShell(2, QUALITY_NORMAL, createShellRuntime()) as SimulationShellOptions,
+    );
 
     shell.launch(0.5, 0.5);
 
@@ -262,7 +265,7 @@ describe("Shell.burst()", () => {
   it("handles a ring burst without throwing", () => {
     const h = makeHarness();
     const sim = createSimulation(h.deps);
-    const options = ringShell(2, QUALITY_NORMAL) as SimulationShellOptions;
+    const options = ringShell(2, QUALITY_NORMAL, createShellRuntime()) as SimulationShellOptions;
     const shell = new sim.Shell(options);
     expect(() => shell.burst(100, 100)).not.toThrow();
   });
@@ -365,7 +368,9 @@ describe("full shell lifecycle (integration across all 12 shell types)", () => {
     (_name, factory) => {
       const h = makeHarness();
       const sim = createSimulation(h.deps);
-      const shell = new sim.Shell(factory(2, QUALITY_NORMAL) as SimulationShellOptions);
+      const shell = new sim.Shell(
+        factory(2, QUALITY_NORMAL, createShellRuntime()) as SimulationShellOptions,
+      );
 
       expect(() => {
         shell.launch(0.5, 0.5);
@@ -398,7 +403,9 @@ describe("sky lighting", () => {
     const h = makeHarness();
     h.setState(makeState({ paused: false, configOverrides: { skyLighting: "2" } }));
     const sim = createSimulation(h.deps);
-    const shell = new sim.Shell(crysanthemumShell(2, QUALITY_NORMAL) as SimulationShellOptions);
+    const shell = new sim.Shell(
+      crysanthemumShell(2, QUALITY_NORMAL, createShellRuntime()) as SimulationShellOptions,
+    );
     shell.launch(0.5, 0.5);
 
     sim.update(17, 1);

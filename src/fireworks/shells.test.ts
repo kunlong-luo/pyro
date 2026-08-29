@@ -30,6 +30,7 @@ import {
   getRandomShellSize,
   launchShellFromConfig,
   fastShellBlacklist,
+  finaleCount,
   seqRandomShell,
   seqTwoRandom,
   seqTriple,
@@ -37,6 +38,7 @@ import {
   seqSmallBarrage,
   seqSmallBarrageCooldown,
   startSequence,
+  createShellRuntime,
   type ShellContext,
   type SequenceContext,
   type ShellInstance,
@@ -54,7 +56,7 @@ import { createDefaultState } from "@/stores/fireworksStore";
 import { createWordBurstTracker } from "./wordBurst";
 import type { Runtime, FireworksState } from "@/stores/fireworksStore";
 
-const runtime: Runtime = {
+const storeRuntime: Runtime = {
   isDesktop: true,
   isHeader: false,
   isHighEndDevice: true,
@@ -63,7 +65,7 @@ const runtime: Runtime = {
 };
 
 function makeState(overrides?: Partial<FireworksState["config"]>): FireworksState {
-  const state = createDefaultState(runtime);
+  const state = createDefaultState(storeRuntime);
   return { ...state, config: { ...state.config, ...overrides } };
 }
 
@@ -105,6 +107,7 @@ function makeSequenceContext(overrides?: Partial<SequenceContext>): SequenceCont
     stageHeight: 800,
     registerUserInteraction: vi.fn(),
     wordBurstTracker: createWordBurstTracker(),
+    runtime: createShellRuntime(),
     ...overrides,
   };
 }
@@ -129,21 +132,24 @@ const ALL_SHELL_FACTORIES = {
 
 describe("randomColor", () => {
   it("always returns a value from the palette", () => {
+    const rt = createShellRuntime();
     for (let i = 0; i < 100; i += 1) {
-      expect(COLOR_CODES).toContain(randomColor());
+      expect(COLOR_CODES).toContain(randomColor(undefined, rt));
     }
   });
 
   it("notColor: never returns the excluded color", () => {
+    const rt = createShellRuntime();
     for (let i = 0; i < 50; i += 1) {
-      expect(randomColor({ notColor: COLOR.Red })).not.toBe(COLOR.Red);
+      expect(randomColor({ notColor: COLOR.Red }, rt)).not.toBe(COLOR.Red);
     }
   });
 
   it("notSame: never returns the same color as the previous call", () => {
+    const rt = createShellRuntime();
     for (let i = 0; i < 50; i += 1) {
-      const first = randomColor();
-      const second = randomColor({ notSame: true });
+      const first = randomColor(undefined, rt);
+      const second = randomColor({ notSame: true }, rt);
       expect(second).not.toBe(first);
     }
   });
@@ -176,24 +182,27 @@ describe("whiteOrGold", () => {
 
 describe("makePistilColor", () => {
   it("never repeats a white shell's own color (any other palette color is fine)", () => {
+    const rt = createShellRuntime();
     for (let i = 0; i < 50; i += 1) {
-      const pistilColor = makePistilColor(COLOR.White);
+      const pistilColor = makePistilColor(COLOR.White, rt);
       expect(pistilColor).not.toBe(COLOR.White);
       expect(COLOR_CODES).toContain(pistilColor);
     }
   });
 
   it("never repeats a gold shell's own color (any other palette color is fine)", () => {
+    const rt = createShellRuntime();
     for (let i = 0; i < 50; i += 1) {
-      const pistilColor = makePistilColor(COLOR.Gold);
+      const pistilColor = makePistilColor(COLOR.Gold, rt);
       expect(pistilColor).not.toBe(COLOR.Gold);
       expect(COLOR_CODES).toContain(pistilColor);
     }
   });
 
   it("returns white or gold for any other shell color", () => {
+    const rt = createShellRuntime();
     for (let i = 0; i < 50; i += 1) {
-      expect([COLOR.White, COLOR.Gold]).toContain(makePistilColor(COLOR.Red));
+      expect([COLOR.White, COLOR.Gold]).toContain(makePistilColor(COLOR.Red, rt));
     }
   });
 });
@@ -204,14 +213,16 @@ describe("makePistilColor", () => {
 
 describe.each(Object.entries(ALL_SHELL_FACTORIES))("%s shell factory", (_name, factory) => {
   it("always sets shellSize to the requested size", () => {
+    const rt = createShellRuntime();
     for (const size of [0, 1, 2.5, 4]) {
-      expect(factory(size, QUALITY_NORMAL).shellSize).toBe(size);
+      expect(factory(size, QUALITY_NORMAL, rt).shellSize).toBe(size);
     }
   });
 
   it("produces a finite, positive spreadSize and starLife", () => {
+    const rt = createShellRuntime();
     for (let i = 0; i < 50; i += 1) {
-      const options = factory(2, QUALITY_NORMAL);
+      const options = factory(2, QUALITY_NORMAL, rt);
       expect(options.spreadSize).toBeGreaterThan(0);
       expect(Number.isFinite(options.spreadSize)).toBe(true);
       expect(options.starLife).toBeGreaterThan(0);
@@ -220,9 +231,10 @@ describe.each(Object.entries(ALL_SHELL_FACTORIES))("%s shell factory", (_name, f
   });
 
   it("produces a color that is a valid single color, INVISIBLE, 'random', or a pair of valid colors", () => {
+    const rt = createShellRuntime();
     const validSingles = new Set([...COLOR_CODES, INVISIBLE, "random"]);
     for (let i = 0; i < 100; i += 1) {
-      const { color } = factory(2, QUALITY_NORMAL);
+      const { color } = factory(2, QUALITY_NORMAL, rt);
       if (Array.isArray(color)) {
         expect(color).toHaveLength(2);
         for (const c of color) expect(COLOR_CODES).toContain(c);
@@ -235,20 +247,22 @@ describe.each(Object.entries(ALL_SHELL_FACTORIES))("%s shell factory", (_name, f
 
 describe("crysanthemumShell", () => {
   it("computes spreadSize and starLife from size", () => {
-    const options = crysanthemumShell(3, QUALITY_NORMAL);
+    const rt = createShellRuntime();
+    const options = crysanthemumShell(3, QUALITY_NORMAL, rt);
     expect(options.spreadSize).toBe(300 + 3 * 100);
     expect(options.starLife).toBe(900 + 3 * 200);
   });
 
   it("scales starDensity down for low quality and fixes it for high quality", () => {
+    const rt = createShellRuntime();
     // Math.random() = 0.5 deterministically yields: glitter=false,
     // singleColor=true, pistil=false, secondColor=null, streamers=false —
     // i.e. no branch re-enters randomColor's notSame/notColor loops.
     const spy = vi.spyOn(Math, "random").mockReturnValue(0.5);
     try {
-      const low = crysanthemumShell(2, QUALITY_LOW).starDensity!;
-      const normal = crysanthemumShell(2, QUALITY_NORMAL).starDensity!;
-      const high = crysanthemumShell(2, QUALITY_HIGH).starDensity!;
+      const low = crysanthemumShell(2, QUALITY_LOW, rt).starDensity!;
+      const normal = crysanthemumShell(2, QUALITY_NORMAL, rt).starDensity!;
+      const high = crysanthemumShell(2, QUALITY_HIGH, rt).starDensity!;
       expect(normal).toBeCloseTo(1.25);
       expect(low).toBeCloseTo(1.25 * 0.8);
       expect(high).toBeCloseTo(1.2);
@@ -258,8 +272,9 @@ describe("crysanthemumShell", () => {
   });
 
   it("only sets pistilColor when pistil is true", () => {
+    const rt = createShellRuntime();
     for (let i = 0; i < 100; i += 1) {
-      const options = crysanthemumShell(2, QUALITY_NORMAL);
+      const options = crysanthemumShell(2, QUALITY_NORMAL, rt);
       if (options.pistil) {
         expect(typeof options.pistilColor).toBe("string");
       } else {
@@ -271,8 +286,9 @@ describe("crysanthemumShell", () => {
 
 describe("ghostShell", () => {
   it("forces invisible color, streamers, no glitter, and 1.5x starLife over crysanthemum", () => {
+    const rt = createShellRuntime();
     for (let i = 0; i < 30; i += 1) {
-      const options = ghostShell(2, QUALITY_NORMAL);
+      const options = ghostShell(2, QUALITY_NORMAL, rt);
       expect(options.color).toBe(INVISIBLE);
       expect(options.streamers).toBe(true);
       expect(options.glitter).toBe("");
@@ -281,15 +297,17 @@ describe("ghostShell", () => {
   });
 
   it("never uses invisible as the secondColor (ghost color)", () => {
+    const rt = createShellRuntime();
     for (let i = 0; i < 30; i += 1) {
-      expect(ghostShell(2, QUALITY_NORMAL).secondColor).not.toBe(INVISIBLE);
+      expect(ghostShell(2, QUALITY_NORMAL, rt).secondColor).not.toBe(INVISIBLE);
     }
   });
 });
 
 describe("strobeShell", () => {
   it("always marks the shell as a strobe with white glitter", () => {
-    const options = strobeShell(2, QUALITY_NORMAL);
+    const rt = createShellRuntime();
+    const options = strobeShell(2, QUALITY_NORMAL, rt);
     expect(options.strobe).toBe(true);
     expect(options.glitter).toBe("light");
     expect(options.glitterColor).toBe(COLOR.White);
@@ -298,16 +316,18 @@ describe("strobeShell", () => {
   });
 
   it("strobeColor is always white or null", () => {
+    const rt = createShellRuntime();
     for (let i = 0; i < 30; i += 1) {
-      expect([COLOR.White, null]).toContain(strobeShell(2, QUALITY_NORMAL).strobeColor);
+      expect([COLOR.White, null]).toContain(strobeShell(2, QUALITY_NORMAL, rt).strobeColor);
     }
   });
 });
 
 describe("palmShell", () => {
   it("picks thick or heavy glitter with the matching starDensity", () => {
+    const rt = createShellRuntime();
     for (let i = 0; i < 30; i += 1) {
-      const options = palmShell(2, QUALITY_NORMAL);
+      const options = palmShell(2, QUALITY_NORMAL, rt);
       if (options.glitter === "thick") {
         expect(options.starDensity).toBeCloseTo(0.15);
       } else {
@@ -320,7 +340,8 @@ describe("palmShell", () => {
 
 describe("ringShell", () => {
   it("always sets ring: true and a positive starCount", () => {
-    const options = ringShell(2, QUALITY_NORMAL);
+    const rt = createShellRuntime();
+    const options = ringShell(2, QUALITY_NORMAL, rt);
     expect(options.ring).toBe(true);
     expect(options.starCount).toBeGreaterThan(0);
   });
@@ -328,13 +349,15 @@ describe("ringShell", () => {
 
 describe("crossetteShell", () => {
   it("always sets crossette: true", () => {
-    expect(crossetteShell(2, QUALITY_NORMAL).crossette).toBe(true);
+    const rt = createShellRuntime();
+    expect(crossetteShell(2, QUALITY_NORMAL, rt).crossette).toBe(true);
   });
 });
 
 describe("floralShell", () => {
   it("always sets floral: true with low starDensity", () => {
-    const options = floralShell(2, QUALITY_NORMAL);
+    const rt = createShellRuntime();
+    const options = floralShell(2, QUALITY_NORMAL, rt);
     expect(options.floral).toBe(true);
     expect(options.starDensity).toBeCloseTo(0.12);
   });
@@ -342,7 +365,8 @@ describe("floralShell", () => {
 
 describe("fallingLeavesShell", () => {
   it("always sets fallingLeaves: true with invisible color and gold glitter", () => {
-    const options = fallingLeavesShell(2, QUALITY_NORMAL);
+    const rt = createShellRuntime();
+    const options = fallingLeavesShell(2, QUALITY_NORMAL, rt);
     expect(options.fallingLeaves).toBe(true);
     expect(options.color).toBe(INVISIBLE);
     expect(options.glitterColor).toBe(COLOR.Gold);
@@ -351,7 +375,8 @@ describe("fallingLeavesShell", () => {
 
 describe("willowShell", () => {
   it("always sets invisible color with gold willow glitter", () => {
-    const options = willowShell(2, QUALITY_NORMAL);
+    const rt = createShellRuntime();
+    const options = willowShell(2, QUALITY_NORMAL, rt);
     expect(options.color).toBe(INVISIBLE);
     expect(options.glitter).toBe("willow");
     expect(options.glitterColor).toBe(COLOR.Gold);
@@ -360,22 +385,25 @@ describe("willowShell", () => {
 
 describe("crackleShell", () => {
   it("always sets crackle: true with gold glitter", () => {
-    const options = crackleShell(2, QUALITY_NORMAL);
+    const rt = createShellRuntime();
+    const options = crackleShell(2, QUALITY_NORMAL, rt);
     expect(options.crackle).toBe(true);
     expect(options.glitter).toBe("light");
     expect(options.glitterColor).toBe(COLOR.Gold);
   });
 
   it("reduces starDensity at low quality", () => {
-    expect(crackleShell(2, QUALITY_LOW).starDensity).toBeCloseTo(0.65);
-    expect(crackleShell(2, QUALITY_NORMAL).starDensity).toBeCloseTo(1);
-    expect(crackleShell(2, QUALITY_HIGH).starDensity).toBeCloseTo(1);
+    const rt = createShellRuntime();
+    expect(crackleShell(2, QUALITY_LOW, rt).starDensity).toBeCloseTo(0.65);
+    expect(crackleShell(2, QUALITY_NORMAL, rt).starDensity).toBeCloseTo(1);
+    expect(crackleShell(2, QUALITY_HIGH, rt).starDensity).toBeCloseTo(1);
   });
 
   it("is gold about 3/4 of the time", () => {
+    const rt = createShellRuntime();
     const spy = vi.spyOn(Math, "random").mockReturnValue(0.1);
     try {
-      expect(crackleShell(2, QUALITY_NORMAL).color).toBe(COLOR.Gold);
+      expect(crackleShell(2, QUALITY_NORMAL, rt).color).toBe(COLOR.Gold);
     } finally {
       spy.mockRestore();
     }
@@ -384,15 +412,17 @@ describe("crackleShell", () => {
 
 describe("horsetailShell", () => {
   it("always sets horsetail: true with medium glitter", () => {
-    const options = horsetailShell(2, QUALITY_NORMAL);
+    const rt = createShellRuntime();
+    const options = horsetailShell(2, QUALITY_NORMAL, rt);
     expect(options.horsetail).toBe(true);
     expect(options.glitter).toBe("medium");
     expect(options.spreadSize).toBe(250 + 2 * 38);
   });
 
   it("strobes exactly when the color is white", () => {
+    const rt = createShellRuntime();
     for (let i = 0; i < 50; i += 1) {
-      const options = horsetailShell(2, QUALITY_NORMAL);
+      const options = horsetailShell(2, QUALITY_NORMAL, rt);
       expect(options.strobe).toBe(options.color === COLOR.White);
     }
   });
@@ -435,9 +465,10 @@ describe("configuredShellName", () => {
 
 describe("randomFastShell", () => {
   it("never returns a blacklisted (slow) shell when selection is Random", () => {
+    const rt = createShellRuntime();
     for (let i = 0; i < 100; i += 1) {
       const ctx = makeShellContext({ state: makeState({ shell: "Random" }) });
-      const options = randomFastShell(ctx)(2, QUALITY_NORMAL);
+      const options = randomFastShell(ctx)(2, QUALITY_NORMAL, rt);
       for (const blacklisted of fastShellBlacklist) {
         expect(namedShellTypes[blacklisted]).not.toBe(undefined);
       }
@@ -454,21 +485,24 @@ describe("randomFastShell", () => {
 
 describe("randomShell", () => {
   it("delegates to randomFastShell in header mode", () => {
+    const rt = createShellRuntime();
     const ctx = makeShellContext({ isHeader: true, state: makeState({ shell: "Palm" }) });
-    const options = randomShell(2, QUALITY_NORMAL, ctx);
+    const options = randomShell(2, QUALITY_NORMAL, ctx, rt);
     expect(options.glitter === "thick" || options.glitter === "heavy").toBe(true);
   });
 });
 
 describe("shellFromConfig", () => {
   it("uses the configured named shell directly", () => {
+    const rt = createShellRuntime();
     const ctx = makeShellContext({ state: makeState({ shell: "Willow" }) });
-    expect(shellFromConfig(2, QUALITY_NORMAL, ctx).color).toBe(INVISIBLE);
+    expect(shellFromConfig(2, QUALITY_NORMAL, ctx, rt).color).toBe(INVISIBLE);
   });
 
   it("falls back to a random shell when configured shell is Random", () => {
+    const rt = createShellRuntime();
     const ctx = makeShellContext({ state: makeState({ shell: "Random" }) });
-    const options = shellFromConfig(2, QUALITY_NORMAL, ctx);
+    const options = shellFromConfig(2, QUALITY_NORMAL, ctx, rt);
     expect(options.shellSize).toBe(2);
   });
 });
@@ -661,42 +695,36 @@ describe("seqSmallBarrage", () => {
 });
 
 // ---------------------------------------------------------------------------
-// startSequence (module-level state machine)
+// startSequence (runtime-scoped state machine — no module-level state)
 // ---------------------------------------------------------------------------
 
 describe("startSequence", () => {
-  it("on the very first call in header mode, delegates to seqTwoRandom", async () => {
-    vi.resetModules();
-    const fresh = await import("./shells");
+  it("on the very first call in header mode, delegates to seqTwoRandom", () => {
     const ctx = makeSequenceContext({ isHeader: true });
-    (fresh.startSequence as typeof startSequence)(ctx);
+    startSequence(ctx);
     expect(FakeShell.instances.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("on the very first call in non-header mode, launches a single centered crysanthemum and returns 2400", async () => {
-    vi.resetModules();
-    const fresh = await import("./shells");
+  it("on the very first call in non-header mode, launches a single centered crysanthemum and returns 2400", () => {
     const ctx = makeSequenceContext({ isHeader: false });
-    const delay = (fresh.startSequence as typeof startSequence)(ctx);
+    const delay = startSequence(ctx);
     expect(delay).toBe(2400);
     expect(FakeShell.instances).toHaveLength(1);
     expect(FakeShell.instances[0].launchCalls[0]).toEqual([0.5, 0.5]);
   });
 
-  it("counts up to finaleCount during finale mode, then resets with a 6000ms pause", async () => {
-    vi.resetModules();
-    const fresh = await import("./shells");
+  it("counts up to finaleCount during finale mode, then resets with a 6000ms pause", () => {
     const ctx = makeSequenceContext({ state: makeState({ finale: true }) });
 
     // Burn the "first call" branch first.
-    (fresh.startSequence as typeof startSequence)(ctx);
+    startSequence(ctx);
 
-    for (let i = 0; i < fresh.finaleCount; i += 1) {
-      const delay = (fresh.startSequence as typeof startSequence)(ctx);
+    for (let i = 0; i < finaleCount; i += 1) {
+      const delay = startSequence(ctx);
       expect(delay).toBe(170);
     }
 
-    const finalDelay = (fresh.startSequence as typeof startSequence)(ctx);
+    const finalDelay = startSequence(ctx);
     expect(finalDelay).toBe(6000);
   });
 
@@ -710,38 +738,35 @@ describe("startSequence", () => {
       vi.restoreAllMocks();
     });
 
-    async function freshNonFirstCallContext(ctxOverrides?: Partial<SequenceContext>) {
-      vi.resetModules();
-      const fresh = await import("./shells");
+    function nonFirstCallContext(ctxOverrides?: Partial<SequenceContext>) {
       const ctx = makeSequenceContext({
         state: makeState({ finale: false }),
         ...ctxOverrides,
       });
-      (fresh.startSequence as typeof startSequence)(ctx); // burn the "first call" branch
+      startSequence(ctx); // burn the "first call" branch
       FakeShell.instances = [];
-      return { fresh, ctx };
+      return ctx;
     }
 
-    it("< 0.08 with the cooldown elapsed -> seqSmallBarrage", async () => {
-      const { fresh, ctx } = await freshNonFirstCallContext();
-      // seqSmallBarrageLastCalled is stamped at module import time; clear
-      // its cooldown by moving the (now fake) clock forward past it.
+    it("< 0.08 with the cooldown elapsed -> seqSmallBarrage", () => {
+      const ctx = nonFirstCallContext();
+      // Advance fake clock past the cooldown so seqSmallBarrage can fire.
       vi.advanceTimersByTime(seqSmallBarrageCooldown + 1000);
       vi.spyOn(Math, "random").mockReturnValueOnce(0.05);
 
-      (fresh.startSequence as typeof startSequence)(ctx);
+      startSequence(ctx);
       vi.runAllTimers();
 
       expect(FakeShell.instances).toHaveLength(11); // isDesktop:true barrageCount
     });
 
-    it("< 0.08 but still within the cooldown -> falls through to a later branch", async () => {
-      const { fresh, ctx } = await freshNonFirstCallContext();
-      // No time advance: seqSmallBarrageLastCalled (stamped at import) is
-      // still "recent" relative to the fake clock's current instant.
+    it("< 0.08 but still within the cooldown -> falls through to a later branch", () => {
+      const ctx = nonFirstCallContext();
+      // No time advance: runtime.seqSmallBarrageLastCalled was set by the
+      // first call's burning, so it's "recent" relative to the fake clock.
       vi.spyOn(Math, "random").mockReturnValueOnce(0.05);
 
-      (fresh.startSequence as typeof startSequence)(ctx);
+      startSequence(ctx);
       vi.runAllTimers();
 
       // Same 0.05 roll, but since it fails the cooldown gate it should have
@@ -749,51 +774,51 @@ describe("startSequence", () => {
       expect(FakeShell.instances).toHaveLength(15);
     });
 
-    it("0.08-0.1 -> seqPyramid", async () => {
-      const { fresh, ctx } = await freshNonFirstCallContext();
+    it("0.08-0.1 -> seqPyramid", () => {
+      const ctx = nonFirstCallContext();
       vi.spyOn(Math, "random").mockReturnValueOnce(0.09);
 
-      (fresh.startSequence as typeof startSequence)(ctx);
+      startSequence(ctx);
       vi.runAllTimers();
 
       expect(FakeShell.instances).toHaveLength(15); // isDesktop:true barrageCountHalf(7)*2+1
     });
 
-    it("0.1-0.6 and not header -> seqRandomShell", async () => {
-      const { fresh, ctx } = await freshNonFirstCallContext({ isHeader: false });
+    it("0.1-0.6 and not header -> seqRandomShell", () => {
+      const ctx = nonFirstCallContext({ isHeader: false });
       vi.spyOn(Math, "random").mockReturnValueOnce(0.5);
 
-      (fresh.startSequence as typeof startSequence)(ctx);
+      startSequence(ctx);
       vi.runAllTimers();
 
       expect(FakeShell.instances).toHaveLength(1);
     });
 
-    it("0.1-0.6 but header -> falls through to seqTwoRandom instead of seqRandomShell", async () => {
-      const { fresh, ctx } = await freshNonFirstCallContext({ isHeader: true });
+    it("0.1-0.6 but header -> falls through to seqTwoRandom instead of seqRandomShell", () => {
+      const ctx = nonFirstCallContext({ isHeader: true });
       vi.spyOn(Math, "random").mockReturnValueOnce(0.5);
 
-      (fresh.startSequence as typeof startSequence)(ctx);
+      startSequence(ctx);
       vi.runAllTimers();
 
       expect(FakeShell.instances).toHaveLength(2);
     });
 
-    it("0.6-0.8 -> seqTwoRandom", async () => {
-      const { fresh, ctx } = await freshNonFirstCallContext();
+    it("0.6-0.8 -> seqTwoRandom", () => {
+      const ctx = nonFirstCallContext();
       vi.spyOn(Math, "random").mockReturnValueOnce(0.7);
 
-      (fresh.startSequence as typeof startSequence)(ctx);
+      startSequence(ctx);
       vi.runAllTimers();
 
       expect(FakeShell.instances).toHaveLength(2);
     });
 
-    it(">= 0.8 -> seqTriple", async () => {
-      const { fresh, ctx } = await freshNonFirstCallContext();
+    it(">= 0.8 -> seqTriple", () => {
+      const ctx = nonFirstCallContext();
       vi.spyOn(Math, "random").mockReturnValueOnce(0.9);
 
-      (fresh.startSequence as typeof startSequence)(ctx);
+      startSequence(ctx);
       vi.runAllTimers();
 
       expect(FakeShell.instances).toHaveLength(3);

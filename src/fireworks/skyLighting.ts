@@ -4,6 +4,7 @@
  */
 
 import { COLOR_CODES, COLOR_TUPLES, SKY_LIGHT_NONE } from "@/fireworks/constants";
+import { SKY_LIGHTING } from "@/config/physics";
 import { skyLightingSelector } from "@/fireworks/selectors";
 import type { FireworksState } from "@/stores/fireworksStore";
 import { Star } from "./particles/pools";
@@ -20,8 +21,8 @@ let currentSkyColor = { r: 0, g: 0, b: 0 };
 let targetSkyColor = { r: 0, g: 0, b: 0 };
 
 export function colorSky(deps: SkyLightingDeps, speed: number): void {
-  const maxSkySaturation = skyLightingSelector(deps.getState()) * 15;
-  const maxStarCount = 500;
+  const maxSkySaturation = skyLightingSelector(deps.getState()) * SKY_LIGHTING.saturationMultiplier;
+  const maxStarCount = SKY_LIGHTING.maxStarCount;
   let totalStarCount = 0;
 
   targetSkyColor.r = 0;
@@ -37,14 +38,17 @@ export function colorSky(deps: SkyLightingDeps, speed: number): void {
     targetSkyColor.b += tuple.b * count;
   }
 
-  const intensity = Math.pow(Math.min(1, totalStarCount / maxStarCount), 0.3);
+  const intensity = Math.pow(
+    Math.min(1, totalStarCount / maxStarCount),
+    SKY_LIGHTING.intensityPower,
+  );
   const maxColorComponent = Math.max(1, targetSkyColor.r, targetSkyColor.g, targetSkyColor.b);
 
   targetSkyColor.r = (targetSkyColor.r / maxColorComponent) * maxSkySaturation * intensity;
   targetSkyColor.g = (targetSkyColor.g / maxColorComponent) * maxSkySaturation * intensity;
   targetSkyColor.b = (targetSkyColor.b / maxColorComponent) * maxSkySaturation * intensity;
 
-  const colorChange = 10;
+  const colorChange = SKY_LIGHTING.colorChangeRate;
   currentSkyColor.r += ((targetSkyColor.r - currentSkyColor.r) / colorChange) * speed;
   currentSkyColor.g += ((targetSkyColor.g - currentSkyColor.g) / colorChange) * speed;
   currentSkyColor.b += ((targetSkyColor.b - currentSkyColor.b) / colorChange) * speed;

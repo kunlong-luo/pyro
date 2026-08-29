@@ -4,6 +4,7 @@
  */
 
 import { COLOR_CODES, COLOR_CODES_W_INVIS, PI_2 } from "@/fireworks/constants";
+import { AIR_DRAG, PARTICLE } from "@/config/physics";
 import { MyMath } from "@/lib/math";
 import type { LatticeResult } from "@/lib/math";
 
@@ -108,8 +109,8 @@ export const BurstFlash = {
 // ---------------------------------------------------------------------------
 
 export const Star = {
-  airDrag: 0.98,
-  airDragHeavy: 0.992,
+  airDrag: AIR_DRAG.star,
+  airDragHeavy: AIR_DRAG.starHeavy,
   active: createParticleCollection<StarInstance>(),
   _pool: [] as StarInstance[],
 
@@ -142,14 +143,14 @@ export const Star = {
     instance.fullLife = life;
     instance.size = size;
     instance.spinAngle = Math.random() * PI_2;
-    instance.spinSpeed = 0.8;
+    instance.spinSpeed = PARTICLE.defaultSpinSpeed;
     instance.spinRadius = 0;
-    instance.sparkFreq = 0;
-    instance.sparkSpeed = 1;
+    instance.sparkFreq = PARTICLE.defaultSparkFreq;
+    instance.sparkSpeed = PARTICLE.defaultSparkSpeed;
     instance.sparkTimer = 0;
     instance.sparkColor = color;
-    instance.sparkLife = 750;
-    instance.sparkLifeVariation = 0.25;
+    instance.sparkLife = PARTICLE.defaultSparkLife;
+    instance.sparkLifeVariation = PARTICLE.defaultSparkLifeVariation;
     instance.strobe = false;
     instance.strobeFreq = undefined;
     instance.onDeath = null;
@@ -179,7 +180,7 @@ export const Star = {
 
 export const Spark = {
   drawWidth: 0,
-  airDrag: 0.9,
+  airDrag: AIR_DRAG.spark,
   active: createParticleCollection<SparkInstance>(),
   _pool: [] as SparkInstance[],
 

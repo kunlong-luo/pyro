@@ -20,6 +20,7 @@ import type { Stage, PointerEventPayload } from "@/lib/stage";
 import type { SoundManager } from "@/fireworks/audio";
 import type { LaunchEvent } from "@/fireworks/shells";
 import { MAX_WIDTH, MAX_HEIGHT } from "@/fireworks/constants";
+import { INTERACTION } from "@/config/physics";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -107,7 +108,7 @@ export function createInteraction(deps: InteractionDeps): Interaction {
 
   function handlePointerStart(event: PointerEventPayload): void {
     registerUserInteraction();
-    const buttonSize = 50;
+    const buttonSize = INTERACTION.buttonSize;
 
     if (event.y < buttonSize) {
       if (event.x < buttonSize) {
@@ -202,8 +203,8 @@ export function createInteraction(deps: InteractionDeps): Interaction {
   // -----------------------------------------------------------------------
 
   function updateSpeedFromEvent(event: PointerEventPayload): boolean {
-    if (isUpdatingSpeed || event.y >= deps.mainStage.height - 44) {
-      const edgePadding = 16;
+    if (isUpdatingSpeed || event.y >= deps.mainStage.height - INTERACTION.speedBarTouchThreshold) {
+      const edgePadding = INTERACTION.edgePadding;
       const newSpeed = (event.x - edgePadding) / (deps.mainStage.width - edgePadding * 2);
       simSpeed = Math.min(Math.max(newSpeed, 0), 1);
       speedBarOpacity = 1;
@@ -221,7 +222,7 @@ export function createInteraction(deps: InteractionDeps): Interaction {
     currentFrame += 1;
 
     if (!isUpdatingSpeed) {
-      speedBarOpacity -= lag / 30;
+      speedBarOpacity -= lag / INTERACTION.speedBarOpacityDecayDivisor;
       if (speedBarOpacity < 0) {
         speedBarOpacity = 0;
       }
@@ -230,7 +231,7 @@ export function createInteraction(deps: InteractionDeps): Interaction {
     if (deps.getState().config.autoLaunch) {
       autoLaunchTime -= timeStep;
       if (autoLaunchTime <= 0) {
-        autoLaunchTime = deps.startSequence() * 1.25;
+        autoLaunchTime = deps.startSequence() * INTERACTION.autoLaunchTimeMultiplier;
       }
     }
   }

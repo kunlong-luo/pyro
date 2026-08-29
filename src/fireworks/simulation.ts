@@ -1,4 +1,16 @@
 import { COLOR, COLOR_CODES_W_INVIS, GRAVITY, INVISIBLE, PI_2 } from "@/fireworks/constants";
+import {
+  BURST,
+  COMET,
+  GLITTER,
+  LAUNCH,
+  PARTICLE,
+  PISTIL,
+  RENDER,
+  SOUND,
+  STREAMER,
+  TRANSITION,
+} from "@/config/physics";
 import { MyMath } from "@/lib/math";
 import { fireworksAppConfig } from "@/config/appConfig";
 import type { Stage } from "@/lib/stage";
@@ -176,23 +188,26 @@ export function createSimulation(deps: SimulationDeps): Simulation {
 
       if (!this.starCount) {
         const density = options.starDensity || 1;
-        const scaledSize = this.spreadSize / 54;
-        this.starCount = Math.max(6, scaledSize * scaledSize * density);
+        const scaledSize = this.spreadSize / BURST.densityDivider;
+        this.starCount = Math.max(BURST.starCountMin, scaledSize * scaledSize * density);
       }
     }
 
     launch(position: number, launchHeight: number): void {
       const width = deps.trailsStage.width;
       const height = deps.trailsStage.height;
-      const horizontalPadding = 60;
-      const verticalPadding = 50;
-      const minimumHeightPercent = 0.45;
+      const horizontalPadding = LAUNCH.horizontalPadding;
+      const verticalPadding = LAUNCH.verticalPadding;
+      const minimumHeightPercent = LAUNCH.minimumHeightPercent;
       const minimumHeight = height - height * minimumHeightPercent;
       const launchX = position * (width - horizontalPadding * 2) + horizontalPadding;
       const launchY = height;
       const burstY = minimumHeight - launchHeight * (minimumHeight - verticalPadding);
       const launchDistance = launchY - burstY;
-      const launchVelocity = Math.pow(launchDistance * 0.04, 0.64);
+      const launchVelocity = Math.pow(
+        launchDistance * LAUNCH.velocityFactor,
+        LAUNCH.velocityExponent,
+      );
 
       const comet = (this.comet = Star.add(
         launchX,
@@ -205,14 +220,16 @@ export function createSimulation(deps: SimulationDeps): Simulation {
 
       comet.heavy = true;
       comet.spinRadius = MyMath.random(0.32, 0.85);
-      comet.sparkFreq = currentIsHighQuality ? 8 : 32 / currentQuality;
-      comet.sparkLife = 320;
-      comet.sparkLifeVariation = 3;
+      comet.sparkFreq = currentIsHighQuality
+        ? COMET.sparkFreqHighQuality
+        : COMET.sparkFreqBase / currentQuality;
+      comet.sparkLife = COMET.sparkLife;
+      comet.sparkLifeVariation = COMET.sparkLifeVariation;
 
       if (this.glitter === "willow" || this.fallingLeaves) {
-        comet.sparkFreq = 20 / currentQuality;
-        comet.sparkSpeed = 0.5;
-        comet.sparkLife = 500;
+        comet.sparkFreq = COMET.willowSparkFreqBase / currentQuality;
+        comet.sparkSpeed = COMET.willowSparkSpeed;
+        comet.sparkLife = COMET.willowSparkLife;
       }
 
       if (this.color === INVISIBLE) {
@@ -221,7 +238,9 @@ export function createSimulation(deps: SimulationDeps): Simulation {
 
       if (Math.random() > 0.4 && !this.horsetail) {
         comet.secondColor = INVISIBLE;
-        comet.transitionTime = Math.pow(Math.random(), 1.5) * 700 + 500;
+        comet.transitionTime =
+          Math.pow(Math.random(), TRANSITION.secondColorPower) * TRANSITION.secondColorMaxTime +
+          TRANSITION.secondColorMinTime;
       }
 
       comet.onDeath = (activeComet) => this.burst(activeComet.x, activeComet.y);
@@ -238,13 +257,13 @@ export function createSimulation(deps: SimulationDeps): Simulation {
   // ---------------------------------------------------------------------------
 
   function burstShell(shell: ShellInstance, x: number, y: number): void {
-    const speed = shell.spreadSize / 96;
+    const speed = shell.spreadSize / BURST.spreadSizeDivider;
     let color: string | null = null;
     let onDeath: ((star: StarInstance) => void) | undefined;
     let sparkFreq: number | undefined;
     let sparkSpeed: number | undefined;
     let sparkLife: number | undefined;
-    let sparkLifeVariation = 0.25;
+    let sparkLifeVariation: number = PARTICLE.defaultSparkLifeVariation;
     let playedDeathSound = false;
 
     if (shell.crossette) {
@@ -275,41 +294,43 @@ export function createSimulation(deps: SimulationDeps): Simulation {
     }
 
     if (shell.glitter === "light") {
-      sparkFreq = 400;
-      sparkSpeed = 0.3;
-      sparkLife = 300;
-      sparkLifeVariation = 2;
+      sparkFreq = GLITTER.light.sparkFreq;
+      sparkSpeed = GLITTER.light.sparkSpeed;
+      sparkLife = GLITTER.light.sparkLife;
+      sparkLifeVariation = GLITTER.light.sparkLifeVariation;
     } else if (shell.glitter === "medium") {
-      sparkFreq = 200;
-      sparkSpeed = 0.44;
-      sparkLife = 700;
-      sparkLifeVariation = 2;
+      sparkFreq = GLITTER.medium.sparkFreq;
+      sparkSpeed = GLITTER.medium.sparkSpeed;
+      sparkLife = GLITTER.medium.sparkLife;
+      sparkLifeVariation = GLITTER.medium.sparkLifeVariation;
     } else if (shell.glitter === "heavy") {
-      sparkFreq = 80;
-      sparkSpeed = 0.8;
-      sparkLife = 1400;
-      sparkLifeVariation = 2;
+      sparkFreq = GLITTER.heavy.sparkFreq;
+      sparkSpeed = GLITTER.heavy.sparkSpeed;
+      sparkLife = GLITTER.heavy.sparkLife;
+      sparkLifeVariation = GLITTER.heavy.sparkLifeVariation;
     } else if (shell.glitter === "thick") {
-      sparkFreq = 16;
-      sparkSpeed = currentIsHighQuality ? 1.65 : 1.5;
-      sparkLife = 1400;
-      sparkLifeVariation = 3;
+      sparkFreq = GLITTER.thick.sparkFreq;
+      sparkSpeed = currentIsHighQuality
+        ? GLITTER.thick.sparkSpeedHQ
+        : GLITTER.thick.sparkSpeedNormal;
+      sparkLife = GLITTER.thick.sparkLife;
+      sparkLifeVariation = GLITTER.thick.sparkLifeVariation;
     } else if (shell.glitter === "streamer") {
-      sparkFreq = 32;
-      sparkSpeed = 1.05;
-      sparkLife = 620;
-      sparkLifeVariation = 2;
+      sparkFreq = GLITTER.streamer.sparkFreq;
+      sparkSpeed = GLITTER.streamer.sparkSpeed;
+      sparkLife = GLITTER.streamer.sparkLife;
+      sparkLifeVariation = GLITTER.streamer.sparkLifeVariation;
     } else if (shell.glitter === "willow") {
-      sparkFreq = 120;
-      sparkSpeed = 0.34;
-      sparkLife = 1400;
-      sparkLifeVariation = 3.8;
+      sparkFreq = GLITTER.willow.sparkFreq;
+      sparkSpeed = GLITTER.willow.sparkSpeed;
+      sparkLife = GLITTER.willow.sparkLife;
+      sparkLifeVariation = GLITTER.willow.sparkLifeVariation;
     }
 
     sparkFreq = (sparkFreq ?? 0) / currentQuality;
 
     const starFactory = (angle: number, speedMultiplier: number) => {
-      const standardInitialSpeed = shell.spreadSize / 1800;
+      const standardInitialSpeed = shell.spreadSize / BURST.initialSpeedDivider;
       const star = Star.add(
         x,
         y,
@@ -322,14 +343,18 @@ export function createSimulation(deps: SimulationDeps): Simulation {
       );
 
       if (shell.secondColor) {
-        star.transitionTime = shell.starLife * (Math.random() * 0.05 + 0.32);
+        star.transitionTime =
+          shell.starLife *
+          (Math.random() * TRANSITION.secondColorFactorMin + TRANSITION.secondColorFactorMax);
         star.secondColor = shell.secondColor;
       }
 
       if (shell.strobe) {
-        star.transitionTime = shell.starLife * (Math.random() * 0.08 + 0.46);
+        star.transitionTime =
+          shell.starLife *
+          (Math.random() * TRANSITION.strobeFactorMin + TRANSITION.strobeFactorMax);
         star.strobe = true;
-        star.strobeFreq = Math.random() * 20 + 40;
+        star.strobeFreq = Math.random() * TRANSITION.strobeFreqRange + TRANSITION.strobeFreqMin;
         if (shell.strobeColor) {
           star.secondColor = shell.strobeColor;
         }
@@ -353,7 +378,7 @@ export function createSimulation(deps: SimulationDeps): Simulation {
       strobe: boolean,
       strobeColorArg: string,
     ) => {
-      const standardInitialSpeed = shell.spreadSize / 1800;
+      const standardInitialSpeed = shell.spreadSize / BURST.initialSpeedDivider;
 
       if (strobe) {
         const dotSpeed = Math.random() * 0.1 + 0.05;
@@ -371,9 +396,11 @@ export function createSimulation(deps: SimulationDeps): Simulation {
           2,
         );
 
-        star.transitionTime = shell.starLife * (Math.random() * 0.08 + 0.46);
+        star.transitionTime =
+          shell.starLife *
+          (Math.random() * TRANSITION.strobeFactorMin + TRANSITION.strobeFactorMax);
         star.strobe = true;
-        star.strobeFreq = Math.random() * 20 + 40;
+        star.strobeFreq = Math.random() * TRANSITION.strobeFreqRange + TRANSITION.strobeFreqMin;
         star.secondColor = strobeColorArg;
       } else {
         Spark.add(
@@ -472,10 +499,10 @@ export function createSimulation(deps: SimulationDeps): Simulation {
 
     if (shell.pistil) {
       new Shell({
-        spreadSize: shell.spreadSize * 0.5,
-        starLife: shell.starLife * 0.6,
+        spreadSize: shell.spreadSize * PISTIL.spreadMultiplier,
+        starLife: shell.starLife * PISTIL.lifeMultiplier,
         starLifeVariation: shell.starLifeVariation,
-        starDensity: 1.4,
+        starDensity: PISTIL.starDensity,
         color: shell.pistilColor as string,
         glitter: "light",
         disableWord: true,
@@ -488,25 +515,28 @@ export function createSimulation(deps: SimulationDeps): Simulation {
 
     if (shell.streamers) {
       new Shell({
-        spreadSize: shell.spreadSize * 0.9,
-        starLife: shell.starLife * 0.8,
+        spreadSize: shell.spreadSize * STREAMER.spreadMultiplier,
+        starLife: shell.starLife * STREAMER.lifeMultiplier,
         starLifeVariation: shell.starLifeVariation,
-        starCount: Math.floor(Math.max(6, shell.spreadSize / 45)),
+        starCount: Math.floor(
+          Math.max(BURST.starCountMin, shell.spreadSize / STREAMER.starCountDivider),
+        ),
         color: COLOR.White,
         disableWord: true,
         glitter: "streamer",
       }).burst(x, y);
     }
 
-    BurstFlash.add(x, y, shell.spreadSize / 4);
+    BurstFlash.add(x, y, shell.spreadSize / BURST.flashRadiusDivider);
 
     if (shell.comet) {
-      const maxDiff = 2;
+      const maxDiff = SOUND.burstMaxSizeDiff;
       const sizeDifferenceFromMax = Math.min(
         maxDiff,
         shellSizeSelector(deps.getState()) - shell.shellSize,
       );
-      const soundScale = (1 - sizeDifferenceFromMax / maxDiff) * 0.3 + 0.7;
+      const soundScale =
+        (1 - sizeDifferenceFromMax / maxDiff) * SOUND.burstScaleRange + SOUND.burstMinScale;
       deps.soundManager.playSound("burst", soundScale);
     }
   }
@@ -526,7 +556,9 @@ export function createSimulation(deps: SimulationDeps): Simulation {
     currentSpeedBarOpacity = deps.getSpeedBarOpacity();
     currentQuality = qualitySelector(state);
     currentIsHighQuality = currentQuality === 3;
-    Spark.drawWidth = currentIsHighQuality ? 0.75 : 1;
+    Spark.drawWidth = currentIsHighQuality
+      ? RENDER.sparkDrawWidthHighQuality
+      : RENDER.sparkDrawWidthNormal;
     currentWordShellEnabled = state.config.wordShell;
 
     // Update effect deps
@@ -589,14 +621,17 @@ export function createSimulation(deps: SimulationDeps): Simulation {
         if (star.sparkFreq) {
           star.sparkTimer -= timeStep;
           while (star.sparkTimer < 0) {
-            star.sparkTimer += star.sparkFreq * 0.75 + star.sparkFreq * inverseBurnRate * 4;
+            star.sparkTimer +=
+              star.sparkFreq * PARTICLE.sparkTimerBaseMultiplier +
+              star.sparkFreq * inverseBurnRate * PARTICLE.sparkTimerBurnRateMultiplier;
             Spark.add(
               star.x,
               star.y,
               star.sparkColor,
               Math.random() * PI_2,
               Math.random() * star.sparkSpeed * burnRate,
-              star.sparkLife * 0.8 + Math.random() * star.sparkLifeVariation * star.sparkLife,
+              star.sparkLife * PARTICLE.sparkLifeMultiplier +
+                Math.random() * star.sparkLifeVariation * star.sparkLife,
             );
           }
         }

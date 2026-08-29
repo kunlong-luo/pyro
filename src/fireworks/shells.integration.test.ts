@@ -9,6 +9,7 @@ import {
   seqTriple,
   seqPyramid,
   seqSmallBarrage,
+  createShellRuntime,
 } from "./shells";
 import { QUALITY_NORMAL } from "./constants";
 import { createDefaultState } from "@/stores/fireworksStore";
@@ -55,7 +56,7 @@ function makeMockSoundManager(): SoundManager {
   };
 }
 
-const runtime: Runtime = {
+const storeRuntime: Runtime = {
   isDesktop: true,
   isHeader: false,
   isHighEndDevice: true,
@@ -64,7 +65,7 @@ const runtime: Runtime = {
 };
 
 function makeState(overrides?: Partial<FireworksState["config"]>): FireworksState {
-  const base = createDefaultState(runtime);
+  const base = createDefaultState(storeRuntime);
   return { ...base, config: { ...base.config, ...overrides } };
 }
 
@@ -100,6 +101,7 @@ describe("shells ↔ simulation integration (real Shell, catches signature misma
           stageHeight: 600,
           registerUserInteraction: vi.fn(),
           wordBurstTracker,
+          runtime: createShellRuntime(),
         },
       ),
     ).not.toThrow();
@@ -134,6 +136,7 @@ describe("shells ↔ simulation integration (real Shell, catches signature misma
         stageHeight: 600,
         registerUserInteraction: vi.fn(),
         wordBurstTracker,
+        runtime: createShellRuntime(),
       }),
     ).not.toThrow();
   });
@@ -173,13 +176,12 @@ describe("shells ↔ simulation integration (real Shell, catches signature misma
         stageHeight: 600,
         registerUserInteraction: vi.fn(),
         wordBurstTracker,
+        runtime: createShellRuntime(),
       }),
     ).not.toThrow();
   });
 
-  it("startSequence with real Shell does not throw and returns a delay", async () => {
-    vi.resetModules();
-    const fresh = await import("./shells");
+  it("startSequence with real Shell does not throw and returns a delay", () => {
     const trails = makeMockStage();
     const main = makeMockStage();
     const soundManager = makeMockSoundManager();
@@ -196,8 +198,9 @@ describe("shells ↔ simulation integration (real Shell, catches signature misma
       canvasContainer: document.createElement("div"),
     };
     const sim = createSimulation(deps);
+    const runtime = createShellRuntime();
     // Burn first-call branch once so we're testing the steady path
-    fresh.startSequence({
+    launchShellFromConfig(null, {
       quality: QUALITY_NORMAL,
       isHeader: false,
       isDesktop: true,
@@ -207,8 +210,9 @@ describe("shells ↔ simulation integration (real Shell, catches signature misma
       stageHeight: 600,
       registerUserInteraction: vi.fn(),
       wordBurstTracker,
+      runtime,
     });
-    const delay = fresh.startSequence({
+    const delay = seqRandomShell({
       quality: QUALITY_NORMAL,
       isHeader: false,
       isDesktop: true,
@@ -218,6 +222,7 @@ describe("shells ↔ simulation integration (real Shell, catches signature misma
       stageHeight: 600,
       registerUserInteraction: vi.fn(),
       wordBurstTracker,
+      runtime,
     });
     expect(typeof delay).toBe("number");
     expect(delay).toBeGreaterThan(0);

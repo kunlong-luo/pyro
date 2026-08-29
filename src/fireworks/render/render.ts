@@ -4,6 +4,7 @@
  */
 
 import { COLOR, COLOR_CODES } from "@/fireworks/constants";
+import { RENDER } from "@/config/physics";
 import { scaleFactorSelector } from "@/fireworks/selectors";
 import { colorSky, shouldColorSky } from "../skyLighting";
 import { Star, Spark, BurstFlash } from "../particles/pools";
@@ -34,7 +35,7 @@ export function render(deps: RenderDeps, speed: number, width: number, height: n
   mainContext.scale(dpr * scaleFactor, dpr * scaleFactor);
 
   trailsContext.globalCompositeOperation = "source-over";
-  trailsContext.fillStyle = `rgba(0, 0, 0, ${deps.getState().config.longExposure ? 0.0025 : 0.175 * speed})`;
+  trailsContext.fillStyle = `rgba(0, 0, 0, ${deps.getState().config.longExposure ? RENDER.longExposureTrailAlpha : RENDER.normalTrailAlphaFactor * speed})`;
   trailsContext.fillRect(0, 0, width, height);
   mainContext.clearRect(0, 0, width, height);
 
@@ -48,10 +49,22 @@ export function render(deps: RenderDeps, speed: number, width: number, height: n
       flash.y,
       flash.radius,
     );
-    burstGradient.addColorStop(0.024, "rgba(255, 255, 255, 1)");
-    burstGradient.addColorStop(0.125, "rgba(255, 160, 20, 0.2)");
-    burstGradient.addColorStop(0.32, "rgba(255, 140, 20, 0.11)");
-    burstGradient.addColorStop(1, "rgba(255, 120, 20, 0)");
+    burstGradient.addColorStop(
+      RENDER.burstGradientStops[0].stop,
+      RENDER.burstGradientStops[0].color,
+    );
+    burstGradient.addColorStop(
+      RENDER.burstGradientStops[1].stop,
+      RENDER.burstGradientStops[1].color,
+    );
+    burstGradient.addColorStop(
+      RENDER.burstGradientStops[2].stop,
+      RENDER.burstGradientStops[2].color,
+    );
+    burstGradient.addColorStop(
+      RENDER.burstGradientStops[3].stop,
+      RENDER.burstGradientStops[3].color,
+    );
     trailsContext.fillStyle = burstGradient;
     trailsContext.fillRect(
       flash.x - flash.radius,
@@ -64,7 +77,7 @@ export function render(deps: RenderDeps, speed: number, width: number, height: n
 
   trailsContext.globalCompositeOperation = "lighten";
 
-  trailsContext.lineWidth = 3;
+  trailsContext.lineWidth = RENDER.lineWidth;
   trailsContext.lineCap = deps.currentIsHighQuality ? "round" : "square";
   mainContext.strokeStyle = "#fff";
   mainContext.lineWidth = 1;
@@ -84,7 +97,10 @@ export function render(deps: RenderDeps, speed: number, width: number, height: n
       trailsContext.moveTo(star.x, star.y);
       trailsContext.lineTo(star.prevX, star.prevY);
       mainContext.moveTo(star.x, star.y);
-      mainContext.lineTo(star.x - star.speedX * 1.6, star.y - star.speedY * 1.6);
+      mainContext.lineTo(
+        star.x - star.speedX * RENDER.starTrailLineMultiplier,
+        star.y - star.speedY * RENDER.starTrailLineMultiplier,
+      );
     }
 
     trailsContext.stroke();
@@ -106,7 +122,7 @@ export function render(deps: RenderDeps, speed: number, width: number, height: n
   }
 
   if (deps.currentSpeedBarOpacity) {
-    const speedBarHeight = 6;
+    const speedBarHeight = RENDER.speedBarHeight;
     mainContext.globalAlpha = deps.currentSpeedBarOpacity;
     mainContext.fillStyle = COLOR.Blue;
     mainContext.fillRect(0, height - speedBarHeight, width * deps.currentSimSpeed, speedBarHeight);

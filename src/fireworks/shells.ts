@@ -2,10 +2,11 @@
  * Shell factories, selection helpers, and launch sequences
  * ported from js/fireworks/shells.js (1:1 port).
  *
- * All factories are pure functions — they take quality level as a param
- * instead of reading isLowQuality/isHighQuality globals. Selection and
- * launch helpers accept their dependencies via params (state, device flags,
- * stage dimensions, Shell constructor, etc.) so there are no hidden globals.
+ * All factories take an explicit {@link ShellRuntime} context for mutable
+ * per-session state (lastColor, finale counters, cooldown timestamps).
+ * Selection and launch helpers accept their dependencies via params
+ * (state, device flags, stage dimensions, Shell constructor, etc.) so there
+ * are no hidden globals.
  */
 
 import {
@@ -24,6 +25,35 @@ import type { WordBurstTracker } from "@/fireworks/wordBurst";
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+
+/**
+ * Explicit mutable state for a single fireworks session.
+ * Create via {@link createShellRuntime} — never share across independent
+ * simulations (tests, multiple canvases, etc.).
+ */
+export interface ShellRuntime {
+  /** Last color returned by {@link randomColor} (used for notSame avoidance). */
+  lastColor: string | undefined;
+  /** Whether the next {@link startSequence} call is the very first one. */
+  isFirstSeq: boolean;
+  /** Number of rapid-fire finale shells launched so far in the current burst. */
+  currentFinaleCount: number;
+  /** Timestamp (ms) of the last {@link seqSmallBarrage} invocation. */
+  seqSmallBarrageLastCalled: number;
+}
+
+/**
+ * Create a fresh {@link ShellRuntime} for a new fireworks session.
+ * Each runtime is fully independent — safe for concurrent use.
+ */
+export function createShellRuntime(): ShellRuntime {
+  return {
+    lastColor: undefined,
+    isFirstSeq: true,
+    currentFinaleCount: 0,
+    seqSmallBarrageLastCalled: Date.now(),
+  };
+}
 
 /** Configuration object returned by every shell factory. */
 export interface ShellOptions {
@@ -61,8 +91,12 @@ export interface ShellInstance {
 /** Constructor type for Shell (matches simulation.js Shell class). */
 export type ShellCtor = new (config: ShellOptions) => ShellInstance;
 
-/** Pure shell factory: takes size and quality, returns config. */
-export type ShellFactory = (size: number, quality: QualityLevel) => ShellOptions;
+/** Pure shell factory: takes size, quality, and runtime context → config. */
+export type ShellFactory = (
+  size: number,
+  quality: QualityLevel,
+  runtime: ShellRuntime,
+) => ShellOptions;
 
 /** Options for the randomColor helper. */
 interface RandomColorOptions {
@@ -93,6 +127,7 @@ export interface SequenceContext extends ShellContext {
   stageHeight: number;
   registerUserInteraction: () => void;
   wordBurstTracker: WordBurstTracker;
+  runtime: ShellRuntime;
 }
 
 /** Click/touch event payload for launchShellFromConfig. */
@@ -102,19 +137,10 @@ export interface LaunchEvent {
 }
 
 // ---------------------------------------------------------------------------
-// Module-level state
-// ---------------------------------------------------------------------------
-
-let lastColor: string | undefined;
-let isFirstSeq = true;
-export const finaleCount = 32;
-let currentFinaleCount = 0;
-let seqSmallBarrageLastCalled = Date.now();
-
-// ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
+export const finaleCount = 32;
 export const fastShellBlacklist = ["Falling Leaves", "Floral", "Willow"];
 export const seqSmallBarrageCooldown = 15000;
 
@@ -126,7 +152,10 @@ function randomColorSimple(): string {
   return COLOR_CODES[(Math.random() * COLOR_CODES.length) | 0];
 }
 
-export function randomColor(options?: RandomColorOptions): string {
+export function randomColor(
+  options: RandomColorOptions | undefined,
+  runtime: ShellRuntime,
+): string {
   const notSame = options?.notSame;
   const notColor = options?.notColor;
   const limitWhite = options?.limitWhite;
@@ -137,7 +166,7 @@ export function randomColor(options?: RandomColorOptions): string {
   }
 
   if (notSame) {
-    while (color === lastColor) {
+    while (color === runtime.lastColor) {
       color = randomColorSimple();
     }
   } else if (notColor) {
@@ -146,7 +175,7 @@ export function randomColor(options?: RandomColorOptions): string {
     }
   }
 
-  lastColor = color;
+  runtime.lastColor = color;
   return color;
 }
 
@@ -166,30 +195,30 @@ export function whiteOrGold(): string {
   return Math.random() < 0.5 ? COLOR.Gold : COLOR.White;
 }
 
-export function makePistilColor(shellColor: string): string {
+export function makePistilColor(shellColor: string, runtime: ShellRuntime): string {
   if (shellColor === COLOR.White || shellColor === COLOR.Gold) {
-    return randomColor({ notColor: shellColor });
+    return randomColor({ notColor: shellColor }, runtime);
   }
 
   return whiteOrGold();
 }
 
 // ---------------------------------------------------------------------------
-// Shell factories (pure: size + quality → ShellOptions)
+// Shell factories (pure: size + quality + runtime → ShellOptions)
 // ---------------------------------------------------------------------------
 
-export const crysanthemumShell: ShellFactory = (size = 1, quality) => {
+export const crysanthemumShell: ShellFactory = (size = 1, quality, runtime) => {
   const glitter = Math.random() < 0.25;
   const singleColor = Math.random() < 0.72;
   const color: string | string[] = singleColor
-    ? randomColor({ limitWhite: true })
-    : [randomColor(), randomColor({ notSame: true })];
+    ? randomColor({ limitWhite: true }, runtime)
+    : [randomColor(undefined, runtime), randomColor({ notSame: true }, runtime)];
   const pistil = singleColor && Math.random() < 0.42;
   // pistil is only true when singleColor is true → color is a string
-  const pistilColor: string | false = pistil ? makePistilColor(color as string) : false;
+  const pistilColor: string | false = pistil ? makePistilColor(color as string, runtime) : false;
   const secondColor: string | null =
     singleColor && (Math.random() < 0.2 || (color as string) === COLOR.White)
-      ? pistilColor || randomColor({ notColor: color as string, limitWhite: true })
+      ? pistilColor || randomColor({ notColor: color as string, limitWhite: true }, runtime)
       : null;
   const streamers =
     !pistil && (typeof color !== "string" || color !== COLOR.White) && Math.random() < 0.42;
@@ -217,11 +246,11 @@ export const crysanthemumShell: ShellFactory = (size = 1, quality) => {
   };
 };
 
-export const ghostShell: ShellFactory = (size = 1, quality) => {
-  const shell = crysanthemumShell(size, quality);
-  const ghostColor = randomColor({ notColor: COLOR.White });
+export const ghostShell: ShellFactory = (size = 1, quality, runtime) => {
+  const shell = crysanthemumShell(size, quality, runtime);
+  const ghostColor = randomColor({ notColor: COLOR.White }, runtime);
   const pistil = Math.random() < 0.42;
-  const pistilColor = pistil && makePistilColor(ghostColor);
+  const pistilColor = pistil && makePistilColor(ghostColor, runtime);
 
   shell.starLife *= 1.5;
   shell.streamers = true;
@@ -234,8 +263,8 @@ export const ghostShell: ShellFactory = (size = 1, quality) => {
   return shell;
 };
 
-export const strobeShell: ShellFactory = (size = 1) => {
-  const color = randomColor({ limitWhite: true });
+export const strobeShell: ShellFactory = (size = 1, _quality, runtime) => {
+  const color = randomColor({ limitWhite: true }, runtime);
   return {
     shellSize: size,
     spreadSize: 280 + size * 92,
@@ -248,12 +277,12 @@ export const strobeShell: ShellFactory = (size = 1) => {
     strobe: true,
     strobeColor: Math.random() < 0.5 ? COLOR.White : null,
     pistil: Math.random() < 0.5,
-    pistilColor: makePistilColor(color),
+    pistilColor: makePistilColor(color, runtime),
   };
 };
 
-export const palmShell: ShellFactory = (size = 1) => {
-  const color = randomColor();
+export const palmShell: ShellFactory = (size = 1, _quality, runtime) => {
+  const color = randomColor(undefined, runtime);
   const thick = Math.random() < 0.5;
   return {
     shellSize: size,
@@ -265,8 +294,8 @@ export const palmShell: ShellFactory = (size = 1) => {
   };
 };
 
-export const ringShell: ShellFactory = (size = 1) => {
-  const color = randomColor();
+export const ringShell: ShellFactory = (size = 1, _quality, runtime) => {
+  const color = randomColor(undefined, runtime);
   const pistil = Math.random() < 0.75;
   return {
     shellSize: size,
@@ -276,15 +305,15 @@ export const ringShell: ShellFactory = (size = 1) => {
     starLife: 900 + size * 200,
     starCount: 2.2 * PI_2 * (size + 1),
     pistil,
-    pistilColor: makePistilColor(color),
+    pistilColor: makePistilColor(color, runtime),
     glitter: pistil ? "" : "light",
     glitterColor: color === COLOR.Gold ? COLOR.Gold : COLOR.White,
     streamers: Math.random() < 0.3,
   };
 };
 
-export const crossetteShell: ShellFactory = (size = 1) => {
-  const color = randomColor({ limitWhite: true });
+export const crossetteShell: ShellFactory = (size = 1, _quality, runtime) => {
+  const color = randomColor({ limitWhite: true }, runtime);
   return {
     shellSize: size,
     spreadSize: 300 + size * 100,
@@ -294,11 +323,11 @@ export const crossetteShell: ShellFactory = (size = 1) => {
     color,
     crossette: true,
     pistil: Math.random() < 0.5,
-    pistilColor: makePistilColor(color),
+    pistilColor: makePistilColor(color, runtime),
   };
 };
 
-export const floralShell: ShellFactory = (size = 1) => ({
+export const floralShell: ShellFactory = (size = 1, _quality, runtime) => ({
   shellSize: size,
   spreadSize: 300 + size * 120,
   starDensity: 0.12,
@@ -308,8 +337,8 @@ export const floralShell: ShellFactory = (size = 1) => ({
     Math.random() < 0.65
       ? "random"
       : Math.random() < 0.15
-        ? randomColor()
-        : [randomColor(), randomColor({ notSame: true })],
+        ? randomColor(undefined, runtime)
+        : [randomColor(undefined, runtime), randomColor({ notSame: true }, runtime)],
   floral: true,
 });
 
@@ -335,8 +364,8 @@ export const willowShell: ShellFactory = (size = 1) => ({
   color: INVISIBLE,
 });
 
-export const crackleShell: ShellFactory = (size = 1, quality) => {
-  const color = Math.random() < 0.75 ? COLOR.Gold : randomColor();
+export const crackleShell: ShellFactory = (size = 1, quality, runtime) => {
+  const color = Math.random() < 0.75 ? COLOR.Gold : randomColor(undefined, runtime);
   return {
     shellSize: size,
     spreadSize: 380 + size * 75,
@@ -348,12 +377,12 @@ export const crackleShell: ShellFactory = (size = 1, quality) => {
     color,
     crackle: true,
     pistil: Math.random() < 0.65,
-    pistilColor: makePistilColor(color),
+    pistilColor: makePistilColor(color, runtime),
   };
 };
 
-export const horsetailShell: ShellFactory = (size = 1) => {
-  const color = randomColor();
+export const horsetailShell: ShellFactory = (size = 1, _quality, runtime) => {
+  const color = randomColor(undefined, runtime);
   return {
     shellSize: size,
     horsetail: true,
@@ -411,11 +440,16 @@ export function configuredShellName(state: FireworksState): string {
  * Pure random shell — needs device context for IS_HEADER check.
  * When IS_HEADER, delegates to randomFastShell.
  */
-export function randomShell(size: number, quality: QualityLevel, ctx: ShellContext): ShellOptions {
+export function randomShell(
+  size: number,
+  quality: QualityLevel,
+  ctx: ShellContext,
+  runtime: ShellRuntime,
+): ShellOptions {
   if (ctx.isHeader) {
-    return randomFastShell(ctx)(size, quality);
+    return randomFastShell(ctx)(size, quality, runtime);
   }
-  return namedShellTypes[randomShellName()](size, quality);
+  return namedShellTypes[randomShellName()](size, quality, runtime);
 }
 
 /**
@@ -442,12 +476,13 @@ export function shellFromConfig(
   size: number,
   quality: QualityLevel,
   ctx: ShellContext,
+  runtime: ShellRuntime,
 ): ShellOptions {
   const name = configuredShellName(ctx.state);
   if (name === "Random") {
-    return randomShell(size, quality, ctx);
+    return randomShell(size, quality, ctx, runtime);
   }
-  return namedShellTypes[name](size, quality);
+  return namedShellTypes[name](size, quality, runtime);
 }
 
 // ---------------------------------------------------------------------------
@@ -493,7 +528,9 @@ export function getRandomShellSize(state: FireworksState): ShellPositionResult {
 
 export function launchShellFromConfig(event: LaunchEvent | null, ctx: SequenceContext): void {
   ctx.registerUserInteraction();
-  const shell = new ctx.shellCtor(shellFromConfig(shellSizeSelector(ctx.state), ctx.quality, ctx));
+  const shell = new ctx.shellCtor(
+    shellFromConfig(shellSizeSelector(ctx.state), ctx.quality, ctx, ctx.runtime),
+  );
 
   if (event && ctx.state.config.wordShell) {
     shell.forceWordBurst = true;
@@ -512,7 +549,7 @@ export function launchShellFromConfig(event: LaunchEvent | null, ctx: SequenceCo
 
 export function seqRandomShell(ctx: SequenceContext): number {
   const size = getRandomShellSize(ctx.state);
-  const shell = new ctx.shellCtor(shellFromConfig(size.size, ctx.quality, ctx));
+  const shell = new ctx.shellCtor(shellFromConfig(size.size, ctx.quality, ctx, ctx.runtime));
   shell.launch(size.x, size.height);
 
   let extraDelay = shell.starLife;
@@ -526,7 +563,7 @@ export function seqRandomShell(ctx: SequenceContext): number {
 export function seqRandomFastShell(ctx: SequenceContext): number {
   const shellFactory = randomFastShell(ctx);
   const size = getRandomShellSize(ctx.state);
-  const shell = new ctx.shellCtor(shellFactory(size.size, ctx.quality));
+  const shell = new ctx.shellCtor(shellFactory(size.size, ctx.quality, ctx.runtime));
   shell.launch(size.x, size.height);
 
   return 900 + Math.random() * 600 + shell.starLife;
@@ -535,8 +572,12 @@ export function seqRandomFastShell(ctx: SequenceContext): number {
 export function seqTwoRandom(ctx: SequenceContext): number {
   const firstSize = getRandomShellSize(ctx.state);
   const secondSize = getRandomShellSize(ctx.state);
-  const firstShell = new ctx.shellCtor(shellFromConfig(firstSize.size, ctx.quality, ctx));
-  const secondShell = new ctx.shellCtor(shellFromConfig(secondSize.size, ctx.quality, ctx));
+  const firstShell = new ctx.shellCtor(
+    shellFromConfig(firstSize.size, ctx.quality, ctx, ctx.runtime),
+  );
+  const secondShell = new ctx.shellCtor(
+    shellFromConfig(secondSize.size, ctx.quality, ctx, ctx.runtime),
+  );
   const leftOffset = Math.random() * 0.2 - 0.1;
   const rightOffset = Math.random() * 0.2 - 0.1;
 
@@ -559,19 +600,19 @@ export function seqTriple(ctx: SequenceContext): number {
   const smallSize = Math.max(0, baseSize - 1.25);
   const baseOffset = Math.random() * 0.08 - 0.04;
 
-  new ctx.shellCtor(shellFactory(baseSize, ctx.quality)).launch(0.5 + baseOffset, 0.7);
+  new ctx.shellCtor(shellFactory(baseSize, ctx.quality, ctx.runtime)).launch(0.5 + baseOffset, 0.7);
 
   const leftDelay = 1000 + Math.random() * 400;
   const rightDelay = 1000 + Math.random() * 400;
 
   setTimeout(() => {
     const offset = Math.random() * 0.08 - 0.04;
-    new ctx.shellCtor(shellFactory(smallSize, ctx.quality)).launch(0.2 + offset, 0.1);
+    new ctx.shellCtor(shellFactory(smallSize, ctx.quality, ctx.runtime)).launch(0.2 + offset, 0.1);
   }, leftDelay);
 
   setTimeout(() => {
     const offset = Math.random() * 0.08 - 0.04;
-    new ctx.shellCtor(shellFactory(smallSize, ctx.quality)).launch(0.8 + offset, 0.1);
+    new ctx.shellCtor(shellFactory(smallSize, ctx.quality, ctx.runtime)).launch(0.8 + offset, 0.1);
   }, rightDelay);
 
   return 4000;
@@ -582,7 +623,8 @@ export function seqPyramid(ctx: SequenceContext): number {
   const largeSize = shellSizeSelector(ctx.state);
   const smallSize = Math.max(0, largeSize - 3);
   const mainShellFactory: ShellFactory = Math.random() < 0.78 ? crysanthemumShell : ringShell;
-  const specialShellFactory: ShellFactory = (size, quality) => randomShell(size, quality, ctx);
+  const specialShellFactory: ShellFactory = (size, quality, rt) =>
+    randomShell(size, quality, ctx, rt);
 
   function launchSequenceShell(x: number, useSpecial: boolean): void {
     const isRandomShell = shellNameSelector(ctx.state) === "Random";
@@ -591,7 +633,9 @@ export function seqPyramid(ctx: SequenceContext): number {
         ? specialShellFactory
         : mainShellFactory
       : (namedShellTypes[configuredShellName(ctx.state)] ?? mainShellFactory);
-    const shell = new ctx.shellCtor(shellFactory(useSpecial ? largeSize : smallSize, ctx.quality));
+    const shell = new ctx.shellCtor(
+      shellFactory(useSpecial ? largeSize : smallSize, ctx.quality, ctx.runtime),
+    );
     const height = x <= 0.5 ? x / 0.5 : (1 - x) / 0.5;
     shell.launch(x, useSpecial ? 0.75 : height * 0.42);
   }
@@ -622,7 +666,7 @@ export function seqPyramid(ctx: SequenceContext): number {
 }
 
 export function seqSmallBarrage(ctx: SequenceContext): number {
-  seqSmallBarrageLastCalled = Date.now();
+  ctx.runtime.seqSmallBarrageLastCalled = Date.now();
   const barrageCount = ctx.isDesktop ? 11 : 5;
   const specialIndex = ctx.isDesktop ? 3 : 1;
   const shellSize = Math.max(0, shellSizeSelector(ctx.state) - 2);
@@ -636,7 +680,7 @@ export function seqSmallBarrage(ctx: SequenceContext): number {
         ? specialShellFactory
         : mainShellFactory
       : (namedShellTypes[configuredShellName(ctx.state)] ?? mainShellFactory);
-    const shell = new ctx.shellCtor(factory(shellSize, ctx.quality));
+    const shell = new ctx.shellCtor(factory(shellSize, ctx.quality, ctx.runtime));
     const height = (Math.cos(x * 5 * Math.PI + Math.PI * 0.5) + 1) / 2;
     shell.launch(x, height * 0.75);
   }
@@ -666,22 +710,20 @@ export function seqSmallBarrage(ctx: SequenceContext): number {
   return 3400 + barrageCount * 120;
 }
 
-// Expose cooldown and lastCalled for startSequence's cooldown check
-seqSmallBarrage.cooldown = seqSmallBarrageCooldown;
-seqSmallBarrage.lastCalled = seqSmallBarrageLastCalled;
-
 // ---------------------------------------------------------------------------
 // Start sequence (main entry point)
 // ---------------------------------------------------------------------------
 
 export function startSequence(ctx: SequenceContext): number {
-  if (isFirstSeq) {
-    isFirstSeq = false;
+  const rt = ctx.runtime;
+
+  if (rt.isFirstSeq) {
+    rt.isFirstSeq = false;
     if (ctx.isHeader) {
       return seqTwoRandom(ctx);
     }
 
-    new ctx.shellCtor(crysanthemumShell(shellSizeSelector(ctx.state), ctx.quality)).launch(
+    new ctx.shellCtor(crysanthemumShell(shellSizeSelector(ctx.state), ctx.quality, rt)).launch(
       0.5,
       0.5,
     );
@@ -690,17 +732,17 @@ export function startSequence(ctx: SequenceContext): number {
 
   if (finaleSelector(ctx.state)) {
     seqRandomFastShell(ctx);
-    if (currentFinaleCount < finaleCount) {
-      currentFinaleCount += 1;
+    if (rt.currentFinaleCount < finaleCount) {
+      rt.currentFinaleCount += 1;
       return 170;
     }
 
-    currentFinaleCount = 0;
+    rt.currentFinaleCount = 0;
     return 6000;
   }
 
   const randomValue = Math.random();
-  if (randomValue < 0.08 && Date.now() - seqSmallBarrageLastCalled > seqSmallBarrageCooldown) {
+  if (randomValue < 0.08 && Date.now() - rt.seqSmallBarrageLastCalled > seqSmallBarrageCooldown) {
     return seqSmallBarrage(ctx);
   }
   if (randomValue < 0.1) {
