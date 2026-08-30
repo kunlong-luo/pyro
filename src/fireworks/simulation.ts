@@ -577,12 +577,11 @@ export function createSimulation(deps: SimulationDeps): Simulation {
     const sparkDrag = 1 - (1 - Spark.airDrag) * speed;
     const gravityAcceleration = (timeStep / 1000) * GRAVITY;
 
-    // Allocate fresh arrays each frame (avoids aliasing with Star.active)
-    const aliveStars: StarInstance[] = [];
-    const aliveSparks: SparkInstance[] = [];
-
     for (const colorCode of COLOR_CODES_W_INVIS) {
       const stars = Star.active[colorCode];
+      // Allocate fresh arrays each frame (avoids aliasing with Star.active)
+      const aliveStars: StarInstance[] = [];
+      const aliveSparks: SparkInstance[] = [];
       for (let i = 0; i < stars.length; i++) {
         const star = stars[i];
         if (star.updateFrame === currentFrame) {
@@ -639,8 +638,6 @@ export function createSimulation(deps: SimulationDeps): Simulation {
           }
         }
 
-        const staysInBucket = true;
-
         if (star.life < star.transitionTime) {
           if (star.secondColor && !star.colorChanged) {
             star.colorChanged = true;
@@ -658,14 +655,13 @@ export function createSimulation(deps: SimulationDeps): Simulation {
           }
         }
 
-        if (staysInBucket) {
-          aliveStars.push(star);
-        }
+        aliveStars.push(star);
       }
 
       Star.active[colorCode] = aliveStars;
 
       const sparks = Spark.active[colorCode];
+      // aliveSparks already declared at start of colorCode loop
       for (let i = 0; i < sparks.length; i++) {
         const spark = sparks[i];
         spark.life -= timeStep;
