@@ -29,7 +29,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
       </head>
-      <body className={`${inter.variable} bg-black font-sans text-white antialiased`} suppressHydrationWarning>
+      <body
+        className={`${inter.variable} bg-black font-sans text-white antialiased`}
+        suppressHydrationWarning
+      >
         {/* Skip link for keyboard navigation */}
         <a href="#main" className="focus focus-on-focus sr-only">
           跳到主要内容
