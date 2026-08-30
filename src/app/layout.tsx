@@ -6,13 +6,38 @@ import { metaCsp } from "@/config/csp";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://nianbroken.github.io/Firework_Simulator/"),
-  title: "烟花模拟器",
-  description: "基于 Web 的烟花模拟器，具备真实粒子物理、12 种弹壳、Web Audio 与自定义背景",
+  metadataBase: new URL("https://kunlong-luo.github.io/pyro/"),
+  title: "烟花模拟器 | Pyro",
+  description:
+    "基于 Web 的烟花模拟器，具备真实粒子物理、12 种弹壳、Web Audio 与自定义背景。纯前端，零后端。",
+  keywords: ["烟花", "模拟器", "fireworks", "simulator", "canvas", "particle", "web-audio"],
+  authors: [{ name: "kunlong-luo" }],
   openGraph: {
-    title: "烟花模拟器",
-    description: "基于 Web 的烟花模拟器，具备真实粒子物理、12 种弹壳、Web Audio 与自定义背景",
-    images: ["images/favicon.png"],
+    type: "website",
+    locale: "zh_CN",
+    url: "https://kunlong-luo.github.io/pyro/",
+    title: "烟花模拟器 | Pyro",
+    description:
+      "基于 Web 的烟花模拟器，具备真实粒子物理、12 种弹壳、Web Audio 与自定义背景。",
+    siteName: "Pyro - 烟花模拟器",
+    images: [
+      {
+        url: "images/preview.png",
+        width: 800,
+        height: 600,
+        alt: "Pyro 烟花模拟器效果预览",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "烟花模拟器 | Pyro",
+    description: "基于 Web 的烟花模拟器，具备真实粒子物理、12 种弹壳、Web Audio 与自定义背景。",
+    images: ["images/preview.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 

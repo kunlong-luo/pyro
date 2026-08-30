@@ -24,7 +24,6 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "allowJs": true,
     "incremental": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,

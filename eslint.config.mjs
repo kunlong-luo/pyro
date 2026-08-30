@@ -6,11 +6,10 @@ import prettierConfig from "eslint-config-prettier";
 
 export default defineConfig(
   {
-    ignores: ["out/**", ".next/**", "node_modules/**", "coverage/**", "eslint.config.js"],
+    ignores: ["out/**", ".next/**", "node_modules/**", "coverage/**", "eslint.config.mjs"],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   ...nextCoreWebVitals,
-  prettierConfig,
   prettierConfig,
 );

@@ -15,15 +15,15 @@
     "zustand",
     "tailwindcss"
   ],
-  "author": "NianBroken",
+  "author": "kunlong-luo",
   "license": "Apache-2.0",
-  "homepage": "https://nianbroken.github.io/Firework_Simulator/",
+  "homepage": "https://kunlong-luo.github.io/pyro/",
   "bugs": {
-    "url": "https://github.com/NianBroken/Firework_Simulator/issues"
+    "url": "https://github.com/kunlong-luo/pyro/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/NianBroken/Firework_Simulator.git"
+    "url": "https://github.com/kunlong-luo/pyro.git"
   },
   "scripts": {
     "dev": "next dev",

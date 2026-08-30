@@ -48,10 +48,6 @@
 
 > 👇 **Click the banner above to open the live demo.** The real thing is much more immersive than a static image — click anywhere to launch a firework, enable **Finale mode** for the 32-shot barrage.
 
-<!-- TODO (after you record): Replace the static PNG below with a GIF / MP4 of Finale mode.
-     Recommended (smallest file): <video src="..." autoplay loop muted playsinline width="800"></video>
-     Alternative: <img src="./docs/screenshots/finale.gif" alt="Finale mode demo" width="800"> -->
-
 <img src="./public/images/preview.png" alt="Pyro in action" width="800" />
 
 ---

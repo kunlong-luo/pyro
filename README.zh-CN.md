@@ -48,10 +48,6 @@
 
 > 👇 **直接点击上方「在线演示」去玩！** 静态图片完全展示不出效果 —— 进去随便点一下画面就能放炮，打开菜单勾选 **「连发模式」** 可以立刻看 32 发 Finale 压轴。
 
-<!-- TODO（你录好以后再换）：把下面的静态 PNG 替换为 Finale 模式的 GIF / MP4 动图。
-     推荐（体积最小）：<video src="..." autoplay loop muted playsinline width="800"></video>
-     备选：<img src="./docs/screenshots/finale.gif" alt="Finale 连发效果演示" width="800"> -->
-
 <img src="./public/images/preview.png" alt="Pyro 效果预览" width="800" />
 
 ---
