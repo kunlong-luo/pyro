@@ -44,6 +44,8 @@ jobs:
 
       - name: Build
         run: pnpm run build
+        env:
+          NEXT_PUBLIC_DEPLOY_TARGET: github-pages
 
       - name: Bundle size check
         run: pnpm run size
