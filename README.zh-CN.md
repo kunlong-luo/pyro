@@ -9,7 +9,7 @@
 12 种弹壳类型 · Web Audio 立体音效 · 自定义背景 · 文字点阵烟花 · 自动连发序列 —— 纯静态，零后端。
 
 <p>
-  <a href="https://nianbroken.github.io/Firework_Simulator/">
+  <a href="https://kunlong-luo.github.io/pyro/">
     <img src="https://img.shields.io/badge/🚀_在线演示-GitHub_Pages-2ea44f?style=for-the-badge" alt="Live Demo">
   </a>
   <a href="./LICENSE">
@@ -26,16 +26,16 @@
 </p>
 
 <p>
-  <img src="https://img.shields.io/github/actions/workflow/status/NianBroken/Firework_Simulator/ci.yml?branch=main&label=CI" alt="CI Status">
-  <img src="https://img.shields.io/github/actions/workflow/status/NianBroken/Firework_Simulator/deploy.yml?branch=main&label=Deploy" alt="Deploy Status">
-  <img src="https://img.shields.io/badge/测试-329_项通过-green" alt="Tests: 329 passed">
+  <img src="https://img.shields.io/github/actions/workflow/status/kunlong-luo/pyro/ci.yml?branch=main&label=CI" alt="CI Status">
+  <img src="https://img.shields.io/github/actions/workflow/status/kunlong-luo/pyro/deploy.yml?branch=main&label=Deploy" alt="Deploy Status">
+  <img src="https://img.shields.io/badge/测试-370_项通过-green" alt="Tests: 370 passed">
   <img src="https://img.shields.io/badge/覆盖率-~95%25-green" alt="Coverage: ~95%">
 </p>
 
 <p>
   <a href="./README.md">🇺🇸 English</a>
   ·
-  <a href="https://github.com/NianBroken/Firework_Simulator/discussions">💬 讨论区</a>
+  <a href="https://github.com/kunlong-luo/pyro/discussions">💬 讨论区</a>
   ·
   <a href="./CONTRIBUTING.md">🤝 贡献指南</a>
 </p>
@@ -188,7 +188,7 @@ pyro/
 │   │   └── SvgSprite.tsx            # 内联 SVG 图标符号库
 │   ├── fireworks/                   # 核心物理 & 渲染领域（完全不依赖 React）
 │   │   ├── simulation.ts            # Shell 类、burst、主循环、粒子池
-│   │   ├── shells.ts                # 12 种弹壳工厂 + 连发序列 + 选择器
+│   │   ├── shells/                  # 12 种弹壳工厂 + 连发序列 + 选择器（已模块化）
 │   │   ├── particles/pools.ts       # Star / Spark / BurstFlash 对象池
 │   │   ├── particles/effects.ts     # Crossette / Floral / Crackle / FallingLeaves 效果
 │   │   ├── render/render.ts         # 所有粒子类型的 Canvas 绘制
@@ -232,7 +232,7 @@ pyro/
 ├── tsconfig.json
 ├── vitest.config.ts
 ├── playwright.config.ts
-└── next.config.ts                   # 静态导出 + basePath=/Firework_Simulator
+└── next.config.ts                   # 静态导出 + basePath=/pyro
 ```
 
 想了解架构细节（弹壳工厂为何这样设计、粒子池的零 GC 思路、迁移管道的版本语义），请阅读 [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) 和 [`docs/ADR/`](./docs/ADR/) 下的两份决策记录。
@@ -316,7 +316,7 @@ storageVersion: "1.0"
 
 > **Settings → Pages → Source → 选「GitHub Actions」**（不是「Deploy from a branch」）。
 
-当前 `basePath` 和 `assetPrefix` 是 `/Firework_Simulator`，匹配现有仓库名与 Pages URL。如果你重命名了仓库，或者 fork 到了别的仓库名下，**记得同步修改 `next.config.ts` 里的这两项** 为 `/你的新仓库名/`，否则所有静态资源都会 404。
+当前 `basePath` 和 `assetPrefix` 是 `/pyro`，匹配现有仓库名与 Pages URL。如果你重命名了仓库，或者 fork 到了别的仓库名下，**记得同步修改 `next.config.ts` 里的这两项** 为 `/你的新仓库名/`，否则所有静态资源都会 404。
 
 ### 其他托管方式
 
@@ -380,7 +380,7 @@ storageVersion: "1.0"
 两个最常见原因：
 
 1. **还没把 Pages 源切到「GitHub Actions」。** 见上文 [部署](#-部署) 那一节，这是 90% 的情况。
-2. **你 fork 的仓库名不是 `Firework_Simulator`。** 如果仓库地址是 `https://github.com/<你的ID>/my-pyro`，打开 `next.config.ts`，把 `basePath` 和 `assetPrefix` 都从 `"/Firework_Simulator"` 改成 `"/my-pyro"`，再 push 一次重跑 deploy job 即可。
+2. **你 fork 的仓库名不是 `pyro`。** 如果仓库地址是 `https://github.com/<你的ID>/my-pyro`，打开 `next.config.ts`，把 `basePath` 和 `assetPrefix` 都从 `"/pyro"` 改成 `"/my-pyro"`，再 push 一次重跑 deploy job 即可。
 
 </details>
 
@@ -405,7 +405,7 @@ storageVersion: "1.0"
 - [ ] **性能浮层**：可开关的 canvas 内 FPS 计数器、实时粒子数量、帧耗时热力条，帮助用户在自己设备上调最佳画质
 - [ ] **编排好的烟花秀**：预置剧本（比如新年 1 分钟完整版序列），页面一加载就自动演完
 
-欢迎到 [Discussions 讨论区](https://github.com/NianBroken/Firework_Simulator/discussions) 投票你最想先看哪一个 —— 或者直接实现一个开 PR，见 [`CONTRIBUTING.md`](./CONTRIBUTING.md)。
+欢迎到 [Discussions 讨论区](https://github.com/kunlong-luo/pyro/discussions) 投票你最想先看哪一个 —— 或者直接实现一个开 PR，见 [`CONTRIBUTING.md`](./CONTRIBUTING.md)。
 
 ---
 
@@ -421,7 +421,7 @@ storageVersion: "1.0"
 
 ## 📜 开源协议
 
-`Copyright © 2022 NianBroken. All rights reserved.`
+`Copyright © 2022-2026 kunlong-luo. All rights reserved.`
 
 以 [Apache License 2.0](./LICENSE) 协议发布。你可以自由使用、修改、分发本项目的代码，但前提是在衍生作品中保留原始协议文本与版权声明，并且对所有修改过的代码也要以同样的协议发布。完整条款见 LICENSE 文件。
 
@@ -439,7 +439,7 @@ storageVersion: "1.0"
 
 <div align="center">
 
-Made with ❤️ by NianBroken · [GitHub 主页](https://github.com/NianBroken)
+Made with ❤️ by kunlong-luo · [GitHub 主页](https://github.com/kunlong-luo)
 
 **[⬆️ 回到顶部](#-pyro--烟花模拟器)**
 

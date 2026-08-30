@@ -9,7 +9,7 @@
 12 shell types · Web Audio SFX · custom backgrounds · text word-bursts · auto-launch sequences — all static, zero backend.
 
 <p>
-  <a href="https://nianbroken.github.io/Firework_Simulator/">
+  <a href="https://kunlong-luo.github.io/pyro/">
     <img src="https://img.shields.io/badge/🚀_Live_Demo-GitHub_Pages-2ea44f?style=for-the-badge" alt="Live Demo">
   </a>
   <a href="./LICENSE">
@@ -26,16 +26,16 @@
 </p>
 
 <p>
-  <img src="https://img.shields.io/github/actions/workflow/status/NianBroken/Firework_Simulator/ci.yml?branch=main&label=CI" alt="CI Status">
-  <img src="https://img.shields.io/github/actions/workflow/status/NianBroken/Firework_Simulator/deploy.yml?branch=main&label=Deploy" alt="Deploy Status">
-  <img src="https://img.shields.io/badge/Tests-329_passed-green" alt="Tests: 329 passed">
+  <img src="https://img.shields.io/github/actions/workflow/status/kunlong-luo/pyro/ci.yml?branch=main&label=CI" alt="CI Status">
+  <img src="https://img.shields.io/github/actions/workflow/status/kunlong-luo/pyro/deploy.yml?branch=main&label=Deploy" alt="Deploy Status">
+  <img src="https://img.shields.io/badge/Tests-370_passed-green" alt="Tests: 370 passed">
   <img src="https://img.shields.io/badge/coverage-~95%25-green" alt="Coverage: ~95%">
 </p>
 
 <p>
   <a href="./README.zh-CN.md">🇨🇳 中文文档</a>
   ·
-  <a href="https://github.com/NianBroken/Firework_Simulator/discussions">💬 Discussions</a>
+  <a href="https://github.com/kunlong-luo/pyro/discussions">💬 Discussions</a>
   ·
   <a href="./CONTRIBUTING.md">🤝 Contributing</a>
 </p>
@@ -188,7 +188,7 @@ pyro/
 │   │   └── SvgSprite.tsx            # Inline SVG icon symbols
 │   ├── fireworks/                   # Core physics & rendering domain (no React)
 │   │   ├── simulation.ts            # Shell class, burst logic, update loop, pools
-│   │   ├── shells.ts                # 12 shell factories + sequences + selectors
+│   │   ├── shells/                  # 12 shell factories + sequences + selectors (modularized)
 │   │   ├── particles/pools.ts       # Star / Spark / BurstFlash object pools
 │   │   ├── particles/effects.ts     # Crossette / Floral / Crackle / FallingLeaves
 │   │   ├── render/render.ts         # Canvas draw for all particle types
@@ -232,7 +232,7 @@ pyro/
 ├── tsconfig.json
 ├── vitest.config.ts
 ├── playwright.config.ts
-└── next.config.ts                   # Static export + basePath=/Firework_Simulator
+└── next.config.ts                   # Static export + basePath=/pyro
 ```
 
 For a detailed explanation of the architecture (why the shell factories work the way they do, where the particle pools come from, how the schema migration pipeline is structured), see [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) and the two ADRs in [`docs/ADR/`](./docs/ADR/).
@@ -316,7 +316,7 @@ You **must** do this **once** in repo settings, otherwise the deploy job fails w
 
 > **Settings → Pages → Source → select "GitHub Actions"** (not "Deploy from a branch").
 
-The `basePath` and `assetPrefix` are currently `/Firework_Simulator`, matching the existing repo name and Pages URL. If you rename the GitHub repo or fork it to a different name, **update both** in `next.config.ts` to match your new path, otherwise static assets 404.
+The `basePath` and `assetPrefix` are currently `/pyro`, matching the existing repo name and Pages URL. If you rename the GitHub repo or fork it to a different name, **update both** in `next.config.ts` to match your new path, otherwise static assets 404.
 
 ### Other hosts
 
@@ -380,7 +380,7 @@ Yes. Edit `defaultWords` in `src/config/appConfig.ts` and rebuild. The array is 
 Two common causes:
 
 1. **You haven't switched the Pages source to "GitHub Actions" yet.** See [Deployment](#-deployment) above — this is the #1 reason.
-2. **Your fork's repo name isn't `Firework_Simulator`.** If your repo URL is `https://github.com/<YOU>/my-pyro`, then open `next.config.ts` and change both `basePath` and `assetPrefix` from `"/Firework_Simulator"` to `"/my-pyro"`. Push again and the deploy job will emit assets under the correct sub-path.
+2. **Your fork's repo name isn't `pyro`.** If your repo URL is `https://github.com/<YOU>/my-pyro`, then open `next.config.ts` and change both `basePath` and `assetPrefix` from `"/pyro"` to `"/my-pyro"`. Push again and the deploy job will emit assets under the correct sub-path.
 
 </details>
 
@@ -405,7 +405,7 @@ Ideas and planned improvements, roughly ordered by likelihood:
 - [ ] **Performance profiler overlay** — optional on-canvas FPS counter, particle-count counter, and a frame-time heat bar to help tune quality on individual devices
 - [ ] **Auto-firework choreographies** — pre-made scripted shows (e.g. a 1-minute New Year sequence) that run on page load
 
-Vote for your favourites in the [Discussions](https://github.com/NianBroken/Firework_Simulator/discussions) — or implement one and open a PR (see [CONTRIBUTING.md](./CONTRIBUTING.md)).
+Vote for your favourites in the [Discussions](https://github.com/kunlong-luo/pyro/discussions) — or implement one and open a PR (see [CONTRIBUTING.md](./CONTRIBUTING.md)).
 
 ---
 
@@ -421,7 +421,7 @@ For security issues, see [SECURITY.md](./SECURITY.md) — **do not open a public
 
 ## 📜 License
 
-`Copyright © 2022 NianBroken. All rights reserved.`
+`Copyright © 2022-2026 kunlong-luo. All rights reserved.`
 
 Licensed under the [Apache License 2.0](./LICENSE). You are free to use, modify, and distribute this code, provided that you retain the original license and copyright notice in derivative works and publish any modifications under the same license. See the LICENSE file for the full text.
 
@@ -439,7 +439,7 @@ This project would not exist without:
 
 <div align="center">
 
-Made with ❤️ by NianBroken · [GitHub](https://github.com/NianBroken)
+Made with ❤️ by kunlong-luo · [GitHub](https://github.com/kunlong-luo)
 
 **[⬆️ Back to top](#-pyro)**
 
