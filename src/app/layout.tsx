@@ -18,8 +18,7 @@ export const metadata: Metadata = {
     locale: "zh_CN",
     url: "https://kunlong-luo.github.io/pyro/",
     title: "烟花模拟器 | Pyro",
-    description:
-      "基于 Web 的烟花模拟器，具备真实粒子物理、12 种弹壳、Web Audio 与自定义背景。",
+    description: "基于 Web 的烟花模拟器，具备真实粒子物理、12 种弹壳、Web Audio 与自定义背景。",
     siteName: "Pyro - 烟花模拟器",
     images: [
       {

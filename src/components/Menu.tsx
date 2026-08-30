@@ -51,7 +51,10 @@ const BACKGROUND_PRESETS = [
   { label: "暮色", value: "linear-gradient(180deg, #1a0533 0%, #2d1b4e 40%, #0f0a1e 100%)" },
   { label: "深海", value: "linear-gradient(180deg, #001428 0%, #002850 50%, #001428 100%)" },
   { label: "暗夜", value: "linear-gradient(180deg, #000000 0%, #0a0a0a 50%, #000000 100%)" },
-  { label: "极光", value: "linear-gradient(135deg, #0a1628 0%, #1a3a5c 30%, #0d2847 60%, #061220 100%)" },
+  {
+    label: "极光",
+    value: "linear-gradient(135deg, #0a1628 0%, #1a3a5c 30%, #0d2847 60%, #061220 100%)",
+  },
   { label: "紫霞", value: "linear-gradient(135deg, #1a0533 0%, #3d1a5c 40%, #1a0533 100%)" },
 ];
 
@@ -187,22 +190,32 @@ export function Menu({
 
             <div className="menu__cards">
               <motion.div custom={0} variants={cardVariants} initial="hidden" animate="visible">
-                <Card className="bg-white/5 border-white/10">
+                <Card className="border-white/10 bg-white/5">
                   <CardHeader>
                     <CardTitle className="text-white/90">烟花设置</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="form-option form-option--select">
-                      <Label className="shell-type-label cursor-pointer text-white/70" onClick={() => handleHelpClick("shellType")}>
+                      <Label
+                        className="shell-type-label cursor-pointer text-white/70"
+                        onClick={() => handleHelpClick("shellType")}
+                      >
                         烟花类型
                       </Label>
-                      <Select value={config.shell} onValueChange={(v) => handleSelectChange("shell", v)}>
-                        <SelectTrigger className="w-[180px] bg-black/50 border-white/20 text-white/70">
+                      <Select
+                        value={config.shell}
+                        onValueChange={(v) => handleSelectChange("shell", v)}
+                      >
+                        <SelectTrigger className="w-[180px] border-white/20 bg-black/50 text-white/70">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-black/90 border-white/20">
+                        <SelectContent className="border-white/20 bg-black/90">
                           {shellNames.map((name) => (
-                            <SelectItem key={name} value={name} className="text-white/70 focus:text-white focus:bg-white/10">
+                            <SelectItem
+                              key={name}
+                              value={name}
+                              className="text-white/70 focus:bg-white/10 focus:text-white"
+                            >
                               {name}
                             </SelectItem>
                           ))}
@@ -211,16 +224,26 @@ export function Menu({
                     </div>
 
                     <div className="form-option form-option--select">
-                      <Label className="shell-size-label cursor-pointer text-white/70" onClick={() => handleHelpClick("shellSize")}>
+                      <Label
+                        className="shell-size-label cursor-pointer text-white/70"
+                        onClick={() => handleHelpClick("shellSize")}
+                      >
                         烟花大小
                       </Label>
-                      <Select value={config.size} onValueChange={(v) => handleSelectChange("size", v)}>
-                        <SelectTrigger className="w-[180px] bg-black/50 border-white/20 text-white/70">
+                      <Select
+                        value={config.size}
+                        onValueChange={(v) => handleSelectChange("size", v)}
+                      >
+                        <SelectTrigger className="w-[180px] border-white/20 bg-black/50 text-white/70">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-black/90 border-white/20">
+                        <SelectContent className="border-white/20 bg-black/90">
                           {SHELL_SIZE_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.value} value={opt.value} className="text-white/70 focus:text-white focus:bg-white/10">
+                            <SelectItem
+                              key={opt.value}
+                              value={opt.value}
+                              className="text-white/70 focus:bg-white/10 focus:text-white"
+                            >
                               {opt.label}
                             </SelectItem>
                           ))}
@@ -229,16 +252,26 @@ export function Menu({
                     </div>
 
                     <div className="form-option form-option--select">
-                      <Label className="quality-ui-label cursor-pointer text-white/70" onClick={() => handleHelpClick("quality")}>
+                      <Label
+                        className="quality-ui-label cursor-pointer text-white/70"
+                        onClick={() => handleHelpClick("quality")}
+                      >
                         画质
                       </Label>
-                      <Select value={config.quality} onValueChange={(v) => handleSelectChange("quality", v)}>
-                        <SelectTrigger className="w-[180px] bg-black/50 border-white/20 text-white/70">
+                      <Select
+                        value={config.quality}
+                        onValueChange={(v) => handleSelectChange("quality", v)}
+                      >
+                        <SelectTrigger className="w-[180px] border-white/20 bg-black/50 text-white/70">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-black/90 border-white/20">
+                        <SelectContent className="border-white/20 bg-black/90">
                           {QUALITY_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.value} value={opt.value} className="text-white/70 focus:text-white focus:bg-white/10">
+                            <SelectItem
+                              key={opt.value}
+                              value={opt.value}
+                              className="text-white/70 focus:bg-white/10 focus:text-white"
+                            >
                               {opt.label}
                             </SelectItem>
                           ))}
@@ -250,22 +283,32 @@ export function Menu({
               </motion.div>
 
               <motion.div custom={1} variants={cardVariants} initial="hidden" animate="visible">
-                <Card className="bg-white/5 border-white/10">
+                <Card className="border-white/10 bg-white/5">
                   <CardHeader>
                     <CardTitle className="text-white/90">显示设置</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="form-option form-option--select">
-                      <Label className="sky-lighting-label cursor-pointer text-white/70" onClick={() => handleHelpClick("skyLighting")}>
+                      <Label
+                        className="sky-lighting-label cursor-pointer text-white/70"
+                        onClick={() => handleHelpClick("skyLighting")}
+                      >
                         照亮天空
                       </Label>
-                      <Select value={config.skyLighting} onValueChange={(v) => handleSelectChange("skyLighting", v)}>
-                        <SelectTrigger className="w-[180px] bg-black/50 border-white/20 text-white/70">
+                      <Select
+                        value={config.skyLighting}
+                        onValueChange={(v) => handleSelectChange("skyLighting", v)}
+                      >
+                        <SelectTrigger className="w-[180px] border-white/20 bg-black/50 text-white/70">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-black/90 border-white/20">
+                        <SelectContent className="border-white/20 bg-black/90">
                           {SKY_LIGHTING_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.value} value={opt.value} className="text-white/70 focus:text-white focus:bg-white/10">
+                            <SelectItem
+                              key={opt.value}
+                              value={opt.value}
+                              className="text-white/70 focus:bg-white/10 focus:text-white"
+                            >
                               {opt.label}
                             </SelectItem>
                           ))}
@@ -274,16 +317,26 @@ export function Menu({
                     </div>
 
                     <div className="form-option form-option--select">
-                      <Label className="scaleFactor-label cursor-pointer text-white/70" onClick={() => handleHelpClick("scaleFactor")}>
+                      <Label
+                        className="scaleFactor-label cursor-pointer text-white/70"
+                        onClick={() => handleHelpClick("scaleFactor")}
+                      >
                         缩放
                       </Label>
-                      <Select value={config.scaleFactor.toFixed(2)} onValueChange={(v) => handleSelectChange("scaleFactor", v)}>
-                        <SelectTrigger className="w-[180px] bg-black/50 border-white/20 text-white/70">
+                      <Select
+                        value={config.scaleFactor.toFixed(2)}
+                        onValueChange={(v) => handleSelectChange("scaleFactor", v)}
+                      >
+                        <SelectTrigger className="w-[180px] border-white/20 bg-black/50 text-white/70">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-black/90 border-white/20">
+                        <SelectContent className="border-white/20 bg-black/90">
                           {SCALE_FACTOR_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.value} value={opt.value} className="text-white/70 focus:text-white focus:bg-white/10">
+                            <SelectItem
+                              key={opt.value}
+                              value={opt.value}
+                              className="text-white/70 focus:bg-white/10 focus:text-white"
+                            >
                               {opt.label}
                             </SelectItem>
                           ))}
@@ -292,61 +345,111 @@ export function Menu({
                     </div>
 
                     <div className="form-option form-option--checkbox">
-                      <Label htmlFor="long-exposure" className="long-exposure-label cursor-pointer text-white/70" onClick={() => handleHelpClick("longExposure")}>
+                      <Label
+                        htmlFor="long-exposure"
+                        className="long-exposure-label cursor-pointer text-white/70"
+                        onClick={() => handleHelpClick("longExposure")}
+                      >
                         保留烟花的火花
                       </Label>
-                      <Switch id="long-exposure" checked={config.longExposure} onCheckedChange={(checked) => handleCheckboxChange("longExposure", checked)} />
+                      <Switch
+                        id="long-exposure"
+                        checked={config.longExposure}
+                        onCheckedChange={(checked) => handleCheckboxChange("longExposure", checked)}
+                      />
                     </div>
                   </CardContent>
                 </Card>
               </motion.div>
 
               <motion.div custom={2} variants={cardVariants} initial="hidden" animate="visible">
-                <Card className="bg-white/5 border-white/10">
+                <Card className="border-white/10 bg-white/5">
                   <CardHeader>
                     <CardTitle className="text-white/90">特效设置</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="form-option form-option--checkbox">
-                      <Label htmlFor="word-shell" className="word-shell-label cursor-pointer text-white/70" onClick={() => handleHelpClick("wordShell")}>
+                      <Label
+                        htmlFor="word-shell"
+                        className="word-shell-label cursor-pointer text-white/70"
+                        onClick={() => handleHelpClick("wordShell")}
+                      >
                         文字烟花
                       </Label>
-                      <Switch id="word-shell" checked={config.wordShell} onCheckedChange={(checked) => handleCheckboxChange("wordShell", checked)} />
+                      <Switch
+                        id="word-shell"
+                        checked={config.wordShell}
+                        onCheckedChange={(checked) => handleCheckboxChange("wordShell", checked)}
+                      />
                     </div>
 
                     <div className="form-option form-option--checkbox">
-                      <Label htmlFor="auto-launch" className="auto-launch-label cursor-pointer text-white/70" onClick={() => handleHelpClick("autoLaunch")}>
+                      <Label
+                        htmlFor="auto-launch"
+                        className="auto-launch-label cursor-pointer text-white/70"
+                        onClick={() => handleHelpClick("autoLaunch")}
+                      >
                         自动放烟花
                       </Label>
-                      <Switch id="auto-launch" checked={config.autoLaunch} onCheckedChange={(checked) => handleCheckboxChange("autoLaunch", checked)} />
+                      <Switch
+                        id="auto-launch"
+                        checked={config.autoLaunch}
+                        onCheckedChange={(checked) => handleCheckboxChange("autoLaunch", checked)}
+                      />
                     </div>
 
-                    <div className={`form-option form-option--checkbox ${config.autoLaunch ? "opacity-100" : "opacity-40"}`}>
-                      <Label htmlFor="finale-mode" className="finale-mode-label cursor-pointer text-white/70" onClick={() => handleHelpClick("finaleMode")}>
+                    <div
+                      className={`form-option form-option--checkbox ${config.autoLaunch ? "opacity-100" : "opacity-40"}`}
+                    >
+                      <Label
+                        htmlFor="finale-mode"
+                        className="finale-mode-label cursor-pointer text-white/70"
+                        onClick={() => handleHelpClick("finaleMode")}
+                      >
                         同时放更多的烟花
                       </Label>
-                      <Switch id="finale-mode" checked={config.finale} onCheckedChange={(checked) => handleCheckboxChange("finale", checked)} />
+                      <Switch
+                        id="finale-mode"
+                        checked={config.finale}
+                        onCheckedChange={(checked) => handleCheckboxChange("finale", checked)}
+                      />
                     </div>
 
                     <div className="form-option form-option--checkbox">
-                      <Label htmlFor="hide-controls" className="hide-controls-label cursor-pointer text-white/70" onClick={() => handleHelpClick("hideControls")}>
+                      <Label
+                        htmlFor="hide-controls"
+                        className="hide-controls-label cursor-pointer text-white/70"
+                        onClick={() => handleHelpClick("hideControls")}
+                      >
                         隐藏控制按钮
                       </Label>
-                      <Switch id="hide-controls" checked={config.hideControls} onCheckedChange={(checked) => handleCheckboxChange("hideControls", checked)} />
+                      <Switch
+                        id="hide-controls"
+                        checked={config.hideControls}
+                        onCheckedChange={(checked) => handleCheckboxChange("hideControls", checked)}
+                      />
                     </div>
 
                     <div className="form-option form-option--checkbox">
-                      <Label htmlFor="fullscreen" className="fullscreen-label cursor-pointer text-white/70" onClick={() => handleHelpClick("fullscreen")}>
+                      <Label
+                        htmlFor="fullscreen"
+                        className="fullscreen-label cursor-pointer text-white/70"
+                        onClick={() => handleHelpClick("fullscreen")}
+                      >
                         全屏
                       </Label>
-                      <Switch id="fullscreen" checked={fullscreen} onCheckedChange={onToggleFullscreen} />
+                      <Switch
+                        id="fullscreen"
+                        checked={fullscreen}
+                        onCheckedChange={onToggleFullscreen}
+                      />
                     </div>
                   </CardContent>
                 </Card>
               </motion.div>
 
               <motion.div custom={3} variants={cardVariants} initial="hidden" animate="visible">
-                <Card className="bg-white/5 border-white/10">
+                <Card className="border-white/10 bg-white/5">
                   <CardHeader>
                     <CardTitle className="text-white/90">背景设置</CardTitle>
                   </CardHeader>
@@ -356,7 +459,7 @@ export function Menu({
                         <button
                           key={preset.label}
                           type="button"
-                          className="h-12 rounded-md border border-white/20 text-xs text-white/70 hover:border-white/40 hover:text-white transition-colors"
+                          className="h-12 rounded-md border border-white/20 text-xs text-white/70 transition-colors hover:border-white/40 hover:text-white"
                           style={{ background: preset.value }}
                           onClick={() => handlePresetClick(preset.value)}
                         >
@@ -366,9 +469,9 @@ export function Menu({
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-white/70 text-xs">自定义背景</Label>
+                      <Label className="text-xs text-white/70">自定义背景</Label>
                       <input
-                        className="background-input w-full h-9 px-3 rounded-md bg-black/50 border border-white/20 text-white/70 text-sm placeholder:text-white/30 focus:outline-none focus:border-white/40"
+                        className="background-input h-9 w-full rounded-md border border-white/20 bg-black/50 px-3 text-sm text-white/70 placeholder:text-white/30 focus:border-white/40 focus:outline-none"
                         type="text"
                         placeholder="图片 URL 或 CSS 渐变..."
                         value={backgroundInput}

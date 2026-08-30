@@ -27,16 +27,14 @@ export function HelpModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="bg-black/90 border-white/20 text-white/90 max-w-md">
+      <DialogContent className="max-w-md border-white/20 bg-black/90 text-white/90">
         <DialogHeader>
           <DialogTitle className="text-lg font-medium text-white/90">
             {content?.header ?? ""}
           </DialogTitle>
-          <DialogDescription className="sr-only">
-            帮助信息
-          </DialogDescription>
+          <DialogDescription className="sr-only">帮助信息</DialogDescription>
         </DialogHeader>
-        <div className="text-sm text-white/70 leading-relaxed whitespace-pre-line">
+        <div className="text-sm leading-relaxed whitespace-pre-line text-white/70">
           {content?.body ?? ""}
         </div>
       </DialogContent>

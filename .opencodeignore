@@ -1,0 +1,58 @@
+# ==========================================
+# 1. Logs & Temporary Files
+# ==========================================
+logs/
+*.log
+*.tmp
+*.temp
+*.swp
+*.bak
+.DS_Store
+Thumbs.db
+
+# ==========================================
+# 2. Build Artifacts (Next.js, Node)
+# ==========================================
+.next/
+node_modules/
+out/
+build/
+dist/
+.turbo/
+*.tsbuildinfo
+
+# ==========================================
+# 3. Test & Coverage Artifacts
+# ==========================================
+coverage/
+.vitest/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# ==========================================
+# 4. Bundle Analyzer & Cache
+# ==========================================
+.next-analyze/
+.size-limit/
+
+# ==========================================
+# 5. IDE Configurations
+# ==========================================
+.idea/
+.vscode/
+*.cwsp
+*.suo
+*.user
+
+# ==========================================
+# 6. Sensitive Environment Files
+# ==========================================
+**/.env
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
+# Keep template files
+!.env.example

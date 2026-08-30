@@ -4,12 +4,7 @@ import { useStore } from "zustand";
 import { motion, AnimatePresence } from "framer-motion";
 import { useFireworksStore } from "@/stores/storeContext";
 import { Icon } from "./Icons";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 function ControlButton({
   label,
@@ -39,9 +34,9 @@ function ControlButton({
           {children}
         </motion.button>
       </TooltipTrigger>
-      <TooltipContent side="bottom" className="bg-black/80 border-white/20 text-white/90">
+      <TooltipContent side="bottom" className="border-white/20 bg-black/80 text-white/90">
         <p className="text-xs">
-          {label} <span className="text-white/50 ml-1">({shortcut})</span>
+          {label} <span className="ml-1 text-white/50">({shortcut})</span>
         </p>
       </TooltipContent>
     </Tooltip>
