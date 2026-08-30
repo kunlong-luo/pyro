@@ -20,7 +20,7 @@
 const cspDirectives = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'",
-  "style-src 'self' 'sha256-RVffQIpfFsSm9AH75W6q/PI66qRwUOG/U3CG59GQaxI='",
+  "style-src 'self' 'unsafe-inline'",
   "font-src 'self' data:",
   "img-src 'self' data:",
   "connect-src 'self'",

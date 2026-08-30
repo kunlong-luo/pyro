@@ -29,16 +29,17 @@ test("the fireworks stage fills the viewport instead of being pushed down", asyn
 });
 
 test("the settings menu is not visible until the settings button is clicked", async ({ page }) => {
+  // Menu is conditionally rendered - doesn't exist in DOM until opened
   const menu = page.locator(".menu");
-  await expect(menu).toHaveCSS("visibility", "hidden");
-  await expect(menu).toHaveCSS("opacity", "0");
+  await expect(menu).not.toBeAttached();
 
   await page.locator(".settings-btn").click();
+  await expect(menu).toBeAttached();
   await expect(menu).toHaveCSS("visibility", "visible");
   await expect(menu).toHaveCSS("opacity", "1");
 
   await page.locator(".close-menu-btn").click();
-  await expect(menu).toHaveCSS("visibility", "hidden");
+  await expect(menu).not.toBeAttached();
 });
 
 test("both canvases are sized to match the stage, not left at their default 300x150", async ({
