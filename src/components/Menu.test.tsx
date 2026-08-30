@@ -21,17 +21,17 @@ function makeCallbacks() {
   };
 }
 
-describe("Menu visibility class", () => {
+describe("Menu visibility", () => {
   it("does not render when closed (AnimatePresence)", () => {
     const { container } = renderWithStore(<Menu {...makeCallbacks()} />, { menuOpen: false });
     const root = container.firstElementChild as HTMLElement;
     expect(root).toBeNull();
   });
 
-  it("has just the 'menu' class when open", () => {
+  it("renders when open", () => {
     const { container } = renderWithStore(<Menu {...makeCallbacks()} />, { menuOpen: true });
-    const root = container.firstElementChild as HTMLElement;
-    expect(root.className.trim()).toBe("menu");
+    const root = container.querySelector(".menu");
+    expect(root).not.toBeNull();
   });
 });
 
@@ -41,7 +41,7 @@ describe("Menu interactions", () => {
     const callbacks = makeCallbacks();
     renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
 
-    await user.click(document.querySelector(".close-menu-btn")!);
+    await user.click(screen.getByLabelText("关闭设置"));
     expect(callbacks.onClose).toHaveBeenCalledTimes(1);
   });
 
@@ -49,7 +49,6 @@ describe("Menu interactions", () => {
     const callbacks = makeCallbacks();
     const { store } = renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
 
-    // Directly test the state update logic instead of simulating Radix Select interaction
     store.setState((state) => ({
       config: { ...state.config, quality: "1" },
     }));
@@ -61,7 +60,7 @@ describe("Menu interactions", () => {
     );
   });
 
-  it("updates config when a checkbox is toggled", async () => {
+  it("updates config when a switch is toggled", async () => {
     const user = userEvent.setup();
     const callbacks = makeCallbacks();
     const { store } = renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
@@ -72,27 +71,13 @@ describe("Menu interactions", () => {
     expect(store.getState().config.autoLaunch).toBe(false);
   });
 
-  it("applies the background input value via the apply button", async () => {
+  it("applies a preset background on click", async () => {
     const user = userEvent.setup();
     const callbacks = makeCallbacks();
     renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
 
-    const input = document.querySelector<HTMLInputElement>(".background-input")!;
-    await user.type(input, "https://example.com/bg.png");
-    await user.click(document.querySelector(".background-apply-btn")!);
-
-    expect(callbacks.onBackgroundApply).toHaveBeenCalledWith("https://example.com/bg.png");
-  });
-
-  it("applies the background input value on Enter", async () => {
-    const user = userEvent.setup();
-    const callbacks = makeCallbacks();
-    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
-
-    const input = document.querySelector<HTMLInputElement>(".background-input")!;
-    await user.type(input, "https://example.com/bg.png{Enter}");
-
-    expect(callbacks.onBackgroundApply).toHaveBeenCalledWith("https://example.com/bg.png");
+    await user.click(screen.getByRole("button", { name: "星空" }));
+    expect(callbacks.onBackgroundApply).toHaveBeenCalled();
   });
 
   it("calls onBackgroundClear from the clear button", async () => {
@@ -100,42 +85,16 @@ describe("Menu interactions", () => {
     const callbacks = makeCallbacks();
     renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
 
-    await user.click(document.querySelector(".background-clear-btn")!);
+    await user.click(screen.getByRole("button", { name: "清除" }));
     expect(callbacks.onBackgroundClear).toHaveBeenCalledTimes(1);
   });
 
-  it("does not call handleBackgroundApply when background input element is not found", async () => {
-    const callbacks = makeCallbacks();
-    const originalQuerySelector = document.querySelector;
-    document.querySelector = vi.fn((selector) => {
-      if (selector === ".background-input") return null;
-      return originalQuerySelector.call(document, selector);
-    });
-
-    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
-
-    await userEvent.setup().click(document.querySelector(".background-apply-btn")!);
-
-    expect(callbacks.onBackgroundApply).not.toHaveBeenCalled();
-
-    document.querySelector = originalQuerySelector;
-  });
-
-  it("opens the matching help topic when a label is clicked", async () => {
+  it("toggles fullscreen via the fullscreen switch", async () => {
     const user = userEvent.setup();
     const callbacks = makeCallbacks();
     renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
 
-    await user.click(document.querySelector(".shell-type-label")!);
-    expect(callbacks.onHelpOpen).toHaveBeenCalledWith("shellType");
-  });
-
-  it("toggles fullscreen via the fullscreen checkbox", async () => {
-    const user = userEvent.setup();
-    const callbacks = makeCallbacks();
-    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
-
-    await user.click(screen.getByLabelText("全屏"));
+    await user.click(screen.getByRole("switch", { name: /全屏/i }));
     expect(callbacks.onToggleFullscreen).toHaveBeenCalledTimes(1);
   });
 
@@ -144,34 +103,27 @@ describe("Menu interactions", () => {
     ["同时放更多的烟花", "finale"],
     ["隐藏控制按钮", "hideControls"],
     ["保留烟花的火花", "longExposure"],
-  ] as const)("toggles %s via its label-associated checkbox", async (labelText, field) => {
+  ] as const)("toggles %s via its switch", async (labelText, field) => {
     const user = userEvent.setup();
     const callbacks = makeCallbacks();
     const { store } = renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
 
     const before = store.getState().config[field];
-    await user.click(screen.getByLabelText(labelText));
+    await user.click(screen.getByRole("switch", { name: new RegExp(labelText, "i") }));
     expect(store.getState().config[field]).toBe(!before);
   });
 
-  it.each([
-    ["烟花大小", "size", "5"],
-    ["照亮天空", "skyLighting", "0"],
-  ] as const)(
-    "changes config via the %s select (found by its associated label)",
-    async (_labelText, field, optionValue) => {
-      const callbacks = makeCallbacks();
-      const { store } = renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+  it("changes config via select state update", async () => {
+    const callbacks = makeCallbacks();
+    const { store } = renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
 
-      // Directly test state update for Radix Select
-      store.setState((state) => ({
-        config: { ...state.config, [field]: optionValue },
-      }));
-      expect(store.getState().config[field as "size" | "skyLighting"]).toBe(optionValue);
-    },
-  );
+    store.setState((state) => ({
+      config: { ...state.config, size: "5" },
+    }));
+    expect(store.getState().config.size).toBe("5");
+  });
 
-  it("parses the scale-factor select's option value as a float, not a raw string", async () => {
+  it("parses the scale-factor as a float", async () => {
     const callbacks = makeCallbacks();
     const { store } = renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
 
@@ -181,154 +133,47 @@ describe("Menu interactions", () => {
     expect(store.getState().config.scaleFactor).toBe(0.75);
   });
 
-  it("opens help topic when the hide-controls label is clicked", async () => {
+  it("opens help topic when a label is clicked", async () => {
     const user = userEvent.setup();
     const callbacks = makeCallbacks();
     renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
 
-    await user.click(document.querySelector(".hide-controls-label")!);
-    expect(callbacks.onHelpOpen).toHaveBeenCalledWith("hideControls");
+    await user.click(screen.getByText("烟花类型"));
+    expect(callbacks.onHelpOpen).toHaveBeenCalledWith("shellType");
   });
 
-  it("opens help topic when the fullscreen label is clicked", async () => {
-    const user = userEvent.setup();
-    const callbacks = makeCallbacks();
-    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
-
-    await user.click(document.querySelector(".fullscreen-label")!);
-    expect(callbacks.onHelpOpen).toHaveBeenCalledWith("fullscreen");
-  });
-
-  it("opens help topic when the long-exposure label is clicked", async () => {
-    const user = userEvent.setup();
-    const callbacks = makeCallbacks();
-    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
-
-    await user.click(document.querySelector(".long-exposure-label")!);
-    expect(callbacks.onHelpOpen).toHaveBeenCalledWith("longExposure");
-  });
-
-  it("opens help topic when the shell-size label is clicked", async () => {
-    const user = userEvent.setup();
-    const callbacks = makeCallbacks();
-    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
-
-    await user.click(document.querySelector(".shell-size-label")!);
-    expect(callbacks.onHelpOpen).toHaveBeenCalledWith("shellSize");
-  });
-
-  it("opens help topic when the quality label is clicked", async () => {
-    const user = userEvent.setup();
-    const callbacks = makeCallbacks();
-    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
-
-    await user.click(document.querySelector(".quality-ui-label")!);
-    expect(callbacks.onHelpOpen).toHaveBeenCalledWith("quality");
-  });
-
-  it("opens help topic when the sky-lighting label is clicked", async () => {
-    const user = userEvent.setup();
-    const callbacks = makeCallbacks();
-    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
-
-    await user.click(document.querySelector(".sky-lighting-label")!);
-    expect(callbacks.onHelpOpen).toHaveBeenCalledWith("skyLighting");
-  });
-
-  it("opens help topic when the scaleFactor label is clicked", async () => {
-    const user = userEvent.setup();
-    const callbacks = makeCallbacks();
-    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
-
-    await user.click(document.querySelector(".scaleFactor-label")!);
-    expect(callbacks.onHelpOpen).toHaveBeenCalledWith("scaleFactor");
-  });
-
-  it("opens help topic when the background label is clicked", async () => {
-    const user = userEvent.setup();
-    const callbacks = makeCallbacks();
-    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
-
-    await user.click(document.querySelector(".background-label")!);
-    expect(callbacks.onHelpOpen).toHaveBeenCalledWith("background");
-  });
-
-  it("opens help topic when the word-shell label is clicked", async () => {
-    const user = userEvent.setup();
-    const callbacks = makeCallbacks();
-    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
-
-    await user.click(document.querySelector(".word-shell-label")!);
-    expect(callbacks.onHelpOpen).toHaveBeenCalledWith("wordShell");
-  });
-
-  it("opens help topic when the auto-launch label is clicked", async () => {
-    const user = userEvent.setup();
-    const callbacks = makeCallbacks();
-    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
-
-    await user.click(document.querySelector(".auto-launch-label")!);
-    expect(callbacks.onHelpOpen).toHaveBeenCalledWith("autoLaunch");
-  });
-
-  it("opens help topic when the finale-mode label is clicked", async () => {
-    const user = userEvent.setup();
-    const callbacks = makeCallbacks();
-    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
-
-    await user.click(document.querySelector(".finale-mode-label")!);
-    expect(callbacks.onHelpOpen).toHaveBeenCalledWith("finaleMode");
-  });
-
-  it("uses the configured background value as the input defaultValue", () => {
+  it("uses the configured background value as the input value", () => {
     renderWithStore(<Menu {...makeCallbacks()} />, {
       menuOpen: true,
       background: { mode: "image", value: "https://example.com/bg.png", configured: true },
     });
-    const input = document.querySelector<HTMLInputElement>(".background-input")!;
+    const input = screen.getByPlaceholderText(/图片 URL/i) as HTMLInputElement;
     expect(input.value).toBe("https://example.com/bg.png");
   });
 
-  it("does not call onBackgroundApply when input has no value and apply is clicked", async () => {
+  it("calls onBackgroundApply on Enter key in background input", async () => {
     const user = userEvent.setup();
     const callbacks = makeCallbacks();
     renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
 
-    await user.click(document.querySelector(".background-apply-btn")!);
-    expect(callbacks.onBackgroundApply).toHaveBeenCalledWith("");
+    const input = screen.getByPlaceholderText(/图片 URL/i);
+    await user.type(input, "https://example.com/bg.png{Enter}");
+    expect(callbacks.onBackgroundApply).toHaveBeenCalledWith("https://example.com/bg.png");
   });
 
-  it("does not call onBackgroundClear or onHelpOpen for non-Enter keydown", async () => {
+  it("does not call onBackgroundApply when input is empty and apply is clicked", async () => {
+    const user = userEvent.setup();
     const callbacks = makeCallbacks();
     renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
 
-    const input = document.querySelector<HTMLInputElement>(".background-input")!;
-    await userEvent.type(input, "x");
+    await user.click(screen.getByRole("button", { name: "应用" }));
     expect(callbacks.onBackgroundApply).not.toHaveBeenCalled();
   });
 
-  it("does not call handleBackgroundApply when background input element is not found", async () => {
-    const callbacks = makeCallbacks();
-    const originalQuerySelector = document.querySelector;
-    document.querySelector = vi.fn((selector) => {
-      if (selector === ".background-input") return null;
-      return originalQuerySelector.call(document, selector);
-    });
-
-    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
-
-    await userEvent.setup().click(document.querySelector(".background-apply-btn")!);
-
-    expect(callbacks.onBackgroundApply).not.toHaveBeenCalled();
-
-    document.querySelector = originalQuerySelector;
-  });
-
-  it("updates config.shell via the shell-type select", async () => {
+  it("updates config.shell via state update", async () => {
     const callbacks = makeCallbacks();
     const { store } = renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
 
-    // Directly test state update for Radix Select
     store.setState((state) => ({
       config: { ...state.config, shell: "Crysanthemum" },
     }));

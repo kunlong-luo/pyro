@@ -156,6 +156,24 @@
     left: 0;
     right: 0;
     transition: opacity 0.3s;
+    overflow-y: auto;
+    padding: 20px 0;
+  }
+  .menu__cards {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    max-width: 420px;
+    padding: 0 16px;
+  }
+  .menu__footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding-bottom: 16px;
   }
   .menu__header {
     margin-top: 5px;

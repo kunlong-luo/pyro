@@ -1,12 +1,6 @@
 "use client";
 
-/**
- * Initial loading screen — 100% pixel-perfect port of
- * legacy.index.html lines 45-48.
- *
- * The engine's init() removes this node from the DOM after
- * sound preloading completes.
- */
+import { motion } from "framer-motion";
 
 export interface LoadingInitProps {
   status?: string;
@@ -15,8 +9,46 @@ export interface LoadingInitProps {
 export function LoadingInit({ status = "正在装配烟花" }: LoadingInitProps) {
   return (
     <div className="loading-init">
-      <div className="loading-init__header">加载中</div>
-      <div className="loading-init__status">{status}</div>
+      <motion.div
+        className="loading-init__spinner"
+        animate={{ rotate: 360 }}
+        transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+      >
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <circle
+            cx="24"
+            cy="24"
+            r="20"
+            stroke="rgba(255,255,255,0.15)"
+            strokeWidth="4"
+          />
+          <circle
+            cx="24"
+            cy="24"
+            r="20"
+            stroke="rgba(255,255,255,0.7)"
+            strokeWidth="4"
+            strokeLinecap="round"
+            strokeDasharray="80 45"
+          />
+        </svg>
+      </motion.div>
+      <motion.div
+        className="loading-init__header"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        加载中
+      </motion.div>
+      <motion.div
+        className="loading-init__status"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.75 }}
+        transition={{ delay: 0.4 }}
+      >
+        {status}
+      </motion.div>
     </div>
   );
 }

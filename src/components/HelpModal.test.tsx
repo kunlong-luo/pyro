@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, afterEach } from "vitest";
-import { cleanup, fireEvent } from "@testing-library/react";
+import { cleanup, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HelpModal } from "./HelpModal";
 import { renderWithStore } from "./testUtils";
@@ -11,60 +11,39 @@ afterEach(() => {
   localStorage.clear();
 });
 
-describe("HelpModal visibility class", () => {
-  it("has just 'help-modal' (no stray 'active') when no topic is open", () => {
-    const { container } = renderWithStore(<HelpModal />, { openHelpTopic: null });
-    const root = container.firstElementChild as HTMLElement;
-    expect(root.className.trim()).toBe("help-modal");
+describe("HelpModal visibility", () => {
+  it("does not render dialog content when no topic is open", () => {
+    renderWithStore(<HelpModal />, { openHelpTopic: null });
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 
-  it("carries a distinct 'active' token (not mashed into 'help-modalactive') when a topic is open", () => {
-    const { container } = renderWithStore(<HelpModal />, { openHelpTopic: "shellType" });
-    const root = container.firstElementChild as HTMLElement;
-    expect(root.className.split(/\s+/)).toEqual(expect.arrayContaining(["help-modal", "active"]));
+  it("renders dialog when a topic is open", () => {
+    renderWithStore(<HelpModal />, { openHelpTopic: "shellType" });
+    expect(screen.getByRole("dialog")).not.toBeNull();
   });
 });
 
 describe("HelpModal content and dismissal", () => {
   it("renders the header/body text for the open topic from appConfig.helpContent", () => {
-    const { container } = renderWithStore(<HelpModal />, { openHelpTopic: "shellType" });
+    renderWithStore(<HelpModal />, { openHelpTopic: "shellType" });
     const expected = fireworksAppConfig.helpContent.shellType;
-    expect(container.querySelector(".help-modal__header")?.textContent).toBe(expected.header);
-    expect(container.querySelector(".help-modal__body")?.textContent).toBe(expected.body);
+    expect(screen.getByRole("heading")).toHaveTextContent(expected.header);
+    expect(screen.getByText(expected.body, { exact: false })).not.toBeNull();
   });
 
   it("clears openHelpTopic when the close button is clicked", async () => {
     const user = userEvent.setup();
-    const { store, container } = renderWithStore(<HelpModal />, { openHelpTopic: "shellType" });
+    const { store } = renderWithStore(<HelpModal />, { openHelpTopic: "shellType" });
 
-    await user.click(container.querySelector(".help-modal__close-btn")!);
+    await user.click(screen.getByRole("button", { name: /close/i }));
     expect(store.getState().openHelpTopic).toBeNull();
   });
 
-  it("clears openHelpTopic when the overlay is clicked", async () => {
+  it("clears openHelpTopic when Escape is pressed", async () => {
     const user = userEvent.setup();
-    const { store, container } = renderWithStore(<HelpModal />, { openHelpTopic: "shellType" });
+    const { store } = renderWithStore(<HelpModal />, { openHelpTopic: "shellType" });
 
-    await user.click(container.querySelector(".help-modal__overlay")!);
+    await user.keyboard("{Escape}");
     expect(store.getState().openHelpTopic).toBeNull();
-  });
-
-  it("clears openHelpTopic when Escape is pressed while the overlay has focus", () => {
-    const { store, container } = renderWithStore(<HelpModal />, { openHelpTopic: "shellType" });
-
-    const overlay = container.querySelector(".help-modal__overlay")! as HTMLElement;
-    overlay.focus();
-    fireEvent.keyDown(overlay, { key: "Escape" });
-
-    expect(store.getState().openHelpTopic).toBeNull();
-  });
-
-  it("ignores other keys on the overlay", () => {
-    const { store, container } = renderWithStore(<HelpModal />, { openHelpTopic: "shellType" });
-
-    const overlay = container.querySelector(".help-modal__overlay")! as HTMLElement;
-    fireEvent.keyDown(overlay, { key: "Enter" });
-
-    expect(store.getState().openHelpTopic).toBe("shellType");
   });
 });

@@ -1,22 +1,12 @@
 "use client";
 
-/**
- * Settings menu — Modernized with shadcn/ui components
- *
- * Form with 5 selects, background input + apply/clear,
- * 6 toggles, close button, credits footer.
- *
- * Reads via Zustand selectors, writes via store.setState,
- * fires onConfigChange callback for side effects.
- */
-
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useStore } from "zustand";
 import { motion, AnimatePresence } from "framer-motion";
 import { useFireworksStore } from "@/stores/storeContext";
 import { fireworksAppConfig } from "@/config/appConfig";
 import { shellNames } from "@/fireworks/shells";
-import type { FireworksConfig } from "@/stores/fireworksStore";
+import { buildDefaultConfig, type FireworksConfig } from "@/stores/fireworksStore";
 import type { HelpContent } from "@/types/app";
 import { Icon } from "./Icons";
 import {
@@ -28,10 +18,8 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-
-// ---------------------------------------------------------------------------
-// Option data (mirrors populateAppControls in engine.js)
-// ---------------------------------------------------------------------------
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 const SHELL_SIZE_OPTIONS = ['3"', '4"', '6"', '8"', '12"', '16"'].map((label, index) => ({
   value: String(index),
@@ -58,9 +46,14 @@ const SCALE_FACTOR_OPTIONS = fireworksAppConfig.scaleFactorOptions.map((value) =
   label: `${value * 100}%`,
 }));
 
-// ---------------------------------------------------------------------------
-// Props
-// ---------------------------------------------------------------------------
+const BACKGROUND_PRESETS = [
+  { label: "星空", value: "linear-gradient(180deg, #0a0a2e 0%, #1a1a4e 50%, #0d0d3d 100%)" },
+  { label: "暮色", value: "linear-gradient(180deg, #1a0533 0%, #2d1b4e 40%, #0f0a1e 100%)" },
+  { label: "深海", value: "linear-gradient(180deg, #001428 0%, #002850 50%, #001428 100%)" },
+  { label: "暗夜", value: "linear-gradient(180deg, #000000 0%, #0a0a0a 50%, #000000 100%)" },
+  { label: "极光", value: "linear-gradient(135deg, #0a1628 0%, #1a3a5c 30%, #0d2847 60%, #061220 100%)" },
+  { label: "紫霞", value: "linear-gradient(135deg, #1a0533 0%, #3d1a5c 40%, #1a0533 100%)" },
+];
 
 export interface MenuProps {
   onConfigChange: (config: FireworksConfig) => void;
@@ -70,10 +63,6 @@ export interface MenuProps {
   onHelpOpen: (topic: keyof HelpContent) => void;
   onClose: () => void;
 }
-
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
 
 export function Menu({
   onConfigChange,
@@ -89,10 +78,9 @@ export function Menu({
   const fullscreen = useStore(store, (s) => s.fullscreen);
   const background = useStore(store, (s) => s.background);
 
-  // Local state for background input value
-  const backgroundValue = background.configured ? background.value : "";
-
-  // ---- helpers ----
+  const [backgroundInput, setBackgroundInput] = useState(
+    background.configured ? background.value : "",
+  );
 
   const updateConfig = useCallback(
     (patch: Partial<FireworksConfig>) => {
@@ -103,8 +91,6 @@ export function Menu({
     },
     [store, onConfigChange],
   );
-
-  // ---- event handlers ----
 
   const handleSelectChange = useCallback(
     (field: keyof FireworksConfig, value: string) => {
@@ -124,28 +110,6 @@ export function Menu({
     [updateConfig],
   );
 
-  const handleBackgroundApply = useCallback(
-    (value: string) => {
-      onBackgroundApply(value);
-    },
-    [onBackgroundApply],
-  );
-
-  const handleBackgroundClear = useCallback(() => {
-    onBackgroundClear();
-  }, [onBackgroundClear]);
-
-  const handleBackgroundKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        const target = e.currentTarget;
-        handleBackgroundApply(target.value);
-      }
-    },
-    [handleBackgroundApply],
-  );
-
   const handleHelpClick = useCallback(
     (topic: keyof HelpContent) => {
       onHelpOpen(topic);
@@ -153,7 +117,45 @@ export function Menu({
     [onHelpOpen],
   );
 
+  const handlePresetClick = useCallback(
+    (value: string) => {
+      setBackgroundInput(value);
+      onBackgroundApply(value);
+    },
+    [onBackgroundApply],
+  );
+
+  const handleCustomBackgroundApply = useCallback(() => {
+    if (backgroundInput.trim()) {
+      onBackgroundApply(backgroundInput.trim());
+    }
+  }, [backgroundInput, onBackgroundApply]);
+
+  const handleResetDefaults = useCallback(() => {
+    const runtime = {
+      isDesktop: window.innerWidth >= 840,
+      isHeader: false,
+      isHighEndDevice: navigator.hardwareConcurrency >= 8,
+      defaultScaleFactor: 1,
+      fullscreen: false,
+    };
+    const defaults = buildDefaultConfig(runtime);
+    store.setState({ config: defaults });
+    onConfigChange(defaults);
+    onBackgroundClear();
+    setBackgroundInput("");
+  }, [store, onConfigChange, onBackgroundClear]);
+
   const isHidden = !menuOpen;
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: { delay: i * 0.08, duration: 0.3 },
+    }),
+  };
 
   return (
     <AnimatePresence>
@@ -183,282 +185,251 @@ export function Menu({
             <div className="menu__header">设置</div>
             <div className="menu__subheader">若想了解更多信息 请点击任意标签</div>
 
-            <form>
-          {/* ---- 烟花类型 ---- */}
-          <div className="form-option form-option--select">
-            <Label
-              className="shell-type-label cursor-pointer"
-              htmlFor="shell-type"
-              onClick={() => handleHelpClick("shellType")}
-            >
-              烟花类型
-            </Label>
-            <Select value={config.shell} onValueChange={(v) => handleSelectChange("shell", v)}>
-              <SelectTrigger id="shell-type" className="w-[180px] bg-black/50 border-white/20 text-white/70">
-                <SelectValue placeholder="选择烟花类型" />
-              </SelectTrigger>
-              <SelectContent className="bg-black/90 border-white/20">
-                {shellNames.map((name) => (
-                  <SelectItem key={name} value={name} className="text-white/70 focus:text-white focus:bg-white/10">
-                    {name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+            <div className="menu__cards">
+              <motion.div custom={0} variants={cardVariants} initial="hidden" animate="visible">
+                <Card className="bg-white/5 border-white/10">
+                  <CardHeader>
+                    <CardTitle className="text-white/90">烟花设置</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="form-option form-option--select">
+                      <Label className="shell-type-label cursor-pointer text-white/70" onClick={() => handleHelpClick("shellType")}>
+                        烟花类型
+                      </Label>
+                      <Select value={config.shell} onValueChange={(v) => handleSelectChange("shell", v)}>
+                        <SelectTrigger className="w-[180px] bg-black/50 border-white/20 text-white/70">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-black/90 border-white/20">
+                          {shellNames.map((name) => (
+                            <SelectItem key={name} value={name} className="text-white/70 focus:text-white focus:bg-white/10">
+                              {name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-          {/* ---- 烟花大小 ---- */}
-          <div className="form-option form-option--select">
-            <Label
-              className="shell-size-label cursor-pointer"
-              htmlFor="shell-size"
-              onClick={() => handleHelpClick("shellSize")}
-            >
-              烟花大小
-            </Label>
-            <Select value={config.size} onValueChange={(v) => handleSelectChange("size", v)}>
-              <SelectTrigger id="shell-size" className="w-[180px] bg-black/50 border-white/20 text-white/70">
-                <SelectValue placeholder="选择大小" />
-              </SelectTrigger>
-              <SelectContent className="bg-black/90 border-white/20">
-                {SHELL_SIZE_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value} className="text-white/70 focus:text-white focus:bg-white/10">
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+                    <div className="form-option form-option--select">
+                      <Label className="shell-size-label cursor-pointer text-white/70" onClick={() => handleHelpClick("shellSize")}>
+                        烟花大小
+                      </Label>
+                      <Select value={config.size} onValueChange={(v) => handleSelectChange("size", v)}>
+                        <SelectTrigger className="w-[180px] bg-black/50 border-white/20 text-white/70">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-black/90 border-white/20">
+                          {SHELL_SIZE_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value} className="text-white/70 focus:text-white focus:bg-white/10">
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-          {/* ---- 画质 ---- */}
-          <div className="form-option form-option--select">
-            <Label
-              className="quality-ui-label cursor-pointer"
-              htmlFor="quality-ui"
-              onClick={() => handleHelpClick("quality")}
-            >
-              画质
-            </Label>
-            <Select value={config.quality} onValueChange={(v) => handleSelectChange("quality", v)}>
-              <SelectTrigger id="quality-ui" className="w-[180px] bg-black/50 border-white/20 text-white/70">
-                <SelectValue placeholder="选择画质" />
-              </SelectTrigger>
-              <SelectContent className="bg-black/90 border-white/20">
-                {QUALITY_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value} className="text-white/70 focus:text-white focus:bg-white/10">
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+                    <div className="form-option form-option--select">
+                      <Label className="quality-ui-label cursor-pointer text-white/70" onClick={() => handleHelpClick("quality")}>
+                        画质
+                      </Label>
+                      <Select value={config.quality} onValueChange={(v) => handleSelectChange("quality", v)}>
+                        <SelectTrigger className="w-[180px] bg-black/50 border-white/20 text-white/70">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-black/90 border-white/20">
+                          {QUALITY_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value} className="text-white/70 focus:text-white focus:bg-white/10">
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
 
-          {/* ---- 照亮天空 ---- */}
-          <div className="form-option form-option--select">
-            <Label
-              className="sky-lighting-label cursor-pointer"
-              htmlFor="sky-lighting"
-              onClick={() => handleHelpClick("skyLighting")}
-            >
-              照亮天空
-            </Label>
-            <Select value={config.skyLighting} onValueChange={(v) => handleSelectChange("skyLighting", v)}>
-              <SelectTrigger id="sky-lighting" className="w-[180px] bg-black/50 border-white/20 text-white/70">
-                <SelectValue placeholder="选择照亮模式" />
-              </SelectTrigger>
-              <SelectContent className="bg-black/90 border-white/20">
-                {SKY_LIGHTING_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value} className="text-white/70 focus:text-white focus:bg-white/10">
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+              <motion.div custom={1} variants={cardVariants} initial="hidden" animate="visible">
+                <Card className="bg-white/5 border-white/10">
+                  <CardHeader>
+                    <CardTitle className="text-white/90">显示设置</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="form-option form-option--select">
+                      <Label className="sky-lighting-label cursor-pointer text-white/70" onClick={() => handleHelpClick("skyLighting")}>
+                        照亮天空
+                      </Label>
+                      <Select value={config.skyLighting} onValueChange={(v) => handleSelectChange("skyLighting", v)}>
+                        <SelectTrigger className="w-[180px] bg-black/50 border-white/20 text-white/70">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-black/90 border-white/20">
+                          {SKY_LIGHTING_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value} className="text-white/70 focus:text-white focus:bg-white/10">
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-          {/* ---- 缩放 ---- */}
-          <div className="form-option form-option--select">
-            <Label
-              className="scaleFactor-label cursor-pointer"
-              htmlFor="scaleFactor"
-              onClick={() => handleHelpClick("scaleFactor")}
-            >
-              缩放
-            </Label>
-            <Select
-              value={config.scaleFactor.toFixed(2)}
-              onValueChange={(v) => handleSelectChange("scaleFactor", v)}
-            >
-              <SelectTrigger id="scaleFactor" className="w-[180px] bg-black/50 border-white/20 text-white/70">
-                <SelectValue placeholder="选择缩放" />
-              </SelectTrigger>
-              <SelectContent className="bg-black/90 border-white/20">
-                {SCALE_FACTOR_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value} className="text-white/70 focus:text-white focus:bg-white/10">
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+                    <div className="form-option form-option--select">
+                      <Label className="scaleFactor-label cursor-pointer text-white/70" onClick={() => handleHelpClick("scaleFactor")}>
+                        缩放
+                      </Label>
+                      <Select value={config.scaleFactor.toFixed(2)} onValueChange={(v) => handleSelectChange("scaleFactor", v)}>
+                        <SelectTrigger className="w-[180px] bg-black/50 border-white/20 text-white/70">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-black/90 border-white/20">
+                          {SCALE_FACTOR_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value} className="text-white/70 focus:text-white focus:bg-white/10">
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-          {/* ---- 自定义背景 ---- */}
-          <div className="form-option form-option--stacked">
-            <label
-              className="background-label"
-              htmlFor="background-input"
-              onClick={() => handleHelpClick("background")}
-            >
-              自定义背景
-            </label>
-            <div className="form-option__content">
-              <input
-                id="background-input"
-                className="background-input"
-                type="text"
-                placeholder="图片地址，或 linear-gradient(...)"
-                autoComplete="off"
-                spellCheck={false}
-                defaultValue={backgroundValue}
-                onKeyDown={handleBackgroundKeyDown}
-              />
-              <div className="form-option__actions">
-                <button
-                  className="background-apply-btn"
-                  type="button"
-                  onClick={() => {
-                    const input = document.querySelector<HTMLInputElement>(".background-input");
-                    if (input) handleBackgroundApply(input.value);
-                  }}
-                >
-                  应用
-                </button>
-                <button
-                  className="background-clear-btn"
-                  type="button"
-                  onClick={handleBackgroundClear}
-                >
-                  清除
-                </button>
-              </div>
-              <div className="background-status" aria-live="polite" />
+                    <div className="form-option form-option--checkbox">
+                      <Label htmlFor="long-exposure" className="long-exposure-label cursor-pointer text-white/70" onClick={() => handleHelpClick("longExposure")}>
+                        保留烟花的火花
+                      </Label>
+                      <Switch id="long-exposure" checked={config.longExposure} onCheckedChange={(checked) => handleCheckboxChange("longExposure", checked)} />
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              <motion.div custom={2} variants={cardVariants} initial="hidden" animate="visible">
+                <Card className="bg-white/5 border-white/10">
+                  <CardHeader>
+                    <CardTitle className="text-white/90">特效设置</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="form-option form-option--checkbox">
+                      <Label htmlFor="word-shell" className="word-shell-label cursor-pointer text-white/70" onClick={() => handleHelpClick("wordShell")}>
+                        文字烟花
+                      </Label>
+                      <Switch id="word-shell" checked={config.wordShell} onCheckedChange={(checked) => handleCheckboxChange("wordShell", checked)} />
+                    </div>
+
+                    <div className="form-option form-option--checkbox">
+                      <Label htmlFor="auto-launch" className="auto-launch-label cursor-pointer text-white/70" onClick={() => handleHelpClick("autoLaunch")}>
+                        自动放烟花
+                      </Label>
+                      <Switch id="auto-launch" checked={config.autoLaunch} onCheckedChange={(checked) => handleCheckboxChange("autoLaunch", checked)} />
+                    </div>
+
+                    <div className={`form-option form-option--checkbox ${config.autoLaunch ? "opacity-100" : "opacity-40"}`}>
+                      <Label htmlFor="finale-mode" className="finale-mode-label cursor-pointer text-white/70" onClick={() => handleHelpClick("finaleMode")}>
+                        同时放更多的烟花
+                      </Label>
+                      <Switch id="finale-mode" checked={config.finale} onCheckedChange={(checked) => handleCheckboxChange("finale", checked)} />
+                    </div>
+
+                    <div className="form-option form-option--checkbox">
+                      <Label htmlFor="hide-controls" className="hide-controls-label cursor-pointer text-white/70" onClick={() => handleHelpClick("hideControls")}>
+                        隐藏控制按钮
+                      </Label>
+                      <Switch id="hide-controls" checked={config.hideControls} onCheckedChange={(checked) => handleCheckboxChange("hideControls", checked)} />
+                    </div>
+
+                    <div className="form-option form-option--checkbox">
+                      <Label htmlFor="fullscreen" className="fullscreen-label cursor-pointer text-white/70" onClick={() => handleHelpClick("fullscreen")}>
+                        全屏
+                      </Label>
+                      <Switch id="fullscreen" checked={fullscreen} onCheckedChange={onToggleFullscreen} />
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              <motion.div custom={3} variants={cardVariants} initial="hidden" animate="visible">
+                <Card className="bg-white/5 border-white/10">
+                  <CardHeader>
+                    <CardTitle className="text-white/90">背景设置</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-3 gap-2">
+                      {BACKGROUND_PRESETS.map((preset) => (
+                        <button
+                          key={preset.label}
+                          type="button"
+                          className="h-12 rounded-md border border-white/20 text-xs text-white/70 hover:border-white/40 hover:text-white transition-colors"
+                          style={{ background: preset.value }}
+                          onClick={() => handlePresetClick(preset.value)}
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-white/70 text-xs">自定义背景</Label>
+                      <input
+                        className="background-input w-full h-9 px-3 rounded-md bg-black/50 border border-white/20 text-white/70 text-sm placeholder:text-white/30 focus:outline-none focus:border-white/40"
+                        type="text"
+                        placeholder="图片 URL 或 CSS 渐变..."
+                        value={backgroundInput}
+                        onChange={(e) => setBackgroundInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleCustomBackgroundApply();
+                          }
+                        }}
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 border-white/20 text-white/70 hover:bg-white/10 hover:text-white"
+                          onClick={handleCustomBackgroundApply}
+                        >
+                          应用
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 border-white/20 text-white/70 hover:bg-white/10 hover:text-white"
+                          onClick={() => {
+                            onBackgroundClear();
+                            setBackgroundInput("");
+                          }}
+                        >
+                          清除
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
             </div>
-          </div>
 
-          {/* ---- 文字烟花 ---- */}
-          <div className="form-option form-option--checkbox">
-            <Label
-              className="word-shell-label cursor-pointer"
-              htmlFor="word-shell"
-              onClick={() => handleHelpClick("wordShell")}
-            >
-              文字烟花
-            </Label>
-            <Switch
-              id="word-shell"
-              checked={config.wordShell}
-              onCheckedChange={(checked) => handleCheckboxChange("wordShell", checked)}
-            />
-          </div>
-
-          {/* ---- 自动放烟花 ---- */}
-          <div className="form-option form-option--checkbox">
-            <Label
-              className="auto-launch-label cursor-pointer"
-              htmlFor="auto-launch"
-              onClick={() => handleHelpClick("autoLaunch")}
-            >
-              自动放烟花
-            </Label>
-            <Switch
-              id="auto-launch"
-              checked={config.autoLaunch}
-              onCheckedChange={(checked) => handleCheckboxChange("autoLaunch", checked)}
-            />
-          </div>
-
-          {/* ---- 同时放更多的烟花 ---- */}
-          <div
-            className={`form-option form-option--checkbox form-option--finale-mode ${
-              config.autoLaunch ? "opacity-100" : "opacity-[0.32]"
-            }`}
-          >
-            <Label
-              className="finale-mode-label cursor-pointer"
-              htmlFor="finale-mode"
-              onClick={() => handleHelpClick("finaleMode")}
-            >
-              同时放更多的烟花
-            </Label>
-            <Switch
-              id="finale-mode"
-              checked={config.finale}
-              onCheckedChange={(checked) => handleCheckboxChange("finale", checked)}
-            />
-          </div>
-
-          {/* ---- 隐藏控制按钮 ---- */}
-          <div className="form-option form-option--checkbox">
-            <Label
-              className="hide-controls-label cursor-pointer"
-              htmlFor="hide-controls"
-              onClick={() => handleHelpClick("hideControls")}
-            >
-              隐藏控制按钮
-            </Label>
-            <Switch
-              id="hide-controls"
-              checked={config.hideControls}
-              onCheckedChange={(checked) => handleCheckboxChange("hideControls", checked)}
-            />
-          </div>
-
-          {/* ---- 全屏 ---- */}
-          <div className="form-option form-option--checkbox form-option--fullscreen">
-            <Label
-              className="fullscreen-label cursor-pointer"
-              htmlFor="fullscreen"
-              onClick={() => handleHelpClick("fullscreen")}
-            >
-              全屏
-            </Label>
-            <Switch
-              id="fullscreen"
-              checked={fullscreen}
-              onCheckedChange={onToggleFullscreen}
-            />
-          </div>
-
-          {/* ---- 保留烟花的火花 ---- */}
-          <div className="form-option form-option--checkbox">
-            <Label
-              className="long-exposure-label cursor-pointer"
-              htmlFor="long-exposure"
-              onClick={() => handleHelpClick("longExposure")}
-            >
-              保留烟花的火花
-            </Label>
-            <Switch
-              id="long-exposure"
-              checked={config.longExposure}
-              onCheckedChange={(checked) => handleCheckboxChange("longExposure", checked)}
-            />
-          </div>
-        </form>
-
-        {/* ---- Credits ---- */}
-        <div className="credits">
-          <p className="copyright">
-            Copyright&nbsp;&copy;&nbsp;2021 -{" "}
-            <span className="copyright-year">{new Date().getFullYear()}</span>
-            &nbsp;
-            <a target="_blank" href="https://www.nianbroken.top/" rel="noreferrer">
-              碎念_Nian
-            </a>
-            <br />
-            All&nbsp;Rights&nbsp;Reserved
-          </p>
-        </div>
+            <div className="menu__footer">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-white/50 hover:text-white/80"
+                onClick={handleResetDefaults}
+              >
+                恢复默认设置
+              </Button>
+              <div className="credits">
+                <p className="copyright">
+                  Copyright&nbsp;&copy;&nbsp;2021 -{" "}
+                  <span className="copyright-year">{new Date().getFullYear()}</span>
+                  &nbsp;
+                  <a target="_blank" href="https://www.nianbroken.top/" rel="noreferrer">
+                    碎念_Nian
+                  </a>
+                </p>
+              </div>
+            </div>
           </motion.div>
         </motion.div>
       )}
