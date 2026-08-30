@@ -54,36 +54,6 @@
 
 <img src="./Image_Preview.png" alt="Pyro 效果预览" width="800" />
 
-### 弹壳截图 Gallery
-
-<!-- TODO（截好图以后再换）：把下面四个位置分别替换成对应截图的路径。
-     截图小技巧：先勾「隐藏控件」+「长曝光」再截图，画面最干净。 -->
-
-<div align="center">
-<table>
-  <tr>
-    <td width="50%">
-      <img src="./Image_Preview.png" alt="菊花弹壳 Chrysanthemum" width="100%" /><br />
-      🌸 菊花 Chrysanthemum · 经典圆形爆破
-    </td>
-    <td width="50%">
-      <img src="./Image_Preview.png" alt="圆环弹壳 Ring" width="100%" /><br />
-      💍 圆环 Ring · 完美正圆
-    </td>
-  </tr>
-  <tr>
-    <td width="50%">
-      <img src="./Image_Preview.png" alt="文字烟花 Word Burst" width="100%" /><br />
-      🀄 文字烟花 · 点阵汉字
-    </td>
-    <td width="50%">
-      <img src="./Image_Preview.png" alt="自定义背景 + 长曝光" width="100%" /><br />
-      🌌 自定义背景 + 长曝光拖尾
-    </td>
-  </tr>
-</table>
-</div>
-
 ---
 
 ## 🎮 操作说明
@@ -239,71 +209,6 @@ pyro/
 
 ---
 
-## 🧩 菜单选项中英对照
-
-游戏内菜单全部是中文。这里提供一版英文速查表，方便英文用户或自己 fork 到英文社区分享时使用：
-
-| 中文标签   | English       | 说明                                                                                                                                                                                    |
-| ---------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 烟花类型   | Shell Type    | 随机 Random · 菊花 Chrysanthemum · 幽灵 Ghost · 频闪 Strobe · 棕榈 Palm · 圆环 Ring · 十字 Crossette · 花朵 Floral · 落叶 Falling Leaves · 垂柳 Willow · 噼啪 Crackle · 马尾 Horse Tail |
-| 烟花大小   | Shell Size    | 3" · 4" · 6" · 8" · 12" · 16"（越大粒子越多）                                                                                                                                           |
-| 画质       | Quality       | 低 Low · 正常 Normal · 高 High · 低配机器直接降画质                                                                                                                                     |
-| 照亮天空   | Sky Lighting  | 不 None · 暗 Dim · 正常 Normal · 每次爆炸对背景的着色强度                                                                                                                               |
-| 缩放       | Scale Factor  | 50% · 62% · 75% · 90% · 100% · 150% · 200% · 逻辑画布分辨率                                                                                                                             |
-| 文字烟花   | Word Burst    | 开启后每 5 发炸出中文文字粒子                                                                                                                                                           |
-| 自动发射   | Auto Launch   | 开启后自动周期放炮，无需点击                                                                                                                                                            |
-| 连发模式   | Finale Mode   | 开启后不间断 32 发高速压轴，最热闹                                                                                                                                                      |
-| 隐藏控件   | Hide Controls | 隐藏顶栏 —— 任何时候按 **M 键** 都能把菜单叫回来                                                                                                                                        |
-| 全屏       | Fullscreen    | 进入浏览器全屏模式                                                                                                                                                                      |
-| 长曝光     | Long Exposure | 拖尾消退极慢，截图做壁纸神器                                                                                                                                                            |
-| 自定义背景 | Background    | 图片 URL · `url(https://…)` · `linear-gradient(…)` 等 CSS 图像语法                                                                                                                      |
-
----
-
-## 🌐 浏览器兼容
-
-| 浏览器                                 | 最低版本 | 备注                                        |
-| -------------------------------------- | -------- | ------------------------------------------- |
-| **Chrome / Edge (Chromium 内核)**      | 90+      | **推荐。** 全部特性完美支持。               |
-| **Firefox**                            | 88+      | 全部特性完美支持。                          |
-| **Safari (桌面)**                      | 14+      | 音频需首次用户交互（点击/触屏）后才能解锁。 |
-| **Safari (iOS)**                       | 14+      | 同桌面；全屏按钮可能被 iOS 屏蔽。           |
-| **Android WebView / 微信 / QQ 浏览器** | 最新版   | 基本可用；全屏 API 可能被宿主 App 拦截。    |
-
-> ⚠️ **必须 HTTPS。** Web Audio、Fullscreen API、跨域背景图都要求页面走 HTTPS。GitHub Pages 演示站天然是 HTTPS；自己部署的话一定要挂 TLS，否则很多特性会静默降级。
-
----
-
-## ⚙️ 配置修改
-
-### 想自定义默认值？改这一个文件就行
-
-所有冻结默认值都在 `src/config/appConfig.ts`：
-
-```ts
-defaultWords: ["新年快乐", "平安喜乐", "万事顺意"]
-defaultBackground: { mode: "none", value: "" } // 或 mode: "image" + 一张 URL
-wordFontFamily: "Gabriola,华文琥珀"
-wordFontSizeMin: 60, wordFontSizeMax: 130
-wordPointDensity: 3
-wordBurstInterval: 5   // 每 N 发烟花炸一次文字烟花
-qualityLevels: { low: 1, normal: 2, high: 3 }
-skyLightingModes: { none: 0, dim: 1, normal: 2 }
-scaleFactorOptions: [0.5, 0.62, 0.75, 0.9, 1.0, 1.5, 2.0]
-storageKey: "cm_fireworks_data"
-storageVersion: "1.0"
-```
-
-### 运行时会被用户覆盖，且持久化到 localStorage 的部分
-
-- 启动时自动判定画质（`navigator.hardwareConcurrency ≥ 8` → 高；否则 → 正常）：
-  `src/stores/fireworksStore.ts` → `buildDefaultConfig`
-- 默认弹壳大小：桌面 8" · 移动 6" · Header 嵌入 4"
-- 背景回退链：**用户设置（持久化）→ 代码默认值 → 空**
-  详见 `src/lib/backgroundManager.ts` 和 `src/fireworks/background.ts`。
-
----
-
 ## 📦 部署
 
 本项目在 `next.config.ts` 里使用 `output: "export"`，所以 `pnpm build` 会把纯静态产物全部输出到 `out/` 目录。上传到任何静态托管即可。
@@ -393,22 +298,6 @@ storageVersion: "1.0"
 
 ---
 
-## 🛣️ 路线图 Roadmap
-
-以下是规划中的改进项（按大概实现概率排序）：
-
-- [ ] **自定义文字输入**：UI 上直接开个输入框，让用户自己输入文字烟花内容，不用再改源码
-- [ ] **弹壳编辑器**：自由组合 glitter（金粉）/ crackle（噼啪）/ crossette（十字）/ ring（圆环）/ strobe（频闪）/ 双色 等参数，做完全自定义的弹壳类型
-- [ ] **可分享配置**：把当前设置（弹壳 + 大小 + 画质 + 背景）序列化到 URL hash 或 JSON 导出/导入，方便分享最喜欢的搭配
-- [ ] **完整运行时 i18n**：不只是两份 README，菜单里的 12 个中文标签 + 帮助浮层也都翻译成英文 / 日语 / 韩语
-- [ ] **PWA 离线可玩**：接入 next-pwa（或新版 Next.js 内置 PWA 插件），可以安装到桌面，断网也能继续放烟花
-- [ ] **性能浮层**：可开关的 canvas 内 FPS 计数器、实时粒子数量、帧耗时热力条，帮助用户在自己设备上调最佳画质
-- [ ] **编排好的烟花秀**：预置剧本（比如新年 1 分钟完整版序列），页面一加载就自动演完
-
-欢迎到 [Discussions 讨论区](https://github.com/kunlong-luo/pyro/discussions) 投票你最想先看哪一个 —— 或者直接实现一个开 PR，见 [`CONTRIBUTING.md`](./CONTRIBUTING.md)。
-
----
-
 ## 🤝 参与贡献
 
 欢迎提 Bug、提功能想法、发 PR！🎇
@@ -424,16 +313,6 @@ storageVersion: "1.0"
 `Copyright © 2022-2026 kunlong-luo. All rights reserved.`
 
 以 [Apache License 2.0](./LICENSE) 协议发布。你可以自由使用、修改、分发本项目的代码，但前提是在衍生作品中保留原始协议文本与版权声明，并且对所有修改过的代码也要以同样的协议发布。完整条款见 LICENSE 文件。
-
----
-
-## 💝 鸣谢
-
-这个项目的诞生离不开以下前辈：
-
-- 🔥 **MillerTime** —— CodePen 原作 [Firework Simulator v2](https://codepen.io/MillerTime/pen/XgpNwb)，本项目的物理常量与弹壳设计完全 1:1 还原，保证原汁原味手感
-- 🧨 **haodong108** —— Gitee 上的 [haodong108/fireworks-2023](https://gitee.com/haodong108/fireworks-2023)，文字烟花与自定义背景等扩展功能的灵感来源
-- 🎨 所有提过 Bug、发过想法、或者只是截了一张自己最喜欢的 Finale 画面发给我的每一个人
 
 ---
 

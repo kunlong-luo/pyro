@@ -54,36 +54,6 @@
 
 <img src="./Image_Preview.png" alt="Pyro in action" width="800" />
 
-### Shell gallery
-
-<!-- TODO (after you take screenshots): Replace each placeholder image path. -->
-<!-- Screenshot tip: Hide controls + enable long-exposure mode for cleanest look. -->
-
-<div align="center">
-<table>
-  <tr>
-    <td width="50%">
-      <img src="./Image_Preview.png" alt="Chrysanthemum Shell" width="100%" /><br />
-      🌸 Chrysanthemum — classic burst
-    </td>
-    <td width="50%">
-      <img src="./Image_Preview.png" alt="Ring Shell" width="100%" /><br />
-      💍 Ring — perfect circle
-    </td>
-  </tr>
-  <tr>
-    <td width="50%">
-      <img src="./Image_Preview.png" alt="Word Burst" width="100%" /><br />
-      🀄 Word Burst — lattice text fireworks
-    </td>
-    <td width="50%">
-      <img src="./Image_Preview.png" alt="Custom Background + Long Exposure" width="100%" /><br />
-      🌌 Custom background + long exposure
-    </td>
-  </tr>
-</table>
-</div>
-
 ---
 
 ## 🎮 How to Play
@@ -239,71 +209,6 @@ For a detailed explanation of the architecture (why the shell factories work the
 
 ---
 
-## 🧩 Menu Options Reference
-
-The in-game menu is in Chinese. Here's a quick English reference:
-
-| 中文 Label | English       | Notes                                                                                                                       |
-| ---------- | ------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| 烟花类型   | Shell Type    | Random · Chrysanthemum · Ghost · Strobe · Palm · Ring · Crossette · Floral · Falling Leaves · Willow · Crackle · Horse Tail |
-| 烟花大小   | Shell Size    | 3" · 4" · 6" · 8" · 12" · 16"                                                                                               |
-| 画质       | Quality       | Low · Normal · High — trade particle count for frame rate on slow devices                                                   |
-| 照亮天空   | Sky Lighting  | None · Dim · Normal — how much each burst tints the background                                                              |
-| 缩放       | Scale Factor  | 50% · 62% · 75% · 90% · 100% · 150% · 200% — logical canvas resolution                                                      |
-| 文字烟花   | Word Burst    | When on, every 5th shell explodes into Chinese text particles                                                               |
-| 自动发射   | Auto Launch   | When on, shells launch automatically (no clicking required)                                                                 |
-| 连发模式   | Finale Mode   | When on, launches a non-stop 32-shell barrage for big celebrations                                                          |
-| 隐藏控件   | Hide Controls | Hides the top bar — press **M** at any time to bring the menu back                                                          |
-| 全屏       | Fullscreen    | Toggles browser fullscreen mode                                                                                             |
-| 长曝光     | Long Exposure | Trails fade out much slower — perfect for wallpaper screenshots                                                             |
-| 自定义背景 | Background    | Image URL · `url(https://…)` · `linear-gradient(…)` etc.                                                                    |
-
----
-
-## 🌐 Browser Support
-
-| Browser                                   | Minimum version | Notes                                                           |
-| ----------------------------------------- | --------------- | --------------------------------------------------------------- |
-| **Chrome / Edge (Chromium)**              | 90+             | **Recommended.** Full feature support.                          |
-| **Firefox**                               | 88+             | Full feature support.                                           |
-| **Safari (desktop)**                      | 14+             | Audio unlocks on first user interaction (tap / click).          |
-| **Safari (iOS)**                          | 14+             | Same as desktop. Fullscreen button may be hidden by the OS.     |
-| **Android WebView / WeChat / QQ Browser** | latest          | Generally works. Fullscreen API may be blocked by the host app. |
-
-> ⚠️ **HTTPS required.** Web Audio, the Fullscreen API, and cross-origin background images all require the page to be served over HTTPS. The GitHub Pages demo is always HTTPS; if you self-host, put this behind TLS or many features will silently degrade.
-
----
-
-## ⚙️ Configuration
-
-### Default values — tweak these for your fork
-
-All frozen defaults live in `src/config/appConfig.ts`:
-
-```ts
-defaultWords: ["新年快乐", "平安喜乐", "万事顺意"]
-defaultBackground: { mode: "none", value: "" } // or mode: "image" + a URL
-wordFontFamily: "Gabriola,华文琥珀"
-wordFontSizeMin: 60, wordFontSizeMax: 130
-wordPointDensity: 3
-wordBurstInterval: 5   // Every Nth shell becomes a word-burst
-qualityLevels: { low: 1, normal: 2, high: 3 }
-skyLightingModes: { none: 0, dim: 1, normal: 2 }
-scaleFactorOptions: [0.5, 0.62, 0.75, 0.9, 1.0, 1.5, 2.0]
-storageKey: "cm_fireworks_data"
-storageVersion: "1.0"
-```
-
-### Runtime overrides — persisted to `localStorage`
-
-- Quality auto-detect at boot (High on `navigator.hardwareConcurrency ≥ 8`; Normal otherwise):
-  `src/stores/fireworksStore.ts` → `buildDefaultConfig`
-- Shell size default: Desktop → 8", Mobile → 6", Header embed → 4"
-- Background resolution fallback chain: **User value (persisted) → code default → none**
-  See `src/lib/backgroundManager.ts` and `src/fireworks/background.ts`.
-
----
-
 ## 📦 Deployment
 
 The project uses `output: "export"` in `next.config.ts`, so `pnpm build` emits pure static files to `out/`. Deploy them anywhere that serves static assets.
@@ -393,22 +298,6 @@ This is a TypeScript + Next.js rewrite of the original [Firework Simulator v2](h
 
 ---
 
-## 🛣️ Roadmap
-
-Ideas and planned improvements, roughly ordered by likelihood:
-
-- [ ] **Custom-word input** — UI text field so users can enter their own word-burst text without editing source
-- [ ] **Shell editor** — combine glitter, crackle, crossette, ring, strobe, dual-color, etc. to make fully custom shell types
-- [ ] **Shareable configs** — serialise the current settings (shell type + size + quality + backgrounds) into a URL hash or JSON export / import so people can share their favourite looks
-- [ ] **Full runtime i18n** — not just the two READMEs, but actually localise all 12 in-game menu labels + help modals to English / Japanese / Korean and more
-- [ ] **PWA / offline** — add `next-pwa` (or the new built-in Next.js PWA plugin) so the demo is installable and loads without internet
-- [ ] **Performance profiler overlay** — optional on-canvas FPS counter, particle-count counter, and a frame-time heat bar to help tune quality on individual devices
-- [ ] **Auto-firework choreographies** — pre-made scripted shows (e.g. a 1-minute New Year sequence) that run on page load
-
-Vote for your favourites in the [Discussions](https://github.com/kunlong-luo/pyro/discussions) — or implement one and open a PR (see [CONTRIBUTING.md](./CONTRIBUTING.md)).
-
----
-
 ## 🤝 Contributing
 
 Contributions, issues and feature requests are all welcome! 🎇
@@ -424,16 +313,6 @@ For security issues, see [SECURITY.md](./SECURITY.md) — **do not open a public
 `Copyright © 2022-2026 kunlong-luo. All rights reserved.`
 
 Licensed under the [Apache License 2.0](./LICENSE). You are free to use, modify, and distribute this code, provided that you retain the original license and copyright notice in derivative works and publish any modifications under the same license. See the LICENSE file for the full text.
-
----
-
-## 💝 Credits & Acknowledgements
-
-This project would not exist without:
-
-- 🔥 **MillerTime** — the original [Firework Simulator v2](https://codepen.io/MillerTime/pen/XgpNwb) on CodePen, whose physics constants and shell designs were preserved 1:1 for authentic feel
-- 🧨 **haodong108** — [haodong108/fireworks-2023](https://gitee.com/haodong108/fireworks-2023) on Gitee, for the word-burst and custom-background feature inspirations
-- 🎨 Everyone who has reported bugs, sent ideas, or simply shared screenshots of their favourite finales
 
 ---
 
