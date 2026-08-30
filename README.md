@@ -52,7 +52,7 @@
      Recommended (smallest file): <video src="..." autoplay loop muted playsinline width="800"></video>
      Alternative: <img src="./docs/screenshots/finale.gif" alt="Finale mode demo" width="800"> -->
 
-<img src="./Image_Preview.png" alt="Pyro in action" width="800" />
+<img src="./public/images/preview.png" alt="Pyro in action" width="800" />
 
 ---
 

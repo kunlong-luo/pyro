@@ -3,12 +3,18 @@ node_modules/
 
 # Build output
 dist/
+.next/
+out/
 
 # Vite
 .vite/
 
 # IDE
 .idea/
+.vscode/
+*.swp
+*.swo
+*~
 
 # OS
 .DS_Store
@@ -21,17 +27,26 @@ Thumbs.db
 .env
 .env.local
 .env.*.local
+
 # Codegraph & plans
 .codegraph
 .omo/
+
 # Generated
 vite.config.d.ts
 vite.config.d.ts.map
-.next/
-out/
+
+# Test & Coverage
 coverage/
-.playwright-mcp/
 test-results/
 playwright-report/
 blob-report/
+.playwright-mcp/
 playwright/.cache/
+
+# Editor & Tool caches
+.eslintcache
+.prettiercache
+*.log
+*.tmp
+*.bak

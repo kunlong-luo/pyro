@@ -52,7 +52,7 @@
      推荐（体积最小）：<video src="..." autoplay loop muted playsinline width="800"></video>
      备选：<img src="./docs/screenshots/finale.gif" alt="Finale 连发效果演示" width="800"> -->
 
-<img src="./Image_Preview.png" alt="Pyro 效果预览" width="800" />
+<img src="./public/images/preview.png" alt="Pyro 效果预览" width="800" />
 
 ---
 
