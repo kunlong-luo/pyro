@@ -1,11 +1,10 @@
 "use client";
 
 /**
- * Settings menu — 100% pixel-perfect port of
- * legacy.index.html lines 71-143 + CSS lines 141-316.
+ * Settings menu — Modernized with shadcn/ui components
  *
  * Form with 5 selects, background input + apply/clear,
- * 6 checkboxes, close button, credits footer.
+ * 6 toggles, close button, credits footer.
  *
  * Reads via Zustand selectors, writes via store.setState,
  * fires onConfigChange callback for side effects.
@@ -13,12 +12,22 @@
 
 import { useCallback } from "react";
 import { useStore } from "zustand";
+import { motion, AnimatePresence } from "framer-motion";
 import { useFireworksStore } from "@/stores/storeContext";
 import { fireworksAppConfig } from "@/config/appConfig";
 import { shellNames } from "@/fireworks/shells";
 import type { FireworksConfig } from "@/stores/fireworksStore";
 import type { HelpContent } from "@/types/app";
 import { Icon } from "./Icons";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 // ---------------------------------------------------------------------------
 // Option data (mirrors populateAppControls in engine.js)
@@ -147,133 +156,150 @@ export function Menu({
   const isHidden = !menuOpen;
 
   return (
-    <div className={`menu ${isHidden ? "hide" : ""}`}>
-      <div className="menu__inner-wrap">
-        <button
-          className="btn btn--bright close-menu-btn"
-          type="button"
-          aria-label="关闭设置"
-          onClick={onClose}
+    <AnimatePresence>
+      {!isHidden && (
+        <motion.div
+          className="menu"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
         >
-          <Icon name="icon-close" size={24} className="text-white" />
-        </button>
-        <div className="menu__header">设置</div>
-        <div className="menu__subheader">若想了解更多信息 请点击任意标签</div>
+          <motion.div
+            className="menu__inner-wrap"
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            transition={{ duration: 0.2, delay: 0.05 }}
+          >
+            <button
+              className="btn btn--bright close-menu-btn"
+              type="button"
+              aria-label="关闭设置"
+              onClick={onClose}
+            >
+              <Icon name="icon-close" size={24} className="text-white" />
+            </button>
+            <div className="menu__header">设置</div>
+            <div className="menu__subheader">若想了解更多信息 请点击任意标签</div>
 
-        <form>
+            <form>
           {/* ---- 烟花类型 ---- */}
           <div className="form-option form-option--select">
-            <label
-              className="shell-type-label"
+            <Label
+              className="shell-type-label cursor-pointer"
               htmlFor="shell-type"
               onClick={() => handleHelpClick("shellType")}
             >
               烟花类型
-            </label>
-            <select
-              id="shell-type"
-              className="shell-type"
-              value={config.shell}
-              onChange={(e) => handleSelectChange("shell", e.target.value)}
-            >
-              {shellNames.map((name) => (
-                <option key={name} value={name}>
-                  {name}
-                </option>
-              ))}
-            </select>
+            </Label>
+            <Select value={config.shell} onValueChange={(v) => handleSelectChange("shell", v)}>
+              <SelectTrigger id="shell-type" className="w-[180px] bg-black/50 border-white/20 text-white/70">
+                <SelectValue placeholder="选择烟花类型" />
+              </SelectTrigger>
+              <SelectContent className="bg-black/90 border-white/20">
+                {shellNames.map((name) => (
+                  <SelectItem key={name} value={name} className="text-white/70 focus:text-white focus:bg-white/10">
+                    {name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* ---- 烟花大小 ---- */}
           <div className="form-option form-option--select">
-            <label
-              className="shell-size-label"
+            <Label
+              className="shell-size-label cursor-pointer"
               htmlFor="shell-size"
               onClick={() => handleHelpClick("shellSize")}
             >
               烟花大小
-            </label>
-            <select
-              id="shell-size"
-              className="shell-size"
-              value={config.size}
-              onChange={(e) => handleSelectChange("size", e.target.value)}
-            >
-              {SHELL_SIZE_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+            </Label>
+            <Select value={config.size} onValueChange={(v) => handleSelectChange("size", v)}>
+              <SelectTrigger id="shell-size" className="w-[180px] bg-black/50 border-white/20 text-white/70">
+                <SelectValue placeholder="选择大小" />
+              </SelectTrigger>
+              <SelectContent className="bg-black/90 border-white/20">
+                {SHELL_SIZE_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value} className="text-white/70 focus:text-white focus:bg-white/10">
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* ---- 画质 ---- */}
           <div className="form-option form-option--select">
-            <label
-              className="quality-ui-label"
+            <Label
+              className="quality-ui-label cursor-pointer"
               htmlFor="quality-ui"
               onClick={() => handleHelpClick("quality")}
             >
               画质
-            </label>
-            <select
-              id="quality-ui"
-              className="quality-ui"
-              value={config.quality}
-              onChange={(e) => handleSelectChange("quality", e.target.value)}
-            >
-              {QUALITY_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+            </Label>
+            <Select value={config.quality} onValueChange={(v) => handleSelectChange("quality", v)}>
+              <SelectTrigger id="quality-ui" className="w-[180px] bg-black/50 border-white/20 text-white/70">
+                <SelectValue placeholder="选择画质" />
+              </SelectTrigger>
+              <SelectContent className="bg-black/90 border-white/20">
+                {QUALITY_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value} className="text-white/70 focus:text-white focus:bg-white/10">
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* ---- 照亮天空 ---- */}
           <div className="form-option form-option--select">
-            <label
-              className="sky-lighting-label"
+            <Label
+              className="sky-lighting-label cursor-pointer"
               htmlFor="sky-lighting"
               onClick={() => handleHelpClick("skyLighting")}
             >
               照亮天空
-            </label>
-            <select
-              id="sky-lighting"
-              className="sky-lighting"
-              value={config.skyLighting}
-              onChange={(e) => handleSelectChange("skyLighting", e.target.value)}
-            >
-              {SKY_LIGHTING_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+            </Label>
+            <Select value={config.skyLighting} onValueChange={(v) => handleSelectChange("skyLighting", v)}>
+              <SelectTrigger id="sky-lighting" className="w-[180px] bg-black/50 border-white/20 text-white/70">
+                <SelectValue placeholder="选择照亮模式" />
+              </SelectTrigger>
+              <SelectContent className="bg-black/90 border-white/20">
+                {SKY_LIGHTING_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value} className="text-white/70 focus:text-white focus:bg-white/10">
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* ---- 缩放 ---- */}
           <div className="form-option form-option--select">
-            <label
-              className="scaleFactor-label"
+            <Label
+              className="scaleFactor-label cursor-pointer"
               htmlFor="scaleFactor"
               onClick={() => handleHelpClick("scaleFactor")}
             >
               缩放
-            </label>
-            <select
-              id="scaleFactor"
-              className="scaleFactor"
+            </Label>
+            <Select
               value={config.scaleFactor.toFixed(2)}
-              onChange={(e) => handleSelectChange("scaleFactor", e.target.value)}
+              onValueChange={(v) => handleSelectChange("scaleFactor", v)}
             >
-              {SCALE_FACTOR_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger id="scaleFactor" className="w-[180px] bg-black/50 border-white/20 text-white/70">
+                <SelectValue placeholder="选择缩放" />
+              </SelectTrigger>
+              <SelectContent className="bg-black/90 border-white/20">
+                {SCALE_FACTOR_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value} className="text-white/70 focus:text-white focus:bg-white/10">
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* ---- 自定义背景 ---- */}
@@ -321,37 +347,33 @@ export function Menu({
 
           {/* ---- 文字烟花 ---- */}
           <div className="form-option form-option--checkbox">
-            <label
-              className="word-shell-label"
+            <Label
+              className="word-shell-label cursor-pointer"
               htmlFor="word-shell"
               onClick={() => handleHelpClick("wordShell")}
             >
               文字烟花
-            </label>
-            <input
+            </Label>
+            <Switch
               id="word-shell"
-              className="word-shell"
-              type="checkbox"
               checked={config.wordShell}
-              onChange={(e) => handleCheckboxChange("wordShell", e.target.checked)}
+              onCheckedChange={(checked) => handleCheckboxChange("wordShell", checked)}
             />
           </div>
 
           {/* ---- 自动放烟花 ---- */}
           <div className="form-option form-option--checkbox">
-            <label
-              className="auto-launch-label"
+            <Label
+              className="auto-launch-label cursor-pointer"
               htmlFor="auto-launch"
               onClick={() => handleHelpClick("autoLaunch")}
             >
               自动放烟花
-            </label>
-            <input
+            </Label>
+            <Switch
               id="auto-launch"
-              className="auto-launch"
-              type="checkbox"
               checked={config.autoLaunch}
-              onChange={(e) => handleCheckboxChange("autoLaunch", e.target.checked)}
+              onCheckedChange={(checked) => handleCheckboxChange("autoLaunch", checked)}
             />
           </div>
 
@@ -361,73 +383,65 @@ export function Menu({
               config.autoLaunch ? "opacity-100" : "opacity-[0.32]"
             }`}
           >
-            <label
-              className="finale-mode-label"
+            <Label
+              className="finale-mode-label cursor-pointer"
               htmlFor="finale-mode"
               onClick={() => handleHelpClick("finaleMode")}
             >
               同时放更多的烟花
-            </label>
-            <input
+            </Label>
+            <Switch
               id="finale-mode"
-              className="finale-mode"
-              type="checkbox"
               checked={config.finale}
-              onChange={(e) => handleCheckboxChange("finale", e.target.checked)}
+              onCheckedChange={(checked) => handleCheckboxChange("finale", checked)}
             />
           </div>
 
           {/* ---- 隐藏控制按钮 ---- */}
           <div className="form-option form-option--checkbox">
-            <label
-              className="hide-controls-label"
+            <Label
+              className="hide-controls-label cursor-pointer"
               htmlFor="hide-controls"
               onClick={() => handleHelpClick("hideControls")}
             >
               隐藏控制按钮
-            </label>
-            <input
+            </Label>
+            <Switch
               id="hide-controls"
-              className="hide-controls"
-              type="checkbox"
               checked={config.hideControls}
-              onChange={(e) => handleCheckboxChange("hideControls", e.target.checked)}
+              onCheckedChange={(checked) => handleCheckboxChange("hideControls", checked)}
             />
           </div>
 
           {/* ---- 全屏 ---- */}
           <div className="form-option form-option--checkbox form-option--fullscreen">
-            <label
-              className="fullscreen-label"
+            <Label
+              className="fullscreen-label cursor-pointer"
               htmlFor="fullscreen"
               onClick={() => handleHelpClick("fullscreen")}
             >
               全屏
-            </label>
-            <input
+            </Label>
+            <Switch
               id="fullscreen"
-              className="fullscreen"
-              type="checkbox"
               checked={fullscreen}
-              onChange={onToggleFullscreen}
+              onCheckedChange={onToggleFullscreen}
             />
           </div>
 
           {/* ---- 保留烟花的火花 ---- */}
           <div className="form-option form-option--checkbox">
-            <label
-              className="long-exposure-label"
+            <Label
+              className="long-exposure-label cursor-pointer"
               htmlFor="long-exposure"
               onClick={() => handleHelpClick("longExposure")}
             >
               保留烟花的火花
-            </label>
-            <input
+            </Label>
+            <Switch
               id="long-exposure"
-              className="long-exposure"
-              type="checkbox"
               checked={config.longExposure}
-              onChange={(e) => handleCheckboxChange("longExposure", e.target.checked)}
+              onCheckedChange={(checked) => handleCheckboxChange("longExposure", checked)}
             />
           </div>
         </form>
@@ -445,7 +459,9 @@ export function Menu({
             All&nbsp;Rights&nbsp;Reserved
           </p>
         </div>
-      </div>
-    </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

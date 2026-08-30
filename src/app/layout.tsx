@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { metaCsp } from "@/config/csp";
+import { Providers } from "@/components/Providers";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -66,6 +67,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main id="main" className="bg-black text-white">
           {children}
         </main>
+        <Providers />
       </body>
     </html>
   );
