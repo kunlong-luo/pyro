@@ -6,15 +6,22 @@ const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
 
+// GitHub Pages needs basePath + static export; Vercel doesn't
+const isGitHubPages = process.env.NEXT_PUBLIC_DEPLOY_TARGET === "github-pages";
+
 const nextConfig: NextConfig = {
-  output: "export",
+  // Only use static export for GitHub Pages; Vercel supports SSR
+  ...(isGitHubPages && { output: "export" }),
   images: {
     unoptimized: true,
   },
   trailingSlash: true,
   skipTrailingSlashRedirect: true,
-  assetPrefix: process.env.NODE_ENV === "production" ? "/pyro/" : "",
-  basePath: process.env.NODE_ENV === "production" ? "/pyro" : "",
+  // Only set basePath for GitHub Pages (subpath deployment)
+  ...(isGitHubPages && {
+    assetPrefix: "/pyro/",
+    basePath: "/pyro",
+  }),
   // Silence Turbopack warning
   turbopack: {},
   // No-op under output: "export" (no server to send headers from — Next
