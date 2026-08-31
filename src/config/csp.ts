@@ -19,9 +19,7 @@
  * unknown directives), so it was never doing anything either way.
  */
 const allowDevEval = process.env.NODE_ENV === "development";
-const scriptSrc = allowDevEval
-  ? "'self' 'unsafe-inline' 'unsafe-eval'"
-  : "'self' 'unsafe-inline'";
+const scriptSrc = allowDevEval ? "'self' 'unsafe-inline' 'unsafe-eval'" : "'self' 'unsafe-inline'";
 
 const cspDirectives = [
   "default-src 'self'",

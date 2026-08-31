@@ -40,8 +40,8 @@ function ToolbarButton({
         </motion.button>
       </TooltipTrigger>
       <TooltipContent side="bottom" className="border-hairline bg-popover text-popover-foreground">
-        <p className="text-xs text-fg">
-          {label} {shortcut && <span className="ml-1 text-fg-muted">({shortcut})</span>}
+        <p className="text-fg text-xs">
+          {label} {shortcut && <span className="text-fg-muted ml-1">({shortcut})</span>}
         </p>
       </TooltipContent>
     </Tooltip>

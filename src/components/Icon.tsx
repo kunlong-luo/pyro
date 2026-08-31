@@ -1,6 +1,17 @@
 "use client";
 
-import { Play, Pause, X, Settings, Volume2, VolumeX, Maximize, Minimize, Eye, EyeOff } from "lucide-react";
+import {
+  Play,
+  Pause,
+  X,
+  Settings,
+  Volume2,
+  VolumeX,
+  Maximize,
+  Minimize,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 
 // Map of icon names to lucide-react components
 const iconMap = {

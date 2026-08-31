@@ -46,17 +46,17 @@
 
 ## 👀 效果预览
 
-> 👇 **直接点击上方「在线演示」去玩！** 静态图完全看不出效果 —— 进去随手点一下就能放烟花，打开设置勾选 **「连发模式」** 立刻看 32 发 Finale 压轴。
-
-<video src="./public/video/preview.mp4" autoplay loop muted playsinline poster="./public/images/preview.png" width="800" controls style="max-width:100%; border-radius:12px; display:block; margin:0 auto;"></video>
+> 👆 **点击下方 GIF 打开在线演示。** 静态图完全看不出效果 —— 进去随手点一下就能放烟花，打开设置勾选 **「连发模式」** 立刻看 32 发 Finale 压轴。
 
 <p align="center">
-  <sub>视频预览（MP4 · 11 MB，流畅度与画质更佳）—— GIF 备选在下方（15 MB），若两者均未加载请查看 <code>public/images/preview.png</code>。</sub>
+  <a href="https://kunlong-luo.github.io/pyro/">
+    <img src="./public/images/preview.gif" alt="Pyro 烟花绽放 GIF 预览" width="800" style="max-width:100%; border-radius:12px;" />
+  </a>
 </p>
 
 <p align="center">
-<img src="./public/images/preview.gif" alt="Pyro 烟花绽放 GIF 预览" width="800" style="max-width:100%; border-radius:12px;" />
-<p/>
+  <sub>GIF 预览（15 MB）—— 点击打开交互式演示。MP4 版本见 <code>public/video/preview.mp4</code>。</sub>
+</p>
 ---
 
 ## 🎮 操作说明

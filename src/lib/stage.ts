@@ -98,7 +98,7 @@ function ensureCanvasNode(canvas: string | HTMLCanvasElement): HTMLCanvasElement
   if (typeof canvas === "string") {
     const el = document.getElementById(canvas);
     if (!(el instanceof HTMLCanvasElement)) {
-        throw new Error("Missing target canvas node.");
+      throw new Error("Missing target canvas node.");
     }
     return el;
   }

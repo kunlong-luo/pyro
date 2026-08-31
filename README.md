@@ -46,17 +46,17 @@
 
 ## 👀 Preview
 
-> 👇 **Click the banner above to open the live demo.** A static image can't do it justice — click anywhere to launch a firework and try **Finale mode** for the 32-shot barrage.
-
-<video src="./public/video/preview.mp4" autoplay loop muted playsinline poster="./public/images/preview.png" width="800" controls style="max-width:100%; border-radius:12px; display:block; margin:0 auto;"></video>
+> 👆 **Click the GIF below to open the live demo.** A static image can't do it justice — click anywhere to launch a firework and try **Finale mode** for the 32-shot barrage.
 
 <p align="center">
-  <sub>Video preview (MP4 · 11 MB, more fluid and higher fidelity) — GIF fallback below (15 MB). If neither loads, see <code>public/images/preview.png</code>.</sub>
+  <a href="https://kunlong-luo.github.io/pyro/">
+    <img src="./public/images/preview.gif" alt="Pyro fireworks bursting — GIF preview" width="800" style="max-width:100%; border-radius:12px;" />
+  </a>
 </p>
 
 <p align="center">
-<img src="./public/images/preview.gif" alt="Pyro fireworks bursting — GIF preview" width="800" style="max-width:100%; border-radius:12px;" />
-<p>
+  <sub>GIF preview (15 MB) — click to open the interactive demo. For the MP4 version, see <code>public/video/preview.mp4</code>.</sub>
+</p>
 ---
 
 ## 🎮 How to Play

@@ -27,14 +27,14 @@ export function Help() {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-md glass-panel rounded-2xl border-soft">
+      <DialogContent className="glass-panel border-soft max-w-md rounded-2xl">
         <DialogHeader>
-          <DialogTitle className="text-lg font-semibold tracking-tight text-fg">
+          <DialogTitle className="text-fg text-lg font-semibold tracking-tight">
             {content?.header ?? ""}
           </DialogTitle>
           <DialogDescription className="sr-only">帮助信息</DialogDescription>
         </DialogHeader>
-        <div className="text-sm leading-relaxed whitespace-pre-line text-fg-secondary">
+        <div className="text-fg-secondary text-sm leading-relaxed whitespace-pre-line">
           {content?.body ?? ""}
         </div>
       </DialogContent>

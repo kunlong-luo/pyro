@@ -184,7 +184,7 @@ export function Settings({
 
                 <div className="form-option form-option--select">
                   <Label
-                    className="shell-type-label cursor-pointer form-option__label"
+                    className="shell-type-label form-option__label cursor-pointer"
                     onClick={() => handleHelpClick("shellType")}
                   >
                     烟花类型
@@ -193,7 +193,7 @@ export function Settings({
                     value={config.shell}
                     onValueChange={(v) => handleSelectChange("shell", v)}
                   >
-                    <SelectTrigger className="w-[180px] bg-surface-inset border-soft text-fg-secondary focus:ring-ring">
+                    <SelectTrigger className="bg-surface-inset border-soft text-fg-secondary focus:ring-ring w-[180px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-popover border-soft text-popover-foreground">
@@ -212,16 +212,13 @@ export function Settings({
 
                 <div className="form-option form-option--select">
                   <Label
-                    className="shell-size-label cursor-pointer form-option__label"
+                    className="shell-size-label form-option__label cursor-pointer"
                     onClick={() => handleHelpClick("shellSize")}
                   >
                     烟花大小
                   </Label>
-                  <Select
-                    value={config.size}
-                    onValueChange={(v) => handleSelectChange("size", v)}
-                  >
-                    <SelectTrigger className="w-[180px] bg-surface-inset border-soft text-fg-secondary focus:ring-ring">
+                  <Select value={config.size} onValueChange={(v) => handleSelectChange("size", v)}>
+                    <SelectTrigger className="bg-surface-inset border-soft text-fg-secondary focus:ring-ring w-[180px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-popover border-soft text-popover-foreground">
@@ -240,7 +237,7 @@ export function Settings({
 
                 <div className="form-option form-option--select">
                   <Label
-                    className="quality-ui-label cursor-pointer form-option__label"
+                    className="quality-ui-label form-option__label cursor-pointer"
                     onClick={() => handleHelpClick("quality")}
                   >
                     画质
@@ -249,7 +246,7 @@ export function Settings({
                     value={config.quality}
                     onValueChange={(v) => handleSelectChange("quality", v)}
                   >
-                    <SelectTrigger className="w-[180px] bg-surface-inset border-soft text-fg-secondary focus:ring-ring">
+                    <SelectTrigger className="bg-surface-inset border-soft text-fg-secondary focus:ring-ring w-[180px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-popover border-soft text-popover-foreground">
@@ -272,7 +269,7 @@ export function Settings({
 
                 <div className="form-option form-option--select">
                   <Label
-                    className="sky-lighting-label cursor-pointer form-option__label"
+                    className="sky-lighting-label form-option__label cursor-pointer"
                     onClick={() => handleHelpClick("skyLighting")}
                   >
                     照亮天空
@@ -281,7 +278,7 @@ export function Settings({
                     value={config.skyLighting}
                     onValueChange={(v) => handleSelectChange("skyLighting", v)}
                   >
-                    <SelectTrigger className="w-[180px] bg-surface-inset border-soft text-fg-secondary focus:ring-ring">
+                    <SelectTrigger className="bg-surface-inset border-soft text-fg-secondary focus:ring-ring w-[180px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-popover border-soft text-popover-foreground">
@@ -300,7 +297,7 @@ export function Settings({
 
                 <div className="form-option form-option--select">
                   <Label
-                    className="scaleFactor-label cursor-pointer form-option__label"
+                    className="scaleFactor-label form-option__label cursor-pointer"
                     onClick={() => handleHelpClick("scaleFactor")}
                   >
                     缩放
@@ -309,7 +306,7 @@ export function Settings({
                     value={config.scaleFactor.toFixed(2)}
                     onValueChange={(v) => handleSelectChange("scaleFactor", v)}
                   >
-                    <SelectTrigger className="w-[180px] bg-surface-inset border-soft text-fg-secondary focus:ring-ring">
+                    <SelectTrigger className="bg-surface-inset border-soft text-fg-secondary focus:ring-ring w-[180px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-popover border-soft text-popover-foreground">
@@ -329,7 +326,7 @@ export function Settings({
                 <div className="form-option form-option--checkbox">
                   <Label
                     htmlFor="long-exposure"
-                    className="long-exposure-label cursor-pointer form-option__label"
+                    className="long-exposure-label form-option__label cursor-pointer"
                     onClick={() => handleHelpClick("longExposure")}
                   >
                     保留烟花的火花
@@ -348,7 +345,7 @@ export function Settings({
                 <div className="form-option form-option--checkbox">
                   <Label
                     htmlFor="word-shell"
-                    className="word-shell-label cursor-pointer form-option__label"
+                    className="word-shell-label form-option__label cursor-pointer"
                     onClick={() => handleHelpClick("wordShell")}
                   >
                     文字烟花
@@ -363,7 +360,7 @@ export function Settings({
                 <div className="form-option form-option--checkbox">
                   <Label
                     htmlFor="auto-launch"
-                    className="auto-launch-label cursor-pointer form-option__label"
+                    className="auto-launch-label form-option__label cursor-pointer"
                     onClick={() => handleHelpClick("autoLaunch")}
                   >
                     自动放烟花
@@ -380,7 +377,7 @@ export function Settings({
                 >
                   <Label
                     htmlFor="finale-mode"
-                    className="finale-mode-label cursor-pointer form-option__label"
+                    className="finale-mode-label form-option__label cursor-pointer"
                     onClick={() => handleHelpClick("finaleMode")}
                   >
                     同时放更多的烟花
@@ -395,7 +392,7 @@ export function Settings({
                 <div className="form-option form-option--checkbox">
                   <Label
                     htmlFor="hide-controls"
-                    className="hide-controls-label cursor-pointer form-option__label"
+                    className="hide-controls-label form-option__label cursor-pointer"
                     onClick={() => handleHelpClick("hideControls")}
                   >
                     隐藏控制按钮
@@ -410,7 +407,7 @@ export function Settings({
                 <div className="form-option form-option--checkbox">
                   <Label
                     htmlFor="fullscreen"
-                    className="fullscreen-label cursor-pointer form-option__label"
+                    className="fullscreen-label form-option__label cursor-pointer"
                     onClick={() => handleHelpClick("fullscreen")}
                   >
                     全屏
@@ -431,7 +428,7 @@ export function Settings({
                     <button
                       key={preset.label}
                       type="button"
-                      className="h-12 rounded-md border border-soft text-xs text-fg-secondary transition-colors hover:border-hairline hover:text-fg"
+                      className="border-soft text-fg-secondary hover:border-hairline hover:text-fg h-12 rounded-md border text-xs transition-colors"
                       style={{ background: preset.value }}
                       onClick={() => handlePresetClick(preset.value)}
                     >
@@ -441,7 +438,7 @@ export function Settings({
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-xs text-fg-muted">自定义背景</Label>
+                  <Label className="text-fg-muted text-xs">自定义背景</Label>
                   <input
                     className="background-input"
                     type="text"
@@ -460,7 +457,7 @@ export function Settings({
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="flex-1 border-soft text-fg-secondary hover:bg-accent-subtle hover:text-fg"
+                      className="border-soft text-fg-secondary hover:bg-accent-subtle hover:text-fg flex-1"
                       onClick={handleCustomBackgroundApply}
                     >
                       应用
@@ -469,7 +466,7 @@ export function Settings({
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="flex-1 border-soft text-fg-secondary hover:bg-accent-subtle hover:text-fg"
+                      className="border-soft text-fg-secondary hover:bg-accent-subtle hover:text-fg flex-1"
                       onClick={() => {
                         onBackgroundClear();
                         setBackgroundInput("");

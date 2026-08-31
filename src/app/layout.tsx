@@ -56,7 +56,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className={`${inter.variable} antialiased`} suppressHydrationWarning>
         {/* Skip link for keyboard navigation */}
-        <a href="#main" className="sr-only">跳到主要内容</a>
+        <a href="#main" className="sr-only">
+          跳到主要内容
+        </a>
 
         <main id="main">{children}</main>
         <ToastProvider />
