@@ -28,7 +28,7 @@
 <p>
   <img src="https://img.shields.io/github/actions/workflow/status/kunlong-luo/pyro/ci.yml?branch=main&label=CI" alt="CI Status">
   <img src="https://img.shields.io/github/actions/workflow/status/kunlong-luo/pyro/deploy.yml?branch=main&label=Deploy" alt="Deploy Status">
-  <img src="https://img.shields.io/badge/测试-370_项通过-green" alt="Tests: 370 passed">
+  <img src="https://img.shields.io/badge/测试-353_项通过-green" alt="Tests: 353 passed">
   <img src="https://img.shields.io/badge/覆盖率-~95%25-green" alt="Coverage: ~95%">
 </p>
 
@@ -46,10 +46,17 @@
 
 ## 👀 效果预览
 
-> 👇 **直接点击上方「在线演示」去玩！** 静态图片完全展示不出效果 —— 进去随便点一下画面就能放炮，打开菜单勾选 **「连发模式」** 可以立刻看 32 发 Finale 压轴。
+> 👇 **直接点击上方「在线演示」去玩！** 静态图完全看不出效果 —— 进去随手点一下就能放烟花，打开设置勾选 **「连发模式」** 立刻看 32 发 Finale 压轴。
 
-<img src="./public/images/preview.png" alt="Pyro 效果预览" width="800" />
+<video src="./public/video/preview.mp4" autoplay loop muted playsinline poster="./public/images/preview.png" width="800" controls style="max-width:100%; border-radius:12px; display:block; margin:0 auto;"></video>
 
+<p align="center">
+  <sub>视频预览（MP4 · 11 MB，流畅度与画质更佳）—— GIF 备选在下方（15 MB），若两者均未加载请查看 <code>public/images/preview.png</code>。</sub>
+</p>
+
+<p align="center">
+<img src="./public/images/preview.gif" alt="Pyro 烟花绽放 GIF 预览" width="800" style="max-width:100%; border-radius:12px;" />
+<p/>
 ---
 
 ## 🎮 操作说明
@@ -142,16 +149,18 @@ pyro/
 │   ├── app/                         # Next.js App Router 入口
 │   │   ├── layout.tsx               # CSP meta 标签、字体、HTML 外壳
 │   │   ├── page.tsx                 # 根组件：组装 store + canvas + UI
-│   │   ├── useFireworksSimulator.ts # 主 React Hook，装配整个引擎
+│   │   ├── useSimulator.ts          # 主 React Hook，装配整个引擎（原 useFireworksSimulator）
 │   │   ├── globals.css              # Tailwind 指令 + 原 CSS 移植
 │   │   └── error.tsx / global-error.tsx
 │   ├── components/                  # React UI 层（纯展示，无业务逻辑）
-│   │   ├── Canvas/DualCanvas.tsx    # 两层 <canvas> + Ticker + 指针事件接线
-│   │   ├── Controls.tsx             # 顶栏（暂停 / 声音 / 菜单 / 全屏）
-│   │   ├── Menu.tsx                 # 设置菜单（所有表单选项 + 帮助弹窗触发）
-│   │   ├── HelpModal.tsx            # 功能说明浮层
-│   │   ├── LoadingInit.tsx          # 首次加载 Spinner
-│   │   └── SvgSprite.tsx            # 内联 SVG 图标符号库
+│   │   ├── Canvas/Canvas.tsx        # 两层 <canvas> + Ticker + 指针事件接线（原 DualCanvas）
+│   │   ├── Toolbar.tsx              # 顶栏：暂停 / 声音 / 设置（原 Controls）
+│   │   ├── Settings.tsx             # 设置面板：所有表单 + 帮助触发（原 Menu）
+│   │   ├── Help.tsx                 # 帮助浮层（原 HelpModal）
+│   │   ├── Loader.tsx               # 首次加载 Spinner（原 LoadingInit）
+│   │   ├── Icon.tsx                 # lucide-react 图标封装（原 Icons / SvgSprite）
+│   │   ├── ToastProvider.tsx        # Sonner Toaster 提供者（原 Providers）
+│   │   └── ui/*                     # shadcn/ui 原子组件（button / dialog / select …）
 │   ├── fireworks/                   # 核心物理 & 渲染领域（完全不依赖 React）
 │   │   ├── simulation.ts            # Shell 类、burst、主循环、粒子池
 │   │   ├── shells/                  # 12 种弹壳工厂 + 连发序列 + 选择器（已模块化）
@@ -170,9 +179,9 @@ pyro/
 │   │   └── storeContext.tsx         # 提供给子组件的 React context
 │   ├── lib/                         # 底层基础能力
 │   │   ├── stage.ts                 # Stage（canvas + DPR）+ createTicker RAF 循环
-│   │   ├── math.ts                  # MyMath 命名空间：距离/角度/夹取/文字点阵化
-│   │   ├── fscreen.ts               # 带厂商前缀的 Fullscreen API 封装
-│   │   └── backgroundManager.ts     # 背景应用/预加载/竞态取消
+│   │   ├── math.ts                  # MyMath：距离/角度/夹取/文字点阵化
+│   │   ├── fullscreen.ts            # Fullscreen API 封装（原 fscreen，含厂商前缀兼容）
+│   │   └── background.ts            # 背景应用 / 预加载 / 竞态取消（原 backgroundManager）
 │   ├── config/
 │   │   ├── appConfig.ts             # 冻结默认值（文字、背景、UI 文案）
 │   │   ├── physics.ts               # 全部可调物理常量（BURST / LAUNCH / …）
@@ -185,7 +194,11 @@ pyro/
 ├── public/
 │   ├── audio/*.mp3                  # 发射 / 爆炸 / 噼啪 音效（预加载）
 │   ├── fonts/                       # Gabriola + 华文琥珀 字体
-│   └── images/favicon.png
+│   ├── images/
+│   │   ├── favicon.png
+│   │   ├── preview.png              # 静态封面（941 KB）
+│   │   └── preview.gif              # 动图预览（15 MB，推荐用 MP4）
+│   └── video/preview.mp4            # 主预览视频（11 MB，自动循环）
 ├── .github/
 │   ├── workflows/ci.yml             # 格式化 + lint + 类型 + 单测 + e2e + 构建
 │   ├── workflows/deploy.yml         # push main 时自动 out/ → GitHub Pages
@@ -202,6 +215,8 @@ pyro/
 ```
 
 想了解架构细节（弹壳工厂为何这样设计、粒子池的零 GC 思路、迁移管道的版本语义），请阅读 [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) 和 [`docs/ADR/`](./docs/ADR/) 下的两份决策记录。
+
+> **重命名提示：** `Menu` → `Settings`、`Controls` → `Toolbar`、`HelpModal` → `Help`、`LoadingInit` → `Loader`、`Icons` → `Icon`、`DualCanvas` → `Canvas`、`useFireworksSimulator` → `useSimulator`、`fscreen` → `fullscreen`、`backgroundManager` → `background`。旧名仍可在 git 历史中找到，请以本结构为准。
 
 ---
 

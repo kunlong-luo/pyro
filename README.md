@@ -28,7 +28,7 @@
 <p>
   <img src="https://img.shields.io/github/actions/workflow/status/kunlong-luo/pyro/ci.yml?branch=main&label=CI" alt="CI Status">
   <img src="https://img.shields.io/github/actions/workflow/status/kunlong-luo/pyro/deploy.yml?branch=main&label=Deploy" alt="Deploy Status">
-  <img src="https://img.shields.io/badge/Tests-370_passed-green" alt="Tests: 370 passed">
+  <img src="https://img.shields.io/badge/Tests-353_passed-green" alt="Tests: 353 passed">
   <img src="https://img.shields.io/badge/coverage-~95%25-green" alt="Coverage: ~95%">
 </p>
 
@@ -46,10 +46,17 @@
 
 ## 👀 Preview
 
-> 👇 **Click the banner above to open the live demo.** The real thing is much more immersive than a static image — click anywhere to launch a firework, enable **Finale mode** for the 32-shot barrage.
+> 👇 **Click the banner above to open the live demo.** A static image can't do it justice — click anywhere to launch a firework and try **Finale mode** for the 32-shot barrage.
 
-<img src="./public/images/preview.png" alt="Pyro in action" width="800" />
+<video src="./public/video/preview.mp4" autoplay loop muted playsinline poster="./public/images/preview.png" width="800" controls style="max-width:100%; border-radius:12px; display:block; margin:0 auto;"></video>
 
+<p align="center">
+  <sub>Video preview (MP4 · 11 MB, more fluid and higher fidelity) — GIF fallback below (15 MB). If neither loads, see <code>public/images/preview.png</code>.</sub>
+</p>
+
+<p align="center">
+<img src="./public/images/preview.gif" alt="Pyro fireworks bursting — GIF preview" width="800" style="max-width:100%; border-radius:12px;" />
+<p>
 ---
 
 ## 🎮 How to Play
@@ -142,16 +149,18 @@ pyro/
 │   ├── app/                         # Next.js App Router entry
 │   │   ├── layout.tsx               # CSP meta tag, fonts, HTML shell
 │   │   ├── page.tsx                 # Root component — wires store + canvas + UI
-│   │   ├── useFireworksSimulator.ts # Main React hook that wires the engine
+│   │   ├── useSimulator.ts          # Main React hook that wires the engine (was useFireworksSimulator)
 │   │   ├── globals.css              # Tailwind directives + legacy CSS port
 │   │   └── error.tsx / global-error.tsx
 │   ├── components/                  # React UI layer (no business logic)
-│   │   ├── Canvas/DualCanvas.tsx    # Two <canvas> layers + Ticker + pointer wiring
-│   │   ├── Controls.tsx             # Top bar (pause / sound / menu / fullscreen)
-│   │   ├── Menu.tsx                 # Settings menu (all form options + help triggers)
-│   │   ├── HelpModal.tsx            # Help overlay dialog
-│   │   ├── LoadingInit.tsx          # Initial loading spinner
-│   │   └── SvgSprite.tsx            # Inline SVG icon symbols
+│   │   ├── Canvas/Canvas.tsx        # Two <canvas> layers + Ticker + pointer wiring (was DualCanvas)
+│   │   ├── Toolbar.tsx              # Top bar: pause / sound / settings (was Controls)
+│   │   ├── Settings.tsx             # Settings panel — all form options + help triggers (was Menu)
+│   │   ├── Help.tsx                 # Help overlay dialog (was HelpModal)
+│   │   ├── Loader.tsx               # Initial loading spinner (was LoadingInit)
+│   │   ├── Icon.tsx                 # lucide-react icon wrapper (was Icons / SvgSprite)
+│   │   ├── ToastProvider.tsx        # Sonner Toaster provider (was Providers)
+│   │   └── ui/*                     # shadcn/ui primitives (button / dialog / select …)
 │   ├── fireworks/                   # Core physics & rendering domain (no React)
 │   │   ├── simulation.ts            # Shell class, burst logic, update loop, pools
 │   │   ├── shells/                  # 12 shell factories + sequences + selectors (modularized)
@@ -170,9 +179,9 @@ pyro/
 │   │   └── storeContext.tsx         # React context provider for the store
 │   ├── lib/                         # Low-level primitives
 │   │   ├── stage.ts                 # Stage (canvas + DPR) + createTicker (RAF loop)
-│   │   ├── math.ts                  # MyMath namespace: dist / angle / clamp / literalLattice
-│   │   ├── fscreen.ts               # Vendor-prefixed Fullscreen API polyfill wrapper
-│   │   └── backgroundManager.ts     # Background apply / preload / race-condition guard
+│   │   ├── math.ts                  # MyMath helpers: dist / angle / clamp / literalLattice
+│   │   ├── fullscreen.ts            # Fullscreen API wrapper (was fscreen, vendor-prefixed)
+│   │   └── background.ts            # Background apply / preload / race guard (was backgroundManager)
 │   ├── config/
 │   │   ├── appConfig.ts             # Frozen defaults (words, backgrounds, UI strings)
 │   │   ├── physics.ts               # All tunable physics constants (BURST / LAUNCH / …)
@@ -185,7 +194,11 @@ pyro/
 ├── public/
 │   ├── audio/*.mp3                  # Lift / burst / crackle SFX (preloaded)
 │   ├── fonts/                       # Gabriola + 华文琥珀 font files
-│   └── images/favicon.png
+│   ├── images/
+│   │   ├── favicon.png
+│   │   ├── preview.png              # Static poster (941 KB)
+│   │   └── preview.gif              # Animated preview (15 MB — prefer MP4)
+│   └── video/preview.mp4            # Main preview video (11 MB, autoplay loop)
 ├── .github/
 │   ├── workflows/ci.yml             # format + lint + typecheck + tests + e2e + build
 │   ├── workflows/deploy.yml         # Builds out/ → GitHub Pages on push to main
@@ -202,6 +215,8 @@ pyro/
 ```
 
 For a detailed explanation of the architecture (why the shell factories work the way they do, where the particle pools come from, how the schema migration pipeline is structured), see [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) and the two ADRs in [`docs/ADR/`](./docs/ADR/).
+
+> **Heads up on renamed files:** `Menu` → `Settings`, `Controls` → `Toolbar`, `HelpModal` → `Help`, `LoadingInit` → `Loader`, `Icons` → `Icon`, `DualCanvas` → `Canvas`, `useFireworksSimulator` → `useSimulator`, `fscreen` → `fullscreen`, `backgroundManager` → `background`. Old names still appear in git history — use the new paths above.
 
 ---
 
