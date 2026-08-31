@@ -470,7 +470,7 @@ export function createSimulation(deps: SimulationDeps): Simulation {
         createBurst(shell.starCount / 2, starFactory);
       }
     } else {
-      throw new Error(`无效的烟花颜色配置: ${shell.color as string}`);
+      throw new Error(`Invalid firework color configuration: ${shell.color as string}`);
     }
 
     if (

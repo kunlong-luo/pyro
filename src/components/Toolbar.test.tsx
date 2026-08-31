@@ -2,7 +2,7 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { screen, cleanup, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Controls } from "./Controls";
+import { Toolbar } from "./Toolbar";
 import { renderWithStore } from "./testUtils";
 
 afterEach(() => {
@@ -10,22 +10,22 @@ afterEach(() => {
   localStorage.clear();
 });
 
-describe("Controls", () => {
+describe("Toolbar", () => {
   it("renders controls container when visible", () => {
-    const { container } = renderWithStore(<Controls />, { menuOpen: false });
+    const { container } = renderWithStore(<Toolbar />, { menuOpen: false });
     const controls = container.querySelector(".controls");
     expect(controls).not.toBeNull();
     expect(controls?.className).not.toContain("hide");
   });
 
   it("hides controls when menu is open", () => {
-    const { container } = renderWithStore(<Controls />, { menuOpen: true });
+    const { container } = renderWithStore(<Toolbar />, { menuOpen: true });
     const controls = container.querySelector(".controls");
     expect(controls?.className).toContain("hide");
   });
 
   it("hides controls when hideControls is set", () => {
-    const { container, store } = renderWithStore(<Controls />);
+    const { container, store } = renderWithStore(<Toolbar />);
     act(() => {
       store.setState((s) => ({ config: { ...s.config, hideControls: true } }));
     });
@@ -35,7 +35,7 @@ describe("Controls", () => {
 
   it("toggles paused state on the pause button", async () => {
     const user = userEvent.setup();
-    const { store } = renderWithStore(<Controls />, { paused: false });
+    const { store } = renderWithStore(<Toolbar />, { paused: false });
 
     await user.click(screen.getByRole("button", { name: "暂停" }));
     expect(store.getState().paused).toBe(true);
@@ -46,7 +46,7 @@ describe("Controls", () => {
 
   it("toggles soundEnabled on the sound button", async () => {
     const user = userEvent.setup();
-    const { store } = renderWithStore(<Controls />, { soundEnabled: true });
+    const { store } = renderWithStore(<Toolbar />, { soundEnabled: true });
 
     await user.click(screen.getByRole("button", { name: "静音" }));
     expect(store.getState().soundEnabled).toBe(false);
@@ -54,7 +54,7 @@ describe("Controls", () => {
 
   it("opens the menu on the settings button", async () => {
     const user = userEvent.setup();
-    const { store } = renderWithStore(<Controls />, { menuOpen: false });
+    const { store } = renderWithStore(<Toolbar />, { menuOpen: false });
 
     await user.click(screen.getByRole("button", { name: "设置" }));
     expect(store.getState().menuOpen).toBe(true);

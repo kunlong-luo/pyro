@@ -1,6 +1,6 @@
 "use client";
 
-import { Play, Pause, X, Settings, Volume2, VolumeX } from "lucide-react";
+import { Play, Pause, X, Settings, Volume2, VolumeX, Maximize, Minimize, Eye, EyeOff } from "lucide-react";
 
 // Map of icon names to lucide-react components
 const iconMap = {
@@ -10,6 +10,10 @@ const iconMap = {
   "icon-settings": Settings,
   "icon-sound-on": Volume2,
   "icon-sound-off": VolumeX,
+  "icon-maximize": Maximize,
+  "icon-minimize": Minimize,
+  "icon-eye": Eye,
+  "icon-eye-off": EyeOff,
 } as const;
 
 type IconName = keyof typeof iconMap;

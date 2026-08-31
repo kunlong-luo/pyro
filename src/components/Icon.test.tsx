@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
-import { Icon } from "./Icons";
+import { Icon } from "./Icon";
 
 describe("Icon", () => {
   beforeEach(() => {

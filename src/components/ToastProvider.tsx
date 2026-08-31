@@ -2,6 +2,6 @@
 
 import { Toaster } from "sonner";
 
-export function Providers() {
+export function ToastProvider() {
   return <Toaster position="top-right" theme="dark" />;
 }

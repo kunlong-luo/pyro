@@ -84,12 +84,12 @@ describe("Stage", () => {
   it("throws when the canvas has no 2D context available", () => {
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
     const canvas = document.createElement("canvas");
-    expect(() => new Stage(canvas)).toThrow(/2D 画布/);
+    expect(() => new Stage(canvas)).toThrow(/2D canvas/);
   });
 
   it("throws for a string id that does not resolve to a canvas element", () => {
     stubCanvasContext();
-    expect(() => new Stage("does-not-exist")).toThrow(/未找到目标画布节点/);
+    expect(() => new Stage("does-not-exist")).toThrow(/Missing target canvas node/);
   });
 
   it("accepts a canvas element directly and derives width/height from it", () => {
@@ -151,15 +151,15 @@ describe("Stage", () => {
   it("throws when dispatching or listening on an unknown event type", () => {
     stubCanvasContext();
     const stage = new Stage(document.createElement("canvas"));
-    expect(() => stage.addEventListener("bogus" as never, () => {})).toThrow(/无效事件类型/);
-    expect(() => stage.dispatchEvent("bogus" as never, {} as never)).toThrow(/无效事件类型/);
+    expect(() => stage.addEventListener("bogus" as never, () => {})).toThrow(/Invalid event type/);
+    expect(() => stage.dispatchEvent("bogus" as never, {} as never)).toThrow(/Invalid event type/);
   });
 
   it("throws when addEventListener('ticker') is called without a Ticker instance", () => {
     stubCanvasContext();
     const stage = new Stage(document.createElement("canvas"));
     expect(() => stage.addEventListener("ticker" as StageEventName, vi.fn())).toThrow(
-      /addEventListener\('ticker',.*\) 需要传入 Ticker 实例/,
+      /addEventListener\('ticker',.*\) requires a Ticker instance/,
     );
   });
 
@@ -178,7 +178,7 @@ describe("Stage", () => {
 
   it("throws when the string ID does not resolve to a canvas element", () => {
     stubCanvasContext();
-    expect(() => new Stage("nonexistent-id")).toThrow(/未找到目标画布节点/);
+    expect(() => new Stage("nonexistent-id")).toThrow(/Missing target canvas node/);
   });
 
   it("destroy() removes the stage from the module registry", () => {

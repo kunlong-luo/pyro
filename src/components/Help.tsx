@@ -12,7 +12,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 
-export function HelpModal() {
+export function Help() {
   const store = useFireworksStore();
   const openHelpTopic = useStore(store, (s) => s.openHelpTopic);
 
@@ -27,14 +27,14 @@ export function HelpModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-md border-white/20 bg-black/90 text-white/90">
+      <DialogContent className="max-w-md glass-panel rounded-2xl border-soft">
         <DialogHeader>
-          <DialogTitle className="text-lg font-medium text-white/90">
+          <DialogTitle className="text-lg font-semibold tracking-tight text-fg">
             {content?.header ?? ""}
           </DialogTitle>
           <DialogDescription className="sr-only">帮助信息</DialogDescription>
         </DialogHeader>
-        <div className="text-sm leading-relaxed whitespace-pre-line text-white/70">
+        <div className="text-sm leading-relaxed whitespace-pre-line text-fg-secondary">
           {content?.body ?? ""}
         </div>
       </DialogContent>

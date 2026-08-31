@@ -10,7 +10,7 @@ export interface ApplyResult {
   error?: Error;
 }
 
-interface BackgroundManagerOptions {
+interface BackgroundOptions {
   container: HTMLElement;
   onStatusChange: (msg: string, state: string) => void;
 }
@@ -65,7 +65,7 @@ function preloadImage(url: string): Promise<void> {
     return fetch(resolvedUrl.href, { cache: "no-store" }).then((response) => {
       const contentType = response.headers.get("content-type") || "";
       if (!response.ok || !contentType.startsWith("image/")) {
-        throw new Error("背景图片加载失败");
+        throw new Error("Failed to load background image");
       }
     });
   }
@@ -73,12 +73,12 @@ function preloadImage(url: string): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     const image = new Image();
     image.onload = () => resolve();
-    image.onerror = () => reject(new Error("背景图片加载失败"));
+    image.onerror = () => reject(new Error("Failed to load background image"));
     image.src = resolvedUrl.href;
   });
 }
 
-export function createBackgroundManager(options: BackgroundManagerOptions): {
+export function createBackground(options: BackgroundOptions): {
   applyBackground: (candidate: string | BackgroundSettings) => Promise<ApplyResult>;
   clearBackground: () => BackgroundSettings;
   setStatus: (message: string, state: string) => void;
@@ -135,7 +135,7 @@ export function createBackgroundManager(options: BackgroundManagerOptions): {
       const validationNode = document.createElement("div");
       validationNode.style.backgroundImage = backgroundDefinition.cssValue;
       if (!validationNode.style.backgroundImage) {
-        throw new Error("背景样式无效");
+        throw new Error("Invalid background style");
       }
 
       container.style.backgroundImage = backgroundDefinition.cssValue;

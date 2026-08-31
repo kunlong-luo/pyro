@@ -1,2 +1,2 @@
-export { DualCanvas } from "./DualCanvas";
-export type { DualCanvasProps } from "./DualCanvas";
+export { Canvas } from "./Canvas";
+export type { CanvasProps } from "./Canvas";

@@ -232,7 +232,7 @@ describe("Shell.burst()", () => {
       color: 42 as unknown as string,
     });
 
-    expect(() => shell.burst(100, 100)).toThrow(/无效的烟花颜色配置/);
+    expect(() => shell.burst(100, 100)).toThrow(/Invalid firework color configuration/);
   });
 
   it("handles a single-color burst without throwing", () => {

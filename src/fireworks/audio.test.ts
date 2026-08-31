@@ -147,7 +147,7 @@ describe("playSound", () => {
 
   it("throws for an unknown sound type", () => {
     const { manager } = primedManager();
-    expect(() => manager.playSound("nonexistent" as SoundType)).toThrow(/不存在声音类型/);
+    expect(() => manager.playSound("nonexistent" as SoundType)).toThrow(/Unknown sound type/);
   });
 
   it("does nothing when the source has no decoded buffers yet", () => {

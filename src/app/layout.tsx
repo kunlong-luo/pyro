@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { metaCsp } from "@/config/csp";
-import { Providers } from "@/components/Providers";
+import { ToastProvider } from "@/components/ToastProvider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -54,19 +54,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
       </head>
-      <body
-        className={`${inter.variable} bg-black font-sans text-white antialiased`}
-        suppressHydrationWarning
-      >
+      <body className={`${inter.variable} antialiased`} suppressHydrationWarning>
         {/* Skip link for keyboard navigation */}
-        <a href="#main" className="focus focus-on-focus sr-only">
-          跳到主要内容
-        </a>
+        <a href="#main" className="sr-only">跳到主要内容</a>
 
-        <main id="main" className="bg-black text-white">
-          {children}
-        </main>
-        <Providers />
+        <main id="main">{children}</main>
+        <ToastProvider />
       </body>
     </html>
   );

@@ -8,7 +8,7 @@
 
 import { fireworksAppConfig } from "@/config/appConfig";
 import type { Background } from "@/stores/fireworksStore";
-import type { BackgroundSettings, ApplyResult } from "@/lib/backgroundManager";
+import type { BackgroundSettings, ApplyResult } from "@/lib/background";
 
 // ---------------------------------------------------------------------------
 // BackgroundManager shape used by these helpers

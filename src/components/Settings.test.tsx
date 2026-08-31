@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { cleanup, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Menu } from "./Menu";
+import { Settings } from "./Settings";
 import { renderWithStore } from "./testUtils";
 
 afterEach(() => {
@@ -21,25 +21,25 @@ function makeCallbacks() {
   };
 }
 
-describe("Menu visibility", () => {
+describe("Settings visibility", () => {
   it("does not render when closed (AnimatePresence)", () => {
-    const { container } = renderWithStore(<Menu {...makeCallbacks()} />, { menuOpen: false });
+    const { container } = renderWithStore(<Settings {...makeCallbacks()} />, { menuOpen: false });
     const root = container.firstElementChild as HTMLElement;
     expect(root).toBeNull();
   });
 
   it("renders when open", () => {
-    const { container } = renderWithStore(<Menu {...makeCallbacks()} />, { menuOpen: true });
+    const { container } = renderWithStore(<Settings {...makeCallbacks()} />, { menuOpen: true });
     const root = container.querySelector(".menu");
     expect(root).not.toBeNull();
   });
 });
 
-describe("Menu interactions", () => {
+describe("Settings interactions", () => {
   it("calls onClose when the close button is clicked", async () => {
     const user = userEvent.setup();
     const callbacks = makeCallbacks();
-    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+    renderWithStore(<Settings {...callbacks} />, { menuOpen: true });
 
     await user.click(screen.getByLabelText("关闭设置"));
     expect(callbacks.onClose).toHaveBeenCalledTimes(1);
@@ -47,7 +47,7 @@ describe("Menu interactions", () => {
 
   it("updates config and notifies onConfigChange when a select changes", async () => {
     const callbacks = makeCallbacks();
-    const { store } = renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+    const { store } = renderWithStore(<Settings {...callbacks} />, { menuOpen: true });
 
     store.setState((state) => ({
       config: { ...state.config, quality: "1" },
@@ -63,7 +63,7 @@ describe("Menu interactions", () => {
   it("updates config when a switch is toggled", async () => {
     const user = userEvent.setup();
     const callbacks = makeCallbacks();
-    const { store } = renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+    const { store } = renderWithStore(<Settings {...callbacks} />, { menuOpen: true });
 
     const autoLaunchSwitch = screen.getByRole("switch", { name: /自动放烟花/i });
     expect(store.getState().config.autoLaunch).toBe(true);
@@ -74,7 +74,7 @@ describe("Menu interactions", () => {
   it("applies a preset background on click", async () => {
     const user = userEvent.setup();
     const callbacks = makeCallbacks();
-    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+    renderWithStore(<Settings {...callbacks} />, { menuOpen: true });
 
     await user.click(screen.getByRole("button", { name: "星空" }));
     expect(callbacks.onBackgroundApply).toHaveBeenCalled();
@@ -83,7 +83,7 @@ describe("Menu interactions", () => {
   it("calls onBackgroundClear from the clear button", async () => {
     const user = userEvent.setup();
     const callbacks = makeCallbacks();
-    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+    renderWithStore(<Settings {...callbacks} />, { menuOpen: true });
 
     await user.click(screen.getByRole("button", { name: "清除" }));
     expect(callbacks.onBackgroundClear).toHaveBeenCalledTimes(1);
@@ -92,7 +92,7 @@ describe("Menu interactions", () => {
   it("toggles fullscreen via the fullscreen switch", async () => {
     const user = userEvent.setup();
     const callbacks = makeCallbacks();
-    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+    renderWithStore(<Settings {...callbacks} />, { menuOpen: true });
 
     await user.click(screen.getByRole("switch", { name: /全屏/i }));
     expect(callbacks.onToggleFullscreen).toHaveBeenCalledTimes(1);
@@ -106,7 +106,7 @@ describe("Menu interactions", () => {
   ] as const)("toggles %s via its switch", async (labelText, field) => {
     const user = userEvent.setup();
     const callbacks = makeCallbacks();
-    const { store } = renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+    const { store } = renderWithStore(<Settings {...callbacks} />, { menuOpen: true });
 
     const before = store.getState().config[field];
     await user.click(screen.getByRole("switch", { name: new RegExp(labelText, "i") }));
@@ -115,7 +115,7 @@ describe("Menu interactions", () => {
 
   it("changes config via select state update", async () => {
     const callbacks = makeCallbacks();
-    const { store } = renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+    const { store } = renderWithStore(<Settings {...callbacks} />, { menuOpen: true });
 
     store.setState((state) => ({
       config: { ...state.config, size: "5" },
@@ -125,7 +125,7 @@ describe("Menu interactions", () => {
 
   it("parses the scale-factor as a float", async () => {
     const callbacks = makeCallbacks();
-    const { store } = renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+    const { store } = renderWithStore(<Settings {...callbacks} />, { menuOpen: true });
 
     store.setState((state) => ({
       config: { ...state.config, scaleFactor: 0.75 },
@@ -136,14 +136,14 @@ describe("Menu interactions", () => {
   it("opens help topic when a label is clicked", async () => {
     const user = userEvent.setup();
     const callbacks = makeCallbacks();
-    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+    renderWithStore(<Settings {...callbacks} />, { menuOpen: true });
 
     await user.click(screen.getByText("烟花类型"));
     expect(callbacks.onHelpOpen).toHaveBeenCalledWith("shellType");
   });
 
   it("uses the configured background value as the input value", () => {
-    renderWithStore(<Menu {...makeCallbacks()} />, {
+    renderWithStore(<Settings {...makeCallbacks()} />, {
       menuOpen: true,
       background: { mode: "image", value: "https://example.com/bg.png", configured: true },
     });
@@ -154,7 +154,7 @@ describe("Menu interactions", () => {
   it("calls onBackgroundApply on Enter key in background input", async () => {
     const user = userEvent.setup();
     const callbacks = makeCallbacks();
-    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+    renderWithStore(<Settings {...callbacks} />, { menuOpen: true });
 
     const input = screen.getByPlaceholderText(/图片 URL/i);
     await user.type(input, "https://example.com/bg.png{Enter}");
@@ -164,7 +164,7 @@ describe("Menu interactions", () => {
   it("does not call onBackgroundApply when input is empty and apply is clicked", async () => {
     const user = userEvent.setup();
     const callbacks = makeCallbacks();
-    renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+    renderWithStore(<Settings {...callbacks} />, { menuOpen: true });
 
     await user.click(screen.getByRole("button", { name: "应用" }));
     expect(callbacks.onBackgroundApply).not.toHaveBeenCalled();
@@ -172,7 +172,7 @@ describe("Menu interactions", () => {
 
   it("updates config.shell via state update", async () => {
     const callbacks = makeCallbacks();
-    const { store } = renderWithStore(<Menu {...callbacks} />, { menuOpen: true });
+    const { store } = renderWithStore(<Settings {...callbacks} />, { menuOpen: true });
 
     store.setState((state) => ({
       config: { ...state.config, shell: "Crysanthemum" },

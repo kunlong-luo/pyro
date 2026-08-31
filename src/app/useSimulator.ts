@@ -17,8 +17,8 @@ import {
   getDefaultScaleFactor,
 } from "@/fireworks/device";
 import { canPlaySoundSelector } from "@/fireworks/selectors";
-import { createBackgroundManager } from "@/lib/backgroundManager";
-import { fscreen } from "@/lib/fscreen";
+import { createBackground } from "@/lib/background";
+import { fscreen } from "@/lib/fullscreen";
 import { initGlobalHandlers, cleanupGlobalHandlers } from "@/lib/stage";
 import type { Ticker, Stage } from "@/lib/stage";
 import type { PointerEventPayload } from "@/lib/stage";
@@ -34,7 +34,7 @@ const defaultScaleFactor = getDefaultScaleFactor();
 // Hook
 // ---------------------------------------------------------------------------
 
-export function useFireworksSimulator() {
+export function useSimulator() {
   const [loadingStatus, setLoadingStatus] = useState("正在装配烟花");
   const [ready, setReady] = useState(false);
   const [stageSize, setStageSize] = useState(() => {
@@ -65,7 +65,7 @@ export function useFireworksSimulator() {
   const simulationRef = useRef<ReturnType<typeof createSimulation> | null>(null);
   const tickerInitializedRef = useRef(false);
   const stageContainerRef = useRef<HTMLDivElement>(null);
-  const backgroundManagerRef = useRef<ReturnType<typeof createBackgroundManager> | null>(null);
+  const backgroundManagerRef = useRef<ReturnType<typeof createBackground> | null>(null);
   const soundManagerRef = useRef<ReturnType<typeof createSoundManager> | null>(null);
 
   // Stable callback for onTickerReady - reads latest refs
@@ -105,7 +105,7 @@ export function useFireworksSimulator() {
         let containerEl: HTMLElement | null =
           stageContainer.querySelector<HTMLElement>(".canvas-container");
         if (!containerEl) containerEl = stageContainer;
-        backgroundManagerRef.current = createBackgroundManager({
+        backgroundManagerRef.current = createBackground({
           container: containerEl,
           onStatusChange: (msg, state) => {
             store.setState({ backgroundStatus: { message: msg, state } });
@@ -215,7 +215,7 @@ export function useFireworksSimulator() {
       });
 
       interaction.handleResize();
-      // Sync DualCanvas size to actual container size after handleResize
+      // Sync Canvas size to actual container size after handleResize
       setStageSize({ w: mainStage.width, h: mainStage.height });
 
       if (IS_HEADER) {

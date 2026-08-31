@@ -8,7 +8,7 @@ import type { PointerEventPayload, Ticker } from "@/lib/stage";
 // Props
 // ---------------------------------------------------------------------------
 
-export interface DualCanvasProps {
+export interface CanvasProps {
   /** Logical width passed to Stage.resize(). */
   stageW: number;
   /** Logical height passed to Stage.resize(). */
@@ -31,7 +31,7 @@ export interface DualCanvasProps {
 // Component
 // ---------------------------------------------------------------------------
 
-export function DualCanvas({
+export function Canvas({
   stageW,
   stageH,
   onPointerStart,
@@ -39,7 +39,7 @@ export function DualCanvas({
   onPointerEnd,
   onResize,
   onTickerReady,
-}: DualCanvasProps) {
+}: CanvasProps) {
   // -- refs for DOM elements --------------------------------------------------
   const trailsRef = useRef<HTMLCanvasElement>(null);
   const mainRef = useRef<HTMLCanvasElement>(null);

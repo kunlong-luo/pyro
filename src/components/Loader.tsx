@@ -2,11 +2,11 @@
 
 import { motion } from "framer-motion";
 
-export interface LoadingInitProps {
+export interface LoaderProps {
   status?: string;
 }
 
-export function LoadingInit({ status = "正在装配烟花" }: LoadingInitProps) {
+export function Loader({ status = "正在装配烟花" }: LoaderProps) {
   return (
     <div className="loading-init">
       <motion.div
@@ -15,12 +15,12 @@ export function LoadingInit({ status = "正在装配烟花" }: LoadingInitProps)
         transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
       >
         <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-          <circle cx="24" cy="24" r="20" stroke="rgba(255,255,255,0.15)" strokeWidth="4" />
+          <circle cx="24" cy="24" r="20" stroke="var(--text-faint)" strokeWidth="4" />
           <circle
             cx="24"
             cy="24"
             r="20"
-            stroke="rgba(255,255,255,0.7)"
+            stroke="var(--text-primary)"
             strokeWidth="4"
             strokeLinecap="round"
             strokeDasharray="80 45"

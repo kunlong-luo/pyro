@@ -1,13 +1,13 @@
 "use client";
 
-import { DualCanvas } from "@/components/Canvas/DualCanvas";
-import { Controls } from "@/components/Controls";
-import { Menu } from "@/components/Menu";
-import { HelpModal } from "@/components/HelpModal";
-import { LoadingInit } from "@/components/LoadingInit";
+import { Canvas } from "@/components/Canvas/Canvas";
+import { Toolbar } from "@/components/Toolbar";
+import { Settings } from "@/components/Settings";
+import { Help } from "@/components/Help";
+import { Loader } from "@/components/Loader";
 
 import { StoreContext } from "@/stores/storeContext";
-import { useFireworksSimulator } from "./useFireworksSimulator";
+import { useSimulator } from "./useSimulator";
 
 // ---------------------------------------------------------------------------
 // Component
@@ -30,7 +30,7 @@ export default function FireworkSimulator() {
     handleToggleFullscreen,
     handleHelpOpen,
     handleClose,
-  } = useFireworksSimulator();
+  } = useSimulator();
 
   return (
     <StoreContext.Provider
@@ -40,9 +40,9 @@ export default function FireworkSimulator() {
         >
       }
     >
-      {!ready && <LoadingInit status={loadingStatus} />}
+      {!ready && <Loader status={loadingStatus} />}
       <div ref={stageContainerRef} className={`stage-container ${ready ? "" : "remove"}`}>
-        <DualCanvas
+        <Canvas
           stageW={stageSize.w || 800}
           stageH={stageSize.h || 600}
           scaleFactor={1}
@@ -51,9 +51,9 @@ export default function FireworkSimulator() {
           onPointerMove={onPointerMove}
           onPointerEnd={onPointerEnd}
         />
-        {ready && <Controls />}
+        {ready && <Toolbar onToggleFullscreen={handleToggleFullscreen} />}
         {ready && (
-          <Menu
+          <Settings
             onConfigChange={handleConfigChange}
             onBackgroundApply={handleBackgroundApply}
             onBackgroundClear={handleBackgroundClear}
@@ -62,7 +62,7 @@ export default function FireworkSimulator() {
             onClose={handleClose}
           />
         )}
-        {ready && <HelpModal />}
+        {ready && <Help />}
       </div>
     </StoreContext.Provider>
   );

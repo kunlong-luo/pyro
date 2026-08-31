@@ -1,9 +1,10 @@
 /*
 Copyright © 2022 NianBroken. All rights reserved.
-Github：https://github.com/NianBroken/Firework_Simulator
-Gitee：https://gitee.com/nianbroken/Firework_Simulator
-本项目采用 Apache-2.0 许可证
-简而言之，你可以自由使用、修改和分享本项目的代码，但前提是在其衍生作品中必须保留原始许可证和版权信息，并且必须以相同的许可证发布所有修改过的代码。
+Github: https://github.com/NianBroken/Firework_Simulator
+Gitee: https://gitee.com/nianbroken/Firework_Simulator
+Licensed under Apache-2.0. You are free to use, modify, and distribute this code,
+provided that you retain the original license and copyright notice in derivative works
+and publish any modifications under the same license.
 */
 
 // ---------------------------------------------------------------------------
@@ -53,7 +54,7 @@ export function createTicker(): Ticker {
   return {
     addListener(callback: FrameCallback): void {
       if (typeof callback !== "function") {
-        throw new Error("Ticker.addListener() 需要传入函数。");
+        throw new Error("Ticker.addListener() requires a function argument.");
       }
 
       listeners.push(callback);
@@ -97,7 +98,7 @@ function ensureCanvasNode(canvas: string | HTMLCanvasElement): HTMLCanvasElement
   if (typeof canvas === "string") {
     const el = document.getElementById(canvas);
     if (!(el instanceof HTMLCanvasElement)) {
-      throw new Error("未找到目标画布节点。");
+        throw new Error("Missing target canvas node.");
     }
     return el;
   }
@@ -140,7 +141,7 @@ export class Stage {
 
     const ctx = this.canvas.getContext("2d");
     if (!ctx) {
-      throw new Error("当前环境不支持 2D 画布。");
+      throw new Error("Current environment does not support 2D canvas.");
     }
     this.ctx = ctx;
 
@@ -181,14 +182,14 @@ export class Stage {
   ): void {
     if (event === "ticker") {
       if (!ticker) {
-        throw new Error("addEventListener('ticker', ...) 需要传入 Ticker 实例。");
+        throw new Error("addEventListener('ticker', ...) requires a Ticker instance.");
       }
       ticker.addListener(handler as FrameCallback);
       return;
     }
 
     if (!(event in this._listeners)) {
-      throw new Error("无效事件类型");
+      throw new Error("Invalid event type.");
     }
 
     (this._listeners[event as StageEventName] as StageEventHandler[]).push(
@@ -208,7 +209,7 @@ export class Stage {
 
     const listeners = this._listeners[event] as StageEventHandler[] | undefined;
     if (!listeners) {
-      throw new Error("无效事件类型");
+      throw new Error("Invalid event type.");
     }
 
     for (const listener of listeners) {

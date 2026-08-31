@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, cleanup, act } from "@testing-library/react";
-import { DualCanvas } from "./DualCanvas";
+import { Canvas } from "./Canvas";
 import { Stage } from "@/lib/stage";
 import type { Ticker } from "@/lib/stage";
 
@@ -16,12 +16,12 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("DualCanvas", () => {
+describe("Canvas", () => {
   it("creates a trails Stage and a main Stage on mount and reports them via onTickerReady", () => {
     stubCanvasContext();
     const onTickerReady = vi.fn();
 
-    render(<DualCanvas stageW={800} stageH={600} scaleFactor={1} onTickerReady={onTickerReady} />);
+    render(<Canvas stageW={800} stageH={600} scaleFactor={1} onTickerReady={onTickerReady} />);
 
     expect(onTickerReady).toHaveBeenCalledTimes(1);
     const [ticker, trailsStage, mainStage] = onTickerReady.mock.calls[0] as [Ticker, Stage, Stage];
@@ -39,7 +39,7 @@ describe("DualCanvas", () => {
     const onResize = vi.fn();
 
     const { rerender } = render(
-      <DualCanvas
+      <Canvas
         stageW={800}
         stageH={600}
         scaleFactor={1}
@@ -51,7 +51,7 @@ describe("DualCanvas", () => {
     onResize.mockClear();
 
     rerender(
-      <DualCanvas
+      <Canvas
         stageW={1024}
         stageH={768}
         scaleFactor={1}
@@ -73,7 +73,7 @@ describe("DualCanvas", () => {
     const onPointerStart = vi.fn();
 
     render(
-      <DualCanvas
+      <Canvas
         stageW={800}
         stageH={600}
         scaleFactor={1}
@@ -99,7 +99,7 @@ describe("DualCanvas", () => {
     const onPointerEnd = vi.fn();
 
     render(
-      <DualCanvas
+      <Canvas
         stageW={800}
         stageH={600}
         scaleFactor={1}
@@ -125,7 +125,7 @@ describe("DualCanvas", () => {
     const onResize = vi.fn();
 
     render(
-      <DualCanvas
+      <Canvas
         stageW={800}
         stageH={600}
         scaleFactor={1}
@@ -142,8 +142,8 @@ describe("DualCanvas", () => {
       window.dispatchEvent(new Event("resize"));
     });
 
-    // Parent (useFireworksSimulator) is now the single window-resize owner and
-    // drives DualCanvas via stageW/stageH props; DualCanvas no longer has its
+    // Parent (useSimulator) is now the single window-resize owner and
+    // drives Canvas via stageW/stageH props; Canvas no longer has its
     // own window listener, so a raw window event must not trigger a resize.
     expect(trailsResizeSpy).not.toHaveBeenCalled();
     expect(mainResizeSpy).not.toHaveBeenCalled();
@@ -155,7 +155,7 @@ describe("DualCanvas", () => {
     const onTickerReady = vi.fn();
 
     const { unmount } = render(
-      <DualCanvas stageW={800} stageH={600} scaleFactor={1} onTickerReady={onTickerReady} />,
+      <Canvas stageW={800} stageH={600} scaleFactor={1} onTickerReady={onTickerReady} />,
     );
     const [, trailsStage, mainStage] = onTickerReady.mock.calls[0] as [Ticker, Stage, Stage];
     const trailsDestroySpy = vi.spyOn(trailsStage, "destroy");
@@ -170,7 +170,7 @@ describe("DualCanvas", () => {
   it("mounts without crashing when no callback props are provided", () => {
     stubCanvasContext();
 
-    render(<DualCanvas stageW={400} stageH={300} scaleFactor={1} />);
+    render(<Canvas stageW={400} stageH={300} scaleFactor={1} />);
 
     expect(document.getElementById("trails-canvas")).not.toBeNull();
     expect(document.getElementById("main-canvas")).not.toBeNull();
