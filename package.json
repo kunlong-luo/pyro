@@ -64,7 +64,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
-    "@next/bundle-analyzer": "^16.3.3",
+    "@next/bundle-analyzer": "^16.3.4",
     "@playwright/test": "^1.62.1",
     "@size-limit/preset-app": "^13.0.3",
     "@tailwindcss/postcss": "^4.3.3",
